@@ -1,0 +1,125 @@
+import { router, protectedProcedure } from "../trpc";
+import { AIFormGenInput, AIThemeGenInput, AIInsightsInput, FormSchemaJSON } from "@sec-form/validators";
+import { forms, submissions } from "@sec-form/db";
+import { eq, and } from "@sec-form/db";
+import { TRPCError } from "@trpc/server";
+import { generateAIForm, generateAITheme, generateAISubmissionsInsights } from "../aiProvider";
+import { cache } from "../redis";
+
+export const aiRouter = router({
+  generateForm: protectedProcedure
+    .input(AIFormGenInput)
+    .mutation(async ({ input, ctx }) => {
+      // 1. Rate Limit Check (max 10 form generations per IP/user per hour)
+      const rateKey = `rate:ai:form:ip:${ctx.ip}`;
+      try {
+        const genCount = await cache.incrAndExpire(rateKey, 3600);
+        if (genCount > 10) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "AI form generation rate limit exceeded. Please try again in an hour.",
+          });
+        }
+      } catch (e: any) {
+        if (e instanceof TRPCError) throw e;
+        console.warn("AI Rate limit check failed, skipping:", e);
+      }
+
+      // 2. Call AI Generation
+      try {
+        const schema = await generateAIForm(input.prompt);
+
+        // Validate structure matches Zod definition
+        const parsed = FormSchemaJSON.safeParse(schema);
+        if (!parsed.success) {
+          console.warn("AI returned invalid schema structure, using fallback parser:", parsed.error);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to generate a valid form schema. Please try a different prompt.",
+          });
+        }
+
+        return parsed.data;
+      } catch (e: any) {
+        if (e instanceof TRPCError) throw e;
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: e.message || "Failed to generate form from prompt",
+        });
+      }
+    }),
+
+  generateTheme: protectedProcedure
+    .input(AIThemeGenInput)
+    .mutation(async ({ input, ctx }) => {
+      // Limit themes generation rate
+      const rateKey = `rate:ai:theme:ip:${ctx.ip}`;
+      try {
+        const themeCount = await cache.incrAndExpire(rateKey, 3600);
+        if (themeCount > 20) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Theme generation limit exceeded. Please wait a bit.",
+          });
+        }
+      } catch (e: any) {
+        if (e instanceof TRPCError) throw e;
+      }
+
+      try {
+        const theme = await generateAITheme(input.prompt);
+        return theme;
+      } catch (e: any) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: e.message || "Failed to generate theme",
+        });
+      }
+    }),
+
+  generateInsights: protectedProcedure
+    .input(AIInsightsInput)
+    .mutation(async ({ input, ctx }) => {
+      const { formId } = input;
+
+      // Verify ownership
+      const form = await ctx.db.query.forms.findFirst({
+        where: and(eq(forms.id, formId), eq(forms.userId, ctx.user.id)),
+      });
+
+      if (!form) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Form not found",
+        });
+      }
+
+      // Fetch Submissions
+      const formSubmissions = await ctx.db.query.submissions.findMany({
+        where: eq(submissions.formId, formId),
+        orderBy: (s, { desc }) => [desc(s.createdAt)],
+      });
+
+      if (formSubmissions.length === 0) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "At least 1 submission is required to generate AI Insights.",
+        });
+      }
+
+      try {
+        const insights = await generateAISubmissionsInsights(
+          form.title,
+          form.schemaJson,
+          formSubmissions
+        );
+
+        return insights;
+      } catch (e: any) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: e.message || "Failed to analyze submissions",
+        });
+      }
+    }),
+});

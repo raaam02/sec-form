@@ -1,0 +1,13 @@
+{
+  "version": "6",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1781343088968,
+      "tag": "0000_lumpy_azazel",
+      "breakpoints": true
+    }
+  ]
+}

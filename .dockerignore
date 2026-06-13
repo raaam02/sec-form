@@ -1,0 +1,32 @@
+# Exclude node modules
+node_modules/
+**/node_modules/
+
+# Exclude build directories
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# Exclude git metadata
+.git/
+.gitignore
+
+# Exclude local environment configs
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+
+# Exclude log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Exclude OS directories
+.DS_Store
+Thumbs.db
