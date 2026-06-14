@@ -6,6 +6,7 @@ import { trpc } from "../utils/trpc";
 import { X, Eye, ArrowUpRight, FileText, BarChart3, Sparkles, BrainCircuit, Check, Calendar, HelpCircle } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface FormDrawerProps {
   form: {
@@ -17,11 +18,12 @@ interface FormDrawerProps {
     schemaJson: any;
   };
   onClose: () => void;
+  isSidebarMode?: boolean;
 }
 
 type TabType = "overview" | "submissions" | "ai-feedback";
 
-export function FormDrawer({ form, onClose }: FormDrawerProps) {
+export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerProps) {
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [aiInsights, setAiInsights] = useState<string | null>(null);
 
@@ -52,13 +54,18 @@ export function FormDrawer({ form, onClose }: FormDrawerProps) {
   return (
     <>
       {/* Backdrop overlay */}
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity" 
-        onClick={onClose}
-      />
+      {!isSidebarMode && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity" 
+          onClick={onClose}
+        />
+      )}
 
       {/* Drawer Container */}
-      <aside className="fixed inset-y-0 right-0 w-full sm:w-[500px] bg-background/95 border-l border-border shadow-2xl z-50 transform transition-transform duration-300 backdrop-blur-md flex flex-col h-full animate-slide-in text-foreground">
+      <aside className={isSidebarMode
+        ? "w-full bg-background flex flex-col h-full text-foreground relative"
+        : "fixed inset-y-0 right-0 w-full sm:w-[500px] bg-background/95 border-l border-border shadow-2xl z-50 transform transition-transform duration-300 backdrop-blur-md flex flex-col h-full animate-slide-in text-foreground"
+      }>
         
         {/* Header */}
         <div className="p-6 border-b border-border flex items-start justify-between shrink-0">
@@ -113,8 +120,33 @@ export function FormDrawer({ form, onClose }: FormDrawerProps) {
           {activeTab === "overview" && (
             <div className="space-y-6">
               {isAnalyticsLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <LoadingSpinner className="w-8 h-8" color="text-indigo-600" />
+                <div className="space-y-6">
+                  {/* Metric Cards */}
+                  <div className="grid grid-cols-3 gap-3">
+                    {Array.from({ length: 3 }).map((_, idx) => (
+                      <div key={idx} className="rounded-xl border border-border bg-muted/20 p-3 text-center space-y-2.5">
+                        <Skeleton className="h-4 w-4 mx-auto" />
+                        <Skeleton className="h-3 w-12 mx-auto" />
+                        <Skeleton className="h-5 w-8 mx-auto" />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Activity Graph */}
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-48 rounded-xl border border-border bg-muted/10" />
+                  </div>
+
+                  {/* Fields Overview */}
+                  <div className="space-y-3">
+                    <Skeleton className="h-4 w-24" />
+                    <div className="space-y-2">
+                      {Array.from({ length: 3 }).map((_, idx) => (
+                        <Skeleton key={idx} className="h-8 w-full rounded-lg bg-muted/20 border border-border/50" />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ) : !analytics ? (
                 <div className="text-center py-10 text-muted-foreground">Failed to load analytics details.</div>
@@ -209,8 +241,22 @@ export function FormDrawer({ form, onClose }: FormDrawerProps) {
           {activeTab === "submissions" && (
             <div className="space-y-4">
               {isSubmissionsLoading ? (
-                <div className="flex items-center justify-center py-20">
-                  <LoadingSpinner className="w-8 h-8" color="text-indigo-600" />
+                <div className="space-y-4">
+                  <Skeleton className="h-4 w-36" />
+                  <div className="space-y-4">
+                    {Array.from({ length: 3 }).map((_, idx) => (
+                      <div key={idx} className="p-4 rounded-xl border border-border bg-muted/10 space-y-3">
+                        <div className="flex items-center justify-between border-b border-border pb-2">
+                          <Skeleton className="h-3 w-28" />
+                          <Skeleton className="h-3 w-16" />
+                        </div>
+                        <div className="space-y-2">
+                          <Skeleton className="h-3.5 w-1/2" />
+                          <Skeleton className="h-3.5 w-2/3" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : !submissionsList || submissionsList.length === 0 ? (
                 <div className="rounded-xl border border-dashed border-border p-8 text-center bg-muted/20">

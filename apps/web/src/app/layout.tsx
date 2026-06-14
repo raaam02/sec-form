@@ -24,26 +24,8 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${plusJakarta.variable} h-full`}>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var savedTheme = localStorage.getItem('theme');
-                  var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {}
-              })()
-            `,
-          }}
-        />
-      </head>
+    <html lang={locale} className={`${plusJakarta.variable} h-full`} suppressHydrationWarning>
+      <head />
       <body className="antialiased font-sans h-full bg-background text-foreground transition-colors duration-200">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>{children}</Providers>

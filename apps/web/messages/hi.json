@@ -214,7 +214,8 @@
     "aiInsightsSubtitle": "जेमिनी-संचालित रिस्पॉन्स और सेंटीमेंट एनालिसिस",
     "aiInsightsNoData": "एआई एनालिसिस शुरू करने के लिए पहले कुछ सबमिशन कलेक्ट करें।",
     "aiInsightsGenerate": "एआई रिपोर्ट जेनरेट करें",
-    "aiInsightsLoading": "जेमिनी से सबमिशन रिस्पॉन्स एनालाइज हो रहा है..."
+    "aiInsightsLoading": "जेमिनी से सबमिशन रिस्पॉन्स एनालाइज हो रहा है...",
+    "submissionsTrend": "सबमिशन ट्रेंड"
   },
   "PublicForm": {
     "submitSuccess": "सबमिशन सफल!",

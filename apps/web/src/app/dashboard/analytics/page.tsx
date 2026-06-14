@@ -6,6 +6,7 @@ import { trpc } from "../../../utils/trpc";
 import { FileText, Eye, BarChart3, Percent, Pencil, Inbox } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { useTranslations } from "next-intl";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AnalyticsDashboardPage() {
   const t = useTranslations("Analytics");
@@ -87,8 +88,47 @@ export default function AnalyticsDashboardPage() {
             </div>
 
             {isFormsLoading ? (
-              <div className="flex items-center justify-center py-20">
-                <LoadingSpinner className="w-8 h-8" color="text-indigo-600" />
+              <div className="overflow-x-auto text-foreground">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50 text-[11px] font-bold text-muted-foreground uppercase tracking-wider select-none">
+                      <th className="py-3.5 px-6">Form Details</th>
+                      <th className="py-3.5 px-6">Visibility</th>
+                      <th className="py-3.5 px-6">Views</th>
+                      <th className="py-3.5 px-6">Responses</th>
+                      <th className="py-3.5 px-6">Conversion Rate</th>
+                      <th className="py-3.5 px-6">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="border-b border-border">
+                        <td className="py-4 px-6">
+                          <Skeleton className="h-4 w-40" />
+                          <Skeleton className="h-3 w-24 mt-2" />
+                        </td>
+                        <td className="py-4 px-6">
+                          <Skeleton className="h-5 w-16 rounded-full" />
+                        </td>
+                        <td className="py-4 px-6">
+                          <Skeleton className="h-4 w-8" />
+                        </td>
+                        <td className="py-4 px-6">
+                          <Skeleton className="h-4 w-8" />
+                        </td>
+                        <td className="py-4 px-6">
+                          <Skeleton className="h-4 w-12" />
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="flex gap-2">
+                            <Skeleton className="h-8 w-16 rounded-xl" />
+                            <Skeleton className="h-8 w-16 rounded-xl" />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : !formsList || formsList.length === 0 ? (
               <div className="py-16 text-center max-w-md mx-auto p-6">
@@ -155,21 +195,21 @@ function FormAnalyticsRow({ form }: { form: any }) {
       </td>
       <td className="py-4 px-6 text-sm font-medium text-foreground">
         {isLoading ? (
-          <span className="inline-block w-4 h-4 rounded-full border-2 border-border border-t-indigo-600 animate-spin" />
+          <Skeleton className="h-4 w-8 inline-block" />
         ) : (
           analytics?.totalViews ?? 0
         )}
       </td>
       <td className="py-4 px-6 text-sm font-medium text-foreground">
         {isLoading ? (
-          <span className="inline-block w-4 h-4 rounded-full border-2 border-border border-t-indigo-600 animate-spin" />
+          <Skeleton className="h-4 w-8 inline-block" />
         ) : (
           analytics?.totalResponses ?? 0
         )}
       </td>
       <td className="py-4 px-6 text-sm font-medium text-foreground">
         {isLoading ? (
-          <span className="inline-block w-4 h-4 rounded-full border-2 border-border border-t-indigo-600 animate-spin" />
+          <Skeleton className="h-4 w-12 inline-block" />
         ) : (
           `${analytics?.conversionRate ?? 0}%`
         )}

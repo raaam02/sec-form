@@ -114,57 +114,68 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden w-full bg-transparent">
-      {/* Page Header (Pinned & Harmonized) */}
-      <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 sm:px-8 shrink-0 transition-colors duration-200">
-        <div>
-          <h1 className="font-outfit text-xl font-bold text-foreground">{t("navDashboard")}</h1>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setIsAIModalOpen(true)}
-            className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
-          >
-            <Sparkles className="h-4 w-4" /> {t("generateAi")}
-          </Button>
-          <Button
-            onClick={() => setIsCreateModalOpen(true)}
-            variant="outline"
-            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
-          >
-            <Plus className="h-4 w-4" /> {t("newForm")}
-          </Button>
-        </div>
-      </header>
-
-      {/* Scrollable Body area */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
-        <div className="max-w-6xl mx-auto space-y-8">
-          {/* STATS OVERVIEW CARDS */}
-          <StatsCardGrid stats={stats} isStatsLoading={isStatsLoading} />
-
-          {/* FORMS LIST SECTION */}
+    <div className="flex h-full w-full overflow-hidden bg-transparent">
+      {/* Main dashboard content (Left side) */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+        {/* Page Header (Pinned & Harmonized) */}
+        <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 sm:px-8 shrink-0 transition-colors duration-200">
           <div>
-            <h2 className="font-outfit text-xl font-bold text-foreground mb-4">{t("title")}</h2>
+            <h1 className="font-outfit text-xl font-bold text-foreground">{t("navDashboard")}</h1>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsAIModalOpen(true)}
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
+            >
+              <Sparkles className="h-4 w-4" /> {t("generateAi")}
+            </Button>
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              variant="outline"
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
+            >
+              <Plus className="h-4 w-4" /> {t("newForm")}
+            </Button>
+          </div>
+        </header>
 
-            <FormCardGrid
-              formsList={formsList}
-              isFormsLoading={isFormsLoading}
-              setSelectedFormForDrawer={setSelectedFormForDrawer}
-              handleDeleteForm={handleDeleteForm}
-              setIsAIModalOpen={setIsAIModalOpen}
-            />
+        {/* Scrollable Body area */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
+          <div className="max-w-6xl mx-auto space-y-8">
+            {/* STATS OVERVIEW CARDS */}
+            <StatsCardGrid stats={stats} isStatsLoading={isStatsLoading} />
+
+            {/* FORMS LIST SECTION */}
+            <div>
+              <h2 className="font-outfit text-xl font-bold text-foreground mb-4">{t("title")}</h2>
+
+              <FormCardGrid
+                formsList={formsList}
+                isFormsLoading={isFormsLoading}
+                setSelectedFormForDrawer={setSelectedFormForDrawer}
+                handleDeleteForm={handleDeleteForm}
+                setIsAIModalOpen={setIsAIModalOpen}
+                isSidebarOpen={!!selectedFormForDrawer}
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Right Drawer component overlay */}
-      {selectedFormForDrawer && (
-        <FormDrawer
-          form={selectedFormForDrawer}
-          onClose={() => setSelectedFormForDrawer(null)}
-        />
-      )}
+      {/* Right Sidebar panel (sliding in Next.js content side-by-side) */}
+      <div
+        className={`border-l border-border h-full bg-card/95 backdrop-blur-md flex flex-col transition-all duration-300 shadow-xl shrink-0 z-30 ${
+          selectedFormForDrawer ? "w-full sm:w-[450px]" : "w-0 overflow-hidden border-l-0"
+        }`}
+      >
+        {selectedFormForDrawer && (
+          <FormDrawer
+            form={selectedFormForDrawer}
+            onClose={() => setSelectedFormForDrawer(null)}
+            isSidebarMode={true}
+          />
+        )}
+      </div>
 
       {/* MODAL: STANDARD CREATE FORM */}
       <CreateFormModal

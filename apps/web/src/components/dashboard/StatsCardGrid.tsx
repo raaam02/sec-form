@@ -3,6 +3,8 @@ import { FileText, Eye, Inbox, Percent } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface StatsCardGridProps {
   stats: {
     totalForms?: number;
@@ -45,20 +47,26 @@ export function StatsCardGrid({ stats, isStatsLoading }: StatsCardGridProps) {
 
   if (isStatsLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="flex overflow-x-auto gap-6 pb-4 scrollbar-thin snap-x snap-mandatory">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="h-24 rounded-2xl border border-border bg-card p-6 animate-pulse shadow-sm" />
+          <Card key={i} className="min-w-[240px] flex-1 shrink-0 snap-start rounded-2xl border border-border bg-card p-6 shadow-sm flex items-center justify-between">
+            <div className="space-y-3 flex-1 pr-4">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-6 w-12" />
+            </div>
+            <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
+          </Card>
         ))}
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="flex overflow-x-auto gap-6 pb-4 scrollbar-thin snap-x snap-mandatory">
       {statsConfig.map((item) => {
         const Icon = item.icon;
         return (
-          <Card key={item.label} className="rounded-2xl border border-border bg-card p-6 shadow-sm flex items-center justify-between text-card-foreground">
+          <Card key={item.label} className="min-w-[240px] flex-1 shrink-0 snap-start rounded-2xl border border-border bg-card p-6 shadow-sm flex items-center justify-between text-card-foreground">
             <div className="text-left">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                 {item.label}

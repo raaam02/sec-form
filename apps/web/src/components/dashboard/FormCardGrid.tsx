@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface FormCard {
   id: string;
   title: string;
@@ -21,6 +23,7 @@ interface FormCardGridProps {
   setSelectedFormForDrawer: (form: FormCard) => void;
   handleDeleteForm: (id: string) => void;
   setIsAIModalOpen: (open: boolean) => void;
+  isSidebarOpen?: boolean;
 }
 
 export function FormCardGrid({
@@ -29,6 +32,7 @@ export function FormCardGrid({
   setSelectedFormForDrawer,
   handleDeleteForm,
   setIsAIModalOpen,
+  isSidebarOpen = false,
 }: FormCardGridProps) {
   const t = useTranslations("Dashboard");
 
@@ -43,10 +47,38 @@ export function FormCardGrid({
     }
   };
 
+  const gridColsClass = isSidebarOpen
+    ? "grid-cols-1 lg:grid-cols-2"
+    : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+
   if (isFormsLoading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <LoadingSpinner className="w-8 h-8" color="text-primary" />
+      <div className={`grid gap-6 ${gridColsClass}`}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Card
+            key={i}
+            className="rounded-2xl border border-border bg-card p-6 shadow-sm flex flex-col justify-between h-[216px]"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-5 w-16 rounded-md" />
+              </div>
+              <Skeleton className="h-6 w-3/4 mt-4" />
+              <div className="space-y-2 mt-3">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-5/6" />
+              </div>
+            </div>
+            <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-2">
+              <Skeleton className="h-4 w-12" />
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-8 rounded-lg" />
+                <Skeleton className="h-8 w-8 rounded-lg" />
+                <Skeleton className="h-8 w-8 rounded-lg" />
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
     );
   }
@@ -71,7 +103,7 @@ export function FormCardGrid({
 
   return (
     <TooltipProvider>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className={`grid gap-6 ${gridColsClass}`}>
         {formsList.map((form) => (
           <Card
             key={form.id}

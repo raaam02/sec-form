@@ -214,7 +214,8 @@
     "aiInsightsSubtitle": "Gemini-generated synthesis of user responses and sentiment",
     "aiInsightsNoData": "Generate a few responses first to let Gemini analyze patterns.",
     "aiInsightsGenerate": "Generate AI Report",
-    "aiInsightsLoading": "Analyzing responses with Gemini..."
+    "aiInsightsLoading": "Analyzing responses with Gemini...",
+    "submissionsTrend": "Submissions Trend"
   },
   "PublicForm": {
     "submitSuccess": "Submission Successful!",

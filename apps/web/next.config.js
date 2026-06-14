@@ -4,7 +4,7 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  transpilePackages: ['@sec-form/shared', '@sec-form/ui', '@sec-form/validators'],
 };
 
 module.exports = withNextIntl(nextConfig);

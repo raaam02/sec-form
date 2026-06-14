@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function PublicFormPage() {
   const params = useParams();
@@ -111,8 +112,28 @@ export default function PublicFormPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <LoadingSpinner className="w-10 h-10" color="text-primary" />
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 md:p-10 bg-muted/20 transition-colors">
+        <div className="max-w-xl w-full border border-border p-6 md:p-8 shadow-lg bg-card rounded-2xl space-y-8">
+          {/* Header */}
+          <div className="space-y-3">
+            <Skeleton className="h-7 w-48" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+          </div>
+          {/* Fields */}
+          <div className="space-y-6">
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <div key={idx} className="space-y-2.5">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+              </div>
+            ))}
+          </div>
+          {/* Submit Trigger */}
+          <div className="pt-6 border-t border-border">
+            <Skeleton className="h-11 w-full rounded-xl" />
+          </div>
+        </div>
       </div>
     );
   }
