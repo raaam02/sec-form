@@ -19,7 +19,8 @@ import { LoadingSpinner } from "@sec-form/ui";
 import { TabBar } from "../TabBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 
 interface BuilderCanvasProps {
   middleTab: "form" | "responses" | "analytics" | "settings";
@@ -50,13 +51,6 @@ interface BuilderCanvasProps {
   handleSaveSettings: (e: React.FormEvent) => void;
 }
 
-const MIDDLE_TABS = [
-  { value: "form", label: "Form", icon: FileText, iconColorClass: "text-indigo-500" },
-  { value: "responses", label: "Responses", icon: CheckCircle2, iconColorClass: "text-emerald-500" },
-  { value: "analytics", label: "Analytics", icon: BarChart3, iconColorClass: "text-amber-500" },
-  { value: "settings", label: "Settings", icon: Settings, iconColorClass: "text-rose-500" }
-] as const;
-
 export function BuilderCanvas({
   middleTab,
   setMiddleTab,
@@ -85,6 +79,16 @@ export function BuilderCanvas({
   setSlug,
   handleSaveSettings,
 }: BuilderCanvasProps) {
+  const t = useTranslations("Builder");
+  const tCommon = useTranslations("Common");
+
+  const MIDDLE_TABS = [
+    { value: "form", label: t("tabBuild"), icon: FileText, iconColorClass: "text-indigo-500" },
+    { value: "responses", label: t("tabSubmissions"), icon: CheckCircle2, iconColorClass: "text-emerald-500" },
+    { value: "analytics", label: "Analytics", icon: BarChart3, iconColorClass: "text-amber-500" },
+    { value: "settings", label: "Settings", icon: Settings, iconColorClass: "text-rose-500" }
+  ] as const;
+
   return (
     <div className="flex-1 flex flex-col overflow-hidden min-w-0 bg-muted/5">
       {/* Tabs header */}
@@ -108,7 +112,7 @@ export function BuilderCanvas({
                     saveForm(fields);
                   }}
                   className="w-full text-2xl font-bold font-outfit border-none focus:outline-none bg-transparent text-foreground border-b border-transparent focus:border-border pb-1 transition-colors"
-                  placeholder="Form Title"
+                  placeholder={t("canvasTitlePlaceholder")}
                 />
                 <input
                   type="text"
@@ -118,14 +122,14 @@ export function BuilderCanvas({
                     saveForm(fields);
                   }}
                   className="w-full text-sm text-muted-foreground border-none focus:outline-none bg-transparent border-b border-transparent focus:border-border mt-2 pb-1 transition-colors"
-                  placeholder="Add description..."
+                  placeholder={t("canvasDescPlaceholder")}
                 />
               </div>
 
               <div className="border-t border-border pt-6 space-y-4">
                 {fields.length === 0 ? (
                   <div className="py-16 border border-dashed border-border rounded-2xl text-center text-muted-foreground text-sm">
-                    Select fields from the left sidebar to add questions to your canvas.
+                    {t("canvasEmptyDesc")}
                   </div>
                 ) : (
                   fields.map((field, index) => (
@@ -230,7 +234,7 @@ export function BuilderCanvas({
           <div className="max-w-3xl mx-auto space-y-6">
             <div className="flex justify-between items-center pb-2 border-b border-border">
               <div>
-                <h3 className="font-outfit font-bold text-foreground text-sm">Collected Responses</h3>
+                <h3 className="font-outfit font-bold text-foreground text-sm">{t("subTotal")}</h3>
                 <p className="text-muted-foreground text-[10px] mt-0.5">List of submissions for this form.</p>
               </div>
               {responses && responses.length > 0 && (
@@ -240,7 +244,7 @@ export function BuilderCanvas({
                   size="sm"
                   className="h-8 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm shrink-0"
                 >
-                  <Download className="h-3.5 w-3.5" /> Export
+                  <Download className="h-3.5 w-3.5" /> {t("shareCopy")}
                 </Button>
               )}
             </div>
@@ -250,7 +254,7 @@ export function BuilderCanvas({
             ) : !responses || responses.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-muted-foreground text-xs">
                 <FileText className="h-8 w-8 text-muted-foreground mb-2" />
-                <span>No submissions received yet.</span>
+                <span>{t("subNoData")}</span>
               </div>
             ) : (
               <div className="space-y-4">
@@ -337,7 +341,7 @@ export function BuilderCanvas({
                 {/* 30-Day Activity Area Chart */}
                 {analytics.timeline && analytics.timeline.length > 0 && (
                   <Card className="border-border bg-card p-4 shadow-sm">
-                    <h3 className="font-outfit font-bold text-foreground text-xs mb-3">Submission & View Rates</h3>
+                    <h3 className="font-outfit font-bold text-foreground text-xs mb-3">{t("submissionsTrend")}</h3>
                     <div className="h-44">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={analytics.timeline}>
@@ -364,7 +368,7 @@ export function BuilderCanvas({
                   <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-border">
                     <div className="flex items-center gap-1.5 text-primary font-bold">
                       <Sparkles className="h-4 w-4" />
-                      <h3 className="font-outfit text-xs">AI Insights</h3>
+                      <h3 className="font-outfit text-xs">{t("aiInsightsTitle")}</h3>
                     </div>
 
                     <Button
@@ -374,7 +378,7 @@ export function BuilderCanvas({
                       className="h-7 items-center gap-1 bg-primary hover:bg-primary/95 text-primary-foreground font-semibold text-[10px] disabled:opacity-50 px-2.5 transition-colors"
                     >
                       {isInsightsGenerating ? <LoadingSpinner className="w-3 h-3" color="text-primary-foreground" /> : <Sparkles className="h-3 w-3" />}
-                      <span>Analyze</span>
+                      <span>{t("aiInsightsGenerate")}</span>
                     </Button>
                   </div>
 
@@ -387,7 +391,7 @@ export function BuilderCanvas({
 
                   {analytics.totalResponses === 0 && (
                     <div className="text-center py-2 text-muted-foreground text-[10px]">
-                      Requires at least 1 response.
+                      {t("aiInsightsNoData")}
                     </div>
                   )}
 
@@ -471,7 +475,7 @@ export function BuilderCanvas({
                   type="submit"
                   className="h-9 px-4 font-semibold text-xs rounded-xl"
                 >
-                  Save Settings
+                  {tCommon("save")}
                 </Button>
               </div>
             </form>

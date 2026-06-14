@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "../components/Providers";
+import { getLocale, getMessages } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -13,13 +15,16 @@ export const metadata: Metadata = {
   description: "Create, theme, embed, and analyze forms instantly utilizing next-gen AI insights. Built for high conversion.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" className={`${plusJakarta.variable} h-full`}>
+    <html lang={locale} className={`${plusJakarta.variable} h-full`}>
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -40,7 +45,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased font-sans h-full bg-background text-foreground transition-colors duration-200">
-        <Providers>{children}</Providers>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

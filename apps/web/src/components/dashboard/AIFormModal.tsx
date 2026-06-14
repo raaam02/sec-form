@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useTranslations } from "next-intl";
 
 interface AIFormModalProps {
   isOpen: boolean;
@@ -24,6 +25,9 @@ export function AIFormModal({
   setIsOpen,
   onGenerate,
 }: AIFormModalProps) {
+  const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
+
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -52,11 +56,11 @@ export function AIFormModal({
           <div className="flex items-center gap-1.5 mb-1 text-primary">
             <Sparkles className="h-5 w-5 fill-primary/10" />
             <DialogTitle className="font-outfit text-xl font-bold text-foreground">
-              AI Form Generator
+              {t("modalAiTitle")}
             </DialogTitle>
           </div>
           <DialogDescription className="text-muted-foreground text-xs mt-1">
-            Describe the purpose of your form. AI will draft appropriate input fields.
+            {t("modalAiDesc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -76,7 +80,7 @@ export function AIFormModal({
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="w-full min-h-[100px] p-3 rounded-xl border border-border bg-background text-foreground text-sm"
-              placeholder="e.g. Create a customer satisfaction feedback form for an e-commerce startup that includes a rating and product categories dropdown"
+              placeholder={t("modalAiPlaceholder")}
               required
               disabled={isLoading}
             />
@@ -90,7 +94,7 @@ export function AIFormModal({
               className="h-10 px-4 rounded-xl"
               disabled={isLoading}
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button
               type="submit"
@@ -100,12 +104,12 @@ export function AIFormModal({
               {isLoading ? (
                 <>
                   <LoadingSpinner className="w-4 h-4" color="text-white" />
-                  <span>Generating schema...</span>
+                  <span>{t("modalAiGenerating")}</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4" />
-                  <span>Generate with AI</span>
+                  <span>{t("modalAiBtn")}</span>
                 </>
               )}
             </Button>

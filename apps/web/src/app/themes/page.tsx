@@ -7,11 +7,16 @@ import { useRouter } from "next/navigation";
 import { BUILTIN_THEMES } from "@sec-form/shared";
 import { Palette, Sparkles, Code } from "lucide-react";
 import { ThemeToggle } from "../../components/ThemeToggle";
+import { LocaleSwitcher } from "../../components/LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
 export default function ThemesPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  
+  const tLanding = useTranslations("Landing");
+  const tThemes = useTranslations("Themes");
 
   const handleDemoLogin = async () => {
     setIsLoggingIn(true);
@@ -45,16 +50,22 @@ export default function ThemesPage() {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="font-outfit text-xl font-bold tracking-tight text-foreground">
-                Formu.AI
+                {tLanding("logo")}
               </span>
             </Link>
 
             <nav className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
-              <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Explore Templates</Link>
-              <Link href="/themes" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Theme Gallery</Link>
-              <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Pricing</Link>
+              <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navExplore")}
+              </Link>
+              <Link href="/themes" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navThemes")}
+              </Link>
+              <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navPricing")}
+              </Link>
               <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1">
-                API Docs <Code className="h-3 w-3" />
+                {tLanding("navApiDocs")} <Code className="h-3 w-3" />
               </a>
             </nav>
 
@@ -65,7 +76,7 @@ export default function ThemesPage() {
                   href="/dashboard"
                   className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
                 >
-                  Dashboard
+                  {tLanding("ctaStart")}
                 </Link>
               ) : (
                 <>
@@ -73,14 +84,14 @@ export default function ThemesPage() {
                     href="/login"
                     className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                   >
-                    Log in
+                    {tLanding("login")}
                   </Link>
                   <button
                     onClick={handleDemoLogin}
                     disabled={isLoggingIn}
                     className="inline-flex h-9 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 text-sm font-semibold text-white shadow-md shadow-indigo-100 dark:shadow-none hover:opacity-90 transition-opacity disabled:opacity-50"
                   >
-                    {isLoggingIn ? "Logging in..." : "Try Demo"}
+                    {isLoggingIn ? tLanding("loggingIn") : tLanding("tryDemo")}
                   </button>
                 </>
               )}
@@ -92,10 +103,10 @@ export default function ThemesPage() {
       <main className="flex-1 py-16 pt-28 container mx-auto px-4 sm:px-6 max-w-5xl">
         <div className="text-center max-w-2xl mx-auto">
           <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Theme Gallery
+            {tThemes("title")}
           </h1>
           <p className="mt-3 text-muted-foreground">
-            Examine our built-in CSS styling presets. Applied directly to public forms to alter backgrounds, typography, and borders instantly.
+            {tThemes("subtitle")}
           </p>
         </div>
 
@@ -163,7 +174,7 @@ export default function ThemesPage() {
                    href="/login"
                    className="block w-full text-center py-2 bg-indigo-600/10 dark:bg-indigo-950/30 hover:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 font-semibold text-sm rounded-xl transition-colors"
                  >
-                  Apply Theme in Builder
+                  {tThemes("applyTheme")}
                 </Link>
               </div>
             </div>
@@ -171,8 +182,25 @@ export default function ThemesPage() {
         </div>
       </main>
 
-       <footer className="border-t border-border bg-muted/50 py-6 text-center text-muted-foreground text-xs">
-        <p>© 2026 Formu.AI. All rights reserved.</p>
+      {/* FOOTER */}
+      <footer className="border-t border-border bg-muted/50 py-10 transition-colors duration-200">
+        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <p>{tLanding("rights")}</p>
+            <LocaleSwitcher />
+          </div>
+          <div className="flex gap-4">
+            <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navExplore")}
+            </Link>
+            <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navPricing")}
+            </Link>
+            <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navApiDocs")}
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );

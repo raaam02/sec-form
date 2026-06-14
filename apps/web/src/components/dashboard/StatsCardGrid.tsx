@@ -1,6 +1,7 @@
 import React from "react";
 import { FileText, Eye, Inbox, Percent } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 
 interface StatsCardGridProps {
   stats: {
@@ -13,27 +14,29 @@ interface StatsCardGridProps {
 }
 
 export function StatsCardGrid({ stats, isStatsLoading }: StatsCardGridProps) {
+  const t = useTranslations("Dashboard");
+
   const statsConfig = [
     {
-      label: "Total Forms",
+      label: t("statForms"),
       value: stats?.totalForms ?? 0,
       icon: FileText,
       colorClass: "bg-primary/10 text-primary",
     },
     {
-      label: "Form Views",
+      label: t("statViews"),
       value: stats?.totalViews ?? 0,
       icon: Eye,
       colorClass: "bg-success/10 text-success",
     },
     {
-      label: "Submissions",
+      label: t("statSubmissions"),
       value: stats?.totalSubmissions ?? 0,
       icon: Inbox,
       colorClass: "bg-purple-500/10 text-purple-500 dark:text-purple-400",
     },
     {
-      label: "Conversion Rate",
+      label: t("statConversion"),
       value: `${stats?.averageConversionRate ?? 0}%`,
       icon: Percent,
       colorClass: "bg-amber-500/10 text-amber-500 dark:text-amber-400",

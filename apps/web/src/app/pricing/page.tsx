@@ -6,11 +6,16 @@ import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { CheckCircle, Sparkles, Code } from "lucide-react";
 import { ThemeToggle } from "../../components/ThemeToggle";
+import { LocaleSwitcher } from "../../components/LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
 export default function PricingPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  
+  const tLanding = useTranslations("Landing");
+  const tPricing = useTranslations("Pricing");
 
   const handleDemoLogin = async () => {
     setIsLoggingIn(true);
@@ -34,9 +39,9 @@ export default function PricingPage() {
 
   const tiers = [
     {
-      name: "Free",
-      price: "$0",
-      description: "Perfect for personal side projects and quick surveys.",
+      name: tPricing("plans.free.name"),
+      price: tPricing("plans.free.price"),
+      description: tPricing("plans.free.desc"),
       features: [
         "Up to 3 active forms",
         "100 submissions per month",
@@ -44,13 +49,13 @@ export default function PricingPage() {
         "Rate limiting validation",
         "Basic theme selection",
       ],
-      cta: "Get Started",
+      cta: tPricing("getStarted"),
       popular: false
     },
     {
-      name: "Pro",
-      price: "$29",
-      description: "Ideal for growing businesses requiring AI and analytics.",
+      name: tPricing("plans.pro.name"),
+      price: tPricing("plans.pro.price"),
+      description: tPricing("plans.pro.desc"),
       features: [
         "Unlimited active forms",
         "Unlimited submissions",
@@ -60,13 +65,13 @@ export default function PricingPage() {
         "Custom URLs & Custom slugs",
         "CSV submissions exports",
       ],
-      cta: "Go Pro",
+      cta: tPricing("getStarted"),
       popular: true
     },
     {
-      name: "Enterprise",
-      price: "Custom",
-      description: "For organizations needing strict security and SLA.",
+      name: tPricing("plans.enterprise.name"),
+      price: tPricing("plans.enterprise.price"),
+      description: tPricing("plans.enterprise.desc"),
       features: [
         "Everything in Pro",
         "Dedicated database clusters",
@@ -75,7 +80,7 @@ export default function PricingPage() {
         "Custom SAML/SSO authentication",
         "Advanced Redis rate limits",
       ],
-      cta: "Contact Sales",
+      cta: tPricing("getStarted"),
       popular: false
     }
   ];
@@ -91,16 +96,22 @@ export default function PricingPage() {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="font-outfit text-xl font-bold tracking-tight text-foreground">
-                Formu.AI
+                {tLanding("logo")}
               </span>
             </Link>
 
             <nav className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
-              <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Explore Templates</Link>
-              <Link href="/themes" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Theme Gallery</Link>
-              <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Pricing</Link>
+              <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navExplore")}
+              </Link>
+              <Link href="/themes" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navThemes")}
+              </Link>
+              <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navPricing")}
+              </Link>
               <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1">
-                API Docs <Code className="h-3 w-3" />
+                {tLanding("navApiDocs")} <Code className="h-3 w-3" />
               </a>
             </nav>
 
@@ -111,7 +122,7 @@ export default function PricingPage() {
                   href="/dashboard"
                   className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
                 >
-                  Dashboard
+                  {tLanding("ctaStart")}
                 </Link>
               ) : (
                 <>
@@ -119,14 +130,14 @@ export default function PricingPage() {
                     href="/login"
                     className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                   >
-                    Log in
+                    {tLanding("login")}
                   </Link>
                   <button
                     onClick={handleDemoLogin}
                     disabled={isLoggingIn}
                     className="inline-flex h-9 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 text-sm font-semibold text-white shadow-md shadow-indigo-100 dark:shadow-none hover:opacity-90 transition-opacity disabled:opacity-50"
                   >
-                    {isLoggingIn ? "Logging in..." : "Try Demo"}
+                    {isLoggingIn ? tLanding("loggingIn") : tLanding("tryDemo")}
                   </button>
                 </>
               )}
@@ -138,10 +149,10 @@ export default function PricingPage() {
       <main className="flex-1 py-16 pt-28 container mx-auto px-4 sm:px-6">
         <div className="text-center max-w-2xl mx-auto">
           <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
-            Simple, Transparent Pricing
+            {tPricing("title")}
           </h1>
           <p className="mt-4 text-muted-foreground text-lg">
-            Choose the tier that matches your scope. Upgrade or downgrade at any time.
+            {tPricing("subtitle")}
           </p>
         </div>
 
@@ -157,7 +168,7 @@ export default function PricingPage() {
             >
               {tier.popular && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider">
-                  Most Popular
+                  {tPricing("mostPopular")}
                 </span>
               )}
               <div>
@@ -165,7 +176,7 @@ export default function PricingPage() {
                 <p className="mt-2 text-muted-foreground text-sm">{tier.description}</p>
                 <div className="mt-6 flex items-baseline gap-1">
                   <span className="text-4xl font-extrabold font-outfit text-foreground">{tier.price}</span>
-                  {tier.price !== "Custom" && <span className="text-muted-foreground text-sm">/month</span>}
+                  {tier.price !== "Custom" && <span className="text-muted-foreground text-sm">/{tPricing("billingMonthly")}</span>}
                 </div>
                 
                 <ul className="mt-8 space-y-4 text-sm text-muted-foreground">
@@ -195,8 +206,25 @@ export default function PricingPage() {
         </div>
       </main>
 
-      <footer className="border-t border-border bg-muted/50 py-6 text-center text-muted-foreground text-xs">
-        <p>© 2026 Formu.AI. All rights reserved.</p>
+      {/* FOOTER */}
+      <footer className="border-t border-border bg-muted/50 py-10 transition-colors duration-200">
+        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <p>{tLanding("rights")}</p>
+            <LocaleSwitcher />
+          </div>
+          <div className="flex gap-4">
+            <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navExplore")}
+            </Link>
+            <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navPricing")}
+            </Link>
+            <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navApiDocs")}
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );

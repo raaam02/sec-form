@@ -14,6 +14,7 @@ import {
   Lock 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface BuilderHeaderProps {
   title: string;
@@ -34,6 +35,7 @@ export function BuilderHeader({
   setIsShareModalOpen,
   publicFormUrl,
 }: BuilderHeaderProps) {
+  const t = useTranslations("Builder");
   const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
 
   const getVisibilityIcon = (vis: string) => {
@@ -52,15 +54,15 @@ export function BuilderHeader({
             variant="outline" 
             size="icon"
             className="h-8 w-8 rounded-xl border border-border bg-card text-muted-foreground shrink-0"
-            title="Back to Dashboard"
+            title={t("backToDashboard")}
             asChild
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
         <div className="min-w-0">
-          <h1 className="font-outfit text-base font-bold text-foreground truncate max-w-[180px] sm:max-w-xs md:max-w-md">{title || "Untitled Form"}</h1>
-          <p className="text-muted-foreground text-[10px] truncate max-w-[180px] sm:max-w-xs md:max-w-md mt-0.5">{description || "No description loaded."}</p>
+          <h1 className="font-outfit text-base font-bold text-foreground truncate max-w-[180px] sm:max-w-xs md:max-w-md">{title || t("canvasTitlePlaceholder")}</h1>
+          <p className="text-muted-foreground text-[10px] truncate max-w-[180px] sm:max-w-xs md:max-w-md mt-0.5">{description || t("canvasDescPlaceholder")}</p>
         </div>
       </div>
 
@@ -70,15 +72,15 @@ export function BuilderHeader({
         <div className="text-xs font-semibold select-none mr-2 hidden sm:block">
           {saveStatus === "saving" ? (
             <span className="text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 font-bold">
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Saving...
+              <RefreshCw className="h-3.5 w-3.5 animate-spin" /> {t("saving")}
             </span>
           ) : saveStatus === "error" ? (
             <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5 font-bold">
-              <AlertCircle className="h-3.5 w-3.5" /> Save failed
+              <AlertCircle className="h-3.5 w-3.5" /> {t("unsavedChanges")}
             </span>
           ) : (
             <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 font-bold">
-              <CheckCircle className="h-3.5 w-3.5" /> Saved
+              <CheckCircle className="h-3.5 w-3.5" /> {t("saved")}
             </span>
           )}
         </div>
@@ -129,7 +131,7 @@ export function BuilderHeader({
             size="icon"
             onClick={() => setIsShareModalOpen(true)}
             className="h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors"
-            title="Share / QR Link"
+            title={t("share")}
           >
             <Share2 className="h-4 w-4" />
           </Button>
@@ -142,7 +144,7 @@ export function BuilderHeader({
           asChild
         >
           <a href={publicFormUrl} target="_blank" rel="noopener noreferrer">
-            <span>Live Preview</span>
+            <span>{t("preview")}</span>
             <ExternalLink className="h-3.5 w-3.5" />
           </a>
         </Button>

@@ -10,11 +10,14 @@ import { LoadingSpinner } from "@sec-form/ui";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { LocaleSwitcher } from "../../components/LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
+  const t = useTranslations("Login");
 
   const [email, setEmail] = useState("demo@demo.com");
   const [password, setPassword] = useState("demo123");
@@ -36,10 +39,10 @@ function LoginForm() {
       if (res?.ok) {
         router.push(redirect);
       } else {
-        setError("Invalid email or password. Please use: demo@demo.com / demo123");
+        setError(t("errorInvalid"));
       }
     } catch (err) {
-      setError("An unexpected error occurred. Please try again.");
+      setError(t("errorGeneric"));
     } finally {
       setIsLoading(false);
     }
@@ -50,12 +53,12 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col justify-center items-center px-4 relative overflow-hidden transition-colors duration-200">
+    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between items-center px-4 py-16 relative overflow-hidden transition-colors duration-200">
       {/* Background blobs */}
       <div className="absolute top-10 left-10 h-72 w-72 rounded-full bg-indigo-200/20 dark:bg-indigo-950/10 blur-3xl" />
       <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-purple-200/20 dark:bg-purple-950/10 blur-3xl" />
 
-      <div className="max-w-md w-full relative z-10">
+      <div className="max-w-md w-full relative z-10 my-auto">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 justify-center mb-4">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-50 to-violet-600 shadow-md">
@@ -66,10 +69,10 @@ function LoginForm() {
             </span>
           </Link>
           <h2 className="font-outfit text-3xl font-extrabold tracking-tight text-foreground">
-            Welcome back
+            {t("title")}
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Sign in to start creating forms with AI
+            {t("subtitle")}
           </p>
         </div>
 
@@ -84,7 +87,7 @@ function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                Email Address
+                {t("emailLabel")}
               </label>
               <div className="relative">
                 <Input
@@ -100,7 +103,7 @@ function LoginForm() {
 
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                Password
+                {t("passwordLabel")}
               </label>
               <div className="relative">
                 <Input
@@ -119,13 +122,13 @@ function LoginForm() {
               disabled={isLoading}
               className="w-full h-11 bg-primary text-primary-foreground font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? t("signingIn") : t("signInBtn")}
             </Button>
           </form>
 
           <div className="my-6 flex items-center justify-between">
             <span className="border-t border-border flex-1" />
-            <span className="text-xs text-muted-foreground uppercase font-semibold px-3">or</span>
+            <span className="text-xs text-muted-foreground uppercase font-semibold px-3">{t("or")}</span>
             <span className="border-t border-border flex-1" />
           </div>
 
@@ -153,15 +156,25 @@ function LoginForm() {
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.96 1.19 15.24 0 12 0 7.37 0 3.37 2.64 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01z"
               />
             </svg>
-            Sign in with Google
+            {t("googleBtn")}
           </Button>
         </Card>
 
         <div className="text-center mt-6 text-xs text-slate-500 dark:text-zinc-500 transition-colors">
-          <span className="font-bold">Hackathon Demo Credentials:</span>
-          <span className="block mt-1 font-mono text-[11px] opacity-75">Email: demo@demo.com &nbsp;|&nbsp; Password: demo123</span>
+          <span className="font-bold">{t("demoTitle")}</span>
+          <span className="block mt-1 font-mono text-[11px] opacity-75">{t("demoCredentials")}</span>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="w-full max-w-xs text-center text-xs text-muted-foreground relative z-10 flex flex-col items-center gap-3 mt-10">
+        <div className="flex gap-4 font-semibold">
+          <Link href="/" className="hover:text-indigo-650 dark:hover:text-indigo-400">Home</Link>
+          <Link href="/explore" className="hover:text-indigo-650 dark:hover:text-indigo-400">Explore</Link>
+          <Link href="/pricing" className="hover:text-indigo-650 dark:hover:text-indigo-400">Pricing</Link>
+        </div>
+        <LocaleSwitcher />
+      </footer>
     </div>
   );
 }
@@ -180,4 +193,3 @@ export default function LoginPage() {
     </Suspense>
   );
 }
-

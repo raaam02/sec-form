@@ -11,10 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
 export default function PublicFormPage() {
   const params = useParams();
   const slug = params.slug as string;
+  const t = useTranslations("PublicForm");
 
   // Query form metadata
   const { data: form, isLoading, error } = trpc.forms.getBySlug.useQuery({ slug });
@@ -147,238 +150,245 @@ export default function PublicFormPage() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 md:p-10 font-[family-name:var(--font-family)] transition-colors"
+      className="min-h-screen flex flex-col items-center justify-between p-4 md:p-10 font-[family-name:var(--font-family)] transition-colors"
       style={{
         ...customStyles,
         backgroundColor: "var(--background-color)",
         color: "var(--text-color)"
       }}
     >
-      <div
-        className="max-w-xl w-full border border-slate-200/50 p-6 md:p-8 shadow-lg transition-all"
-        style={{
-          backgroundColor: "var(--card-color)",
-          borderRadius: "var(--border-radius)"
-        }}
-      >
-        {isSubmitted ? (
-          /* Submission success container */
-          <div className="text-center py-10 flex flex-col items-center justify-center gap-4">
-            <CheckCircle2 className="h-16 w-16 text-[color:var(--primary)]" />
-            <h1 className="font-outfit text-3xl font-extrabold text-slate-900 leading-none">Responses Submitted</h1>
-            <p className="text-slate-500 text-sm max-w-xs mt-1">Thank you for taking the time to complete this questionnaire. Your responses were saved.</p>
-            <button
-              onClick={() => {
-                setAnswers({});
-                setIsSubmitted(false);
-              }}
-              className="mt-6 text-xs font-bold text-[color:var(--primary)] hover:underline"
-            >
-              Submit another response
-            </button>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Header info */}
-            <div>
-              <h1 className="font-outfit text-2xl font-bold leading-tight">{form.title}</h1>
-              {form.description && <p className="text-sm mt-2 opacity-80 leading-relaxed">{form.description}</p>}
+      <div className="w-full flex-1 flex items-center justify-center py-6">
+        <div
+          className="max-w-xl w-full border border-slate-200/50 p-6 md:p-8 shadow-lg transition-all"
+          style={{
+            backgroundColor: "var(--card-color)",
+            borderRadius: "var(--border-radius)"
+          }}
+        >
+          {isSubmitted ? (
+            /* Submission success container */
+            <div className="text-center py-10 flex flex-col items-center justify-center gap-4">
+              <CheckCircle2 className="h-16 w-16 text-[color:var(--primary)]" />
+              <h1 className="font-outfit text-3xl font-extrabold leading-none">{t("submitSuccess")}</h1>
+              <p className="text-slate-500 text-sm max-w-xs mt-1">{t("submitSuccessDesc")}</p>
+              <button
+                onClick={() => {
+                  setAnswers({});
+                  setIsSubmitted(false);
+                }}
+                className="mt-6 text-xs font-bold text-[color:var(--primary)] hover:underline"
+              >
+                {t("submitAnother")}
+              </button>
             </div>
-
-            {submitError && (
-              <div className="rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-                <span>{submitError}</span>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Header info */}
+              <div>
+                <h1 className="font-outfit text-2xl font-bold leading-tight">{form.title}</h1>
+                {form.description && <p className="text-sm mt-2 opacity-80 leading-relaxed">{form.description}</p>}
               </div>
-            )}
 
-            {/* Fields rendering list */}
-            <div className="space-y-6">
-              {fields.map((field) => (
-                <div key={field.id} className="space-y-2 text-left">
-                  <label className="text-sm font-semibold block">
-                    {field.label} {field.required && <span className="text-destructive">*</span>}
-                  </label>
-                  {field.description && <span className="text-xs opacity-60 block leading-tight">{field.description}</span>}
+              {submitError && (
+                <div className="rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+                  <span>{submitError}</span>
+                </div>
+              )}
 
-                  <div className="mt-1">
-                    {/* SHORT TEXT */}
-                    {field.type === "text" && (
-                      <Input
-                        type="text"
-                        value={answers[field.id] || ""}
-                        onChange={(e) => handleInputChange(field.id, e.target.value)}
-                        placeholder={field.placeholder || "Your answer..."}
-                        className="text-slate-900 bg-white"
-                        style={{
-                          borderRadius: "var(--border-radius)",
-                          borderColor: "rgba(128,128,128,0.2)"
-                        }}
-                      />
-                    )}
+              {/* Fields rendering list */}
+              <div className="space-y-6">
+                {fields.map((field) => (
+                  <div key={field.id} className="space-y-2 text-left">
+                    <label className="text-sm font-semibold block">
+                      {field.label} {field.required && <span className="text-destructive">*</span>}
+                    </label>
+                    {field.description && <span className="text-xs opacity-60 block leading-tight">{field.description}</span>}
 
-                    {/* LONG TEXT */}
-                    {field.type === "textarea" && (
-                      <Textarea
-                        value={answers[field.id] || ""}
-                        onChange={(e) => handleInputChange(field.id, e.target.value)}
-                        placeholder={field.placeholder || "Your response..."}
-                        className="text-slate-900 bg-white"
-                        style={{
-                          borderRadius: "var(--border-radius)",
-                          borderColor: "rgba(128,128,128,0.2)"
-                        }}
-                      />
-                    )}
-
-                    {/* EMAIL */}
-                    {field.type === "email" && (
-                      <Input
-                        type="email"
-                        value={answers[field.id] || ""}
-                        onChange={(e) => handleInputChange(field.id, e.target.value)}
-                        placeholder={field.placeholder || "you@example.com"}
-                        className="text-slate-900 bg-white"
-                        style={{
-                          borderRadius: "var(--border-radius)",
-                          borderColor: "rgba(128,128,128,0.2)"
-                        }}
-                      />
-                    )}
-
-                    {/* NUMBER */}
-                    {field.type === "number" && (
-                      <Input
-                        type="number"
-                        value={answers[field.id] === undefined ? "" : answers[field.id]}
-                        onChange={(e) => handleInputChange(field.id, e.target.value)}
-                        placeholder="0"
-                        className="max-w-[150px] text-slate-900 bg-white"
-                        style={{
-                          borderRadius: "var(--border-radius)",
-                          borderColor: "rgba(128,128,128,0.2)"
-                        }}
-                      />
-                    )}
-
-                    {/* SINGLE SELECT */}
-                    {field.type === "select" && (
-                      <select
-                        value={answers[field.id] || ""}
-                        onChange={(e) => handleInputChange(field.id, e.target.value)}
-                        className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        style={{
-                          borderRadius: "var(--border-radius)",
-                          borderColor: "rgba(128,128,128,0.2)"
-                        }}
-                      >
-                        <option value="">Choose option...</option>
-                        {field.options?.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
-                    )}
-
-                    {/* MULTI SELECT */}
-                    {field.type === "multiselect" && (
-                      <div className="space-y-2 pl-1">
-                        {field.options?.map((opt) => {
-                          const currentAnswers = (answers[field.id] as string[]) || [];
-                          const isChecked = currentAnswers.includes(opt);
-                          return (
-                            <div key={opt} className="flex items-center gap-2 text-sm text-slate-700">
-                              <Checkbox
-                                id={`${field.id}-${opt}`}
-                                checked={isChecked}
-                                onCheckedChange={(checked) => handleMultiSelectChange(field.id, opt, !!checked)}
-                                className="border-slate-300"
-                              />
-                              <label htmlFor={`${field.id}-${opt}`} className="cursor-pointer font-medium select-none">{opt}</label>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* CHECKBOX */}
-                    {field.type === "checkbox" && (
-                      <div className="flex items-center gap-2 text-sm text-slate-700 pl-1">
-                        <Checkbox
-                          id={field.id}
-                          checked={answers[field.id] || false}
-                          onCheckedChange={(checked) => handleCheckboxChange(field.id, !!checked)}
-                          className="border-slate-300"
-                        />
-                        <label htmlFor={field.id} className="cursor-pointer font-medium select-none">I confirm this detail</label>
-                      </div>
-                    )}
-
-                    {/* RATING */}
-                    {field.type === "rating" && (
-                      <div className="flex gap-2 pl-1">
-                        {Array.from({ length: 5 }).map((_, idx) => {
-                          const starVal = idx + 1;
-                          const currentVal = answers[field.id] || 0;
-                          return (
-                            <button
-                              type="button"
-                              key={idx}
-                              onClick={() => handleInputChange(field.id, starVal)}
-                              className={`text-3xl transition-colors ${
-                                starVal <= currentVal ? "text-amber-400" : "text-slate-300"
-                              }`}
-                            >
-                              ★
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* DATE */}
-                    {field.type === "date" && (
-                      <div className="relative max-w-[200px]">
+                    <div className="mt-1">
+                      {/* SHORT TEXT */}
+                      {field.type === "text" && (
                         <Input
-                          type="date"
+                          type="text"
                           value={answers[field.id] || ""}
                           onChange={(e) => handleInputChange(field.id, e.target.value)}
+                          placeholder={field.placeholder || "Your answer..."}
                           className="text-slate-900 bg-white"
                           style={{
                             borderRadius: "var(--border-radius)",
                             borderColor: "rgba(128,128,128,0.2)"
                           }}
                         />
-                      </div>
+                      )}
+
+                      {/* LONG TEXT */}
+                      {field.type === "textarea" && (
+                        <Textarea
+                          value={answers[field.id] || ""}
+                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                          placeholder={field.placeholder || "Your response..."}
+                          className="text-slate-900 bg-white"
+                          style={{
+                            borderRadius: "var(--border-radius)",
+                            borderColor: "rgba(128,128,128,0.2)"
+                          }}
+                        />
+                      )}
+
+                      {/* EMAIL */}
+                      {field.type === "email" && (
+                        <Input
+                          type="email"
+                          value={answers[field.id] || ""}
+                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                          placeholder={field.placeholder || "you@example.com"}
+                          className="text-slate-900 bg-white"
+                          style={{
+                            borderRadius: "var(--border-radius)",
+                            borderColor: "rgba(128,128,128,0.2)"
+                          }}
+                        />
+                      )}
+
+                      {/* NUMBER */}
+                      {field.type === "number" && (
+                        <Input
+                          type="number"
+                          value={answers[field.id] === undefined ? "" : answers[field.id]}
+                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                          placeholder="0"
+                          className="max-w-[150px] text-slate-900 bg-white"
+                          style={{
+                            borderRadius: "var(--border-radius)",
+                            borderColor: "rgba(128,128,128,0.2)"
+                          }}
+                        />
+                      )}
+
+                      {/* SINGLE SELECT */}
+                      {field.type === "select" && (
+                        <select
+                          value={answers[field.id] || ""}
+                          onChange={(e) => handleInputChange(field.id, e.target.value)}
+                          className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                          style={{
+                            borderRadius: "var(--border-radius)",
+                            borderColor: "rgba(128,128,128,0.2)"
+                          }}
+                        >
+                          <option value="">Choose option...</option>
+                          {field.options?.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      )}
+
+                      {/* MULTI SELECT */}
+                      {field.type === "multiselect" && (
+                        <div className="space-y-2 pl-1">
+                          {field.options?.map((opt) => {
+                            const currentAnswers = (answers[field.id] as string[]) || [];
+                            const isChecked = currentAnswers.includes(opt);
+                            return (
+                              <div key={opt} className="flex items-center gap-2 text-sm text-slate-700">
+                                <Checkbox
+                                  id={`${field.id}-${opt}`}
+                                  checked={isChecked}
+                                  onCheckedChange={(checked) => handleMultiSelectChange(field.id, opt, !!checked)}
+                                  className="border-slate-300"
+                                />
+                                <label htmlFor={`${field.id}-${opt}`} className="cursor-pointer font-medium select-none">{opt}</label>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* CHECKBOX */}
+                      {field.type === "checkbox" && (
+                        <div className="flex items-center gap-2 text-sm text-slate-700 pl-1">
+                          <Checkbox
+                            id={field.id}
+                            checked={answers[field.id] || false}
+                            onCheckedChange={(checked) => handleCheckboxChange(field.id, !!checked)}
+                            className="border-slate-300"
+                          />
+                          <label htmlFor={field.id} className="cursor-pointer font-medium select-none">I confirm this detail</label>
+                        </div>
+                      )}
+
+                      {/* RATING */}
+                      {field.type === "rating" && (
+                        <div className="flex gap-2 pl-1">
+                          {Array.from({ length: 5 }).map((_, idx) => {
+                            const starVal = idx + 1;
+                            const currentVal = answers[field.id] || 0;
+                            return (
+                              <button
+                                type="button"
+                                key={idx}
+                                onClick={() => handleInputChange(field.id, starVal)}
+                                className={`text-3xl transition-colors ${
+                                  starVal <= currentVal ? "text-amber-400" : "text-slate-300"
+                                }`}
+                              >
+                                ★
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* DATE */}
+                      {field.type === "date" && (
+                        <div className="relative max-w-[200px]">
+                          <Input
+                            type="date"
+                            value={answers[field.id] || ""}
+                            onChange={(e) => handleInputChange(field.id, e.target.value)}
+                            className="text-slate-900 bg-white"
+                            style={{
+                              borderRadius: "var(--border-radius)",
+                              borderColor: "rgba(128,128,128,0.2)"
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Inline Zod alert */}
+                    {validationErrors[field.id] && (
+                      <span className="text-xs text-destructive font-semibold block">{validationErrors[field.id]}</span>
                     )}
                   </div>
+                ))}
+              </div>
 
-                  {/* Inline Zod alert */}
-                  {validationErrors[field.id] && (
-                    <span className="text-xs text-destructive font-semibold block">{validationErrors[field.id]}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Submission triggers */}
-            <div className="pt-6 border-t border-slate-100">
-              <Button
-                type="submit"
-                disabled={submitMutation.isLoading}
-                className="w-full h-11 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
-                style={{
-                  backgroundColor: "var(--primary)",
-                  borderRadius: "var(--border-radius)",
-                  boxShadow: "0 10px 15px -3px rgba(var(--primary), 0.15)"
-                }}
-              >
-                {submitMutation.isLoading ? <LoadingSpinner className="w-5 h-5" color="text-white" /> : "Submit Responses"}
-              </Button>
-            </div>
-          </form>
-        )}
+              {/* Submission triggers */}
+              <div className="pt-6 border-t border-slate-100">
+                <Button
+                  type="submit"
+                  disabled={submitMutation.isLoading}
+                  className="w-full h-11 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
+                  style={{
+                    backgroundColor: "var(--primary)",
+                    borderRadius: "var(--border-radius)",
+                    boxShadow: "0 10px 15px -3px rgba(var(--primary), 0.15)"
+                  }}
+                >
+                  {submitMutation.isLoading ? <LoadingSpinner className="w-5 h-5" color="text-white" /> : t("submitBtn")}
+                </Button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="w-full text-center text-xs opacity-60 flex flex-col items-center gap-2 mt-6 pb-6">
+        <span>{t("poweredBy")} Formu.AI</span>
+        <LocaleSwitcher />
+      </footer>
     </div>
   );
 }
-

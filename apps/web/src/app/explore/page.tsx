@@ -7,12 +7,18 @@ import { useRouter } from "next/navigation";
 import { FORM_TEMPLATES } from "@sec-form/shared";
 import { Copy, Sparkles, Code } from "lucide-react";
 import { ThemeToggle } from "../../components/ThemeToggle";
+import { LocaleSwitcher } from "../../components/LocaleSwitcher";
+import { useTranslations } from "next-intl";
 
 export default function ExplorePage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const tLanding = useTranslations("Landing");
+  const tExplore = useTranslations("Explore");
+  const tCommon = useTranslations("Common");
 
   const handleDemoLogin = async () => {
     setIsLoggingIn(true);
@@ -60,16 +66,22 @@ export default function ExplorePage() {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="font-outfit text-xl font-bold tracking-tight text-foreground">
-                Formu.AI
+                {tLanding("logo")}
               </span>
             </Link>
 
             <nav className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
-              <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Explore Templates</Link>
-              <Link href="/themes" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Theme Gallery</Link>
-              <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Pricing</Link>
+              <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navExplore")}
+              </Link>
+              <Link href="/themes" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navThemes")}
+              </Link>
+              <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                {tLanding("navPricing")}
+              </Link>
               <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1">
-                API Docs <Code className="h-3 w-3" />
+                {tLanding("navApiDocs")} <Code className="h-3 w-3" />
               </a>
             </nav>
 
@@ -80,7 +92,7 @@ export default function ExplorePage() {
                   href="/dashboard"
                   className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
                 >
-                  Dashboard
+                  {tLanding("ctaStart")}
                 </Link>
               ) : (
                 <>
@@ -88,14 +100,14 @@ export default function ExplorePage() {
                     href="/login"
                     className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
                   >
-                    Log in
+                    {tLanding("login")}
                   </Link>
                   <button
                     onClick={handleDemoLogin}
                     disabled={isLoggingIn}
                     className="inline-flex h-9 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 text-sm font-semibold text-white shadow-md shadow-indigo-100 dark:shadow-none hover:opacity-90 transition-opacity disabled:opacity-50"
                   >
-                    {isLoggingIn ? "Logging in..." : "Try Demo"}
+                    {isLoggingIn ? tLanding("loggingIn") : tLanding("tryDemo")}
                   </button>
                 </>
               )}
@@ -106,11 +118,11 @@ export default function ExplorePage() {
 
       <main className="flex-1 py-16 pt-28 container mx-auto px-4 sm:px-6 max-w-6xl">
         <div className="text-center max-w-2xl mx-auto">
-          <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-slate-900 dark:text-zinc-50 sm:text-5xl">
-            Template Gallery
+          <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
+            {tExplore("title")}
           </h1>
-          <p className="mt-3 text-slate-600 dark:text-zinc-400">
-            Kickstart your collection workflows with pre-built form configurations crafted by industry experts.
+          <p className="mt-3 text-muted-foreground">
+            {tExplore("subtitle")}
           </p>
         </div>
 
@@ -126,7 +138,7 @@ export default function ExplorePage() {
                   : "bg-card border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               }`}
             >
-              {cat}
+              {cat === "All" ? tExplore("filterAll") : cat}
             </button>
           ))}
         </div>
@@ -143,7 +155,7 @@ export default function ExplorePage() {
                   <span className="rounded-md bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-300">
                     {template.category}
                   </span>
-                  <span className="text-xs text-muted-foreground font-medium">{template.fields.length} questions</span>
+                  <span className="text-xs text-muted-foreground font-medium">{template.fields.length} {tExplore("questions")}</span>
                 </div>
                 <h3 className="mt-4 font-outfit text-xl font-bold text-foreground">{template.title}</h3>
                 <p className="mt-2 text-muted-foreground text-sm line-clamp-2 min-h-[40px]">{template.description}</p>
@@ -188,7 +200,7 @@ export default function ExplorePage() {
                       </div>
                     ))}
                     <div className="h-7 w-full rounded bg-indigo-600/10 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-800/40 flex items-center justify-center text-[10px] font-bold mt-1.5 select-none pointer-events-none">
-                      Submit
+                      {tCommon("submit")}
                     </div>
                   </div>
                 </div>
@@ -199,7 +211,7 @@ export default function ExplorePage() {
                   onClick={() => handleUseTemplate(template.id)}
                   className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors"
                 >
-                  <Copy className="h-4 w-4" /> Use Template
+                  <Copy className="h-4 w-4" /> {tExplore("useTemplate")}
                 </button>
               </div>
             </div>
@@ -207,8 +219,25 @@ export default function ExplorePage() {
         </div>
       </main>
 
-      <footer className="border-t border-border bg-muted/50 py-6 text-center text-muted-foreground text-xs">
-        <p>© 2026 Formu.AI. All rights reserved.</p>
+      {/* FOOTER */}
+      <footer className="border-t border-border bg-muted py-10 transition-colors duration-200">
+        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <p>{tLanding("rights")}</p>
+            <LocaleSwitcher />
+          </div>
+          <div className="flex gap-4">
+            <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navExplore")}
+            </Link>
+            <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navPricing")}
+            </Link>
+            <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              {tLanding("navApiDocs")}
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );

@@ -5,6 +5,7 @@ import { ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
 import { TabBar } from "../TabBar";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface BuilderSidebarRightProps {
   rightTab: "preview" | "embed";
@@ -18,11 +19,6 @@ interface BuilderSidebarRightProps {
   hostOrigin: string;
 }
 
-const RIGHT_TABS = [
-  { value: "preview", label: "Preview", icon: Smartphone, iconColorClass: "text-indigo-500" },
-  { value: "embed", label: "Embed", icon: Code, iconColorClass: "text-teal-500" }
-] as const;
-
 export function BuilderSidebarRight({
   rightTab,
   setRightTab,
@@ -34,9 +30,17 @@ export function BuilderSidebarRight({
   id,
   hostOrigin,
 }: BuilderSidebarRightProps) {
+  const t = useTranslations("Builder");
+  const tCommon = useTranslations("Common");
+
+  const RIGHT_TABS = [
+    { value: "preview", label: t("preview"), icon: Smartphone, iconColorClass: "text-indigo-500" },
+    { value: "embed", label: t("shareEmbed"), icon: Code, iconColorClass: "text-teal-500" }
+  ] as const;
+
   const handleCopyCode = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert("Copied to clipboard!");
+    alert(t("shareCopied"));
   };
 
   return (
@@ -75,10 +79,10 @@ export function BuilderSidebarRight({
                   }}
                 >
                   <h2 className="text-sm font-extrabold" style={{ color: activeTheme?.textColor || "#0f172a" }}>
-                    {title || "Untitled Form"}
+                    {title || t("canvasTitlePlaceholder")}
                   </h2>
                   <p className="text-[10px] opacity-70 mt-1">
-                    {description || "Provide instructions here."}
+                    {description || t("canvasDescPlaceholder")}
                   </p>
                 </div>
 
@@ -86,7 +90,7 @@ export function BuilderSidebarRight({
                 <div className="space-y-4">
                   {fields.length === 0 ? (
                     <div className="text-center py-10 text-[10px] opacity-50">
-                      Empty Canvas. Add questions.
+                      {t("canvasEmptyTitle")}
                     </div>
                   ) : (
                     fields.map((field) => (
@@ -207,7 +211,7 @@ export function BuilderSidebarRight({
                   }}
                   disabled
                 >
-                  Submit Form
+                  {tCommon("submit")}
                 </button>
               </div>
             </div>
@@ -217,7 +221,7 @@ export function BuilderSidebarRight({
         {rightTab === "embed" && (
           <div className="space-y-6">
             <div>
-              <h3 className="font-outfit font-bold text-foreground text-sm">Iframe Embed Code</h3>
+              <h3 className="font-outfit font-bold text-foreground text-sm">{t("shareEmbed")} Code</h3>
               <p className="text-muted-foreground text-[10px] mt-0.5">Embed the form on any webpage.</p>
               
               <div className="mt-3 relative">

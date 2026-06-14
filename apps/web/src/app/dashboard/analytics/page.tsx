@@ -2,36 +2,39 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { trpc } from "../../../utils/trpc";
 import { FileText, Eye, BarChart3, Percent, Pencil, Inbox } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
+import { useTranslations } from "next-intl";
 
 export default function AnalyticsDashboardPage() {
+  const t = useTranslations("Analytics");
+  const tDashboard = useTranslations("Dashboard");
+
   const { data: stats, isLoading: isStatsLoading } = trpc.analytics.getDashboardStats.useQuery();
   const { data: formsList, isLoading: isFormsLoading } = trpc.forms.list.useQuery();
 
   const statsConfig = [
     {
-      label: "Total Forms",
+      label: tDashboard("statForms"),
       value: stats?.totalForms ?? 0,
       icon: FileText,
       colorClass: "bg-indigo-500/10 text-indigo-500 dark:text-indigo-400",
     },
     {
-      label: "Form Views",
+      label: tDashboard("statViews"),
       value: stats?.totalViews ?? 0,
       icon: Eye,
       colorClass: "bg-emerald-500/10 text-emerald-500 dark:text-emerald-400",
     },
     {
-      label: "Submissions",
+      label: tDashboard("statSubmissions"),
       value: stats?.totalSubmissions ?? 0,
       icon: Inbox,
       colorClass: "bg-purple-500/10 text-purple-500 dark:text-purple-400",
     },
     {
-      label: "Conversion Rate",
+      label: tDashboard("statConversion"),
       value: `${stats?.averageConversionRate ?? 0}%`,
       icon: Percent,
       colorClass: "bg-amber-500/10 text-amber-500 dark:text-amber-400",
@@ -43,7 +46,7 @@ export default function AnalyticsDashboardPage() {
       {/* Page Header */}
       <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 sm:px-8 shrink-0 transition-colors duration-200">
         <div>
-          <h1 className="font-outfit text-xl font-bold text-foreground">Analytics Overview</h1>
+          <h1 className="font-outfit text-xl font-bold text-foreground">{t("title")}</h1>
         </div>
       </header>
 
@@ -79,8 +82,8 @@ export default function AnalyticsDashboardPage() {
           {/* FORMS LIST TABLE */}
           <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm text-card-foreground">
             <div className="p-6 border-b border-border">
-              <h2 className="font-outfit text-lg font-bold text-foreground">Forms Performance</h2>
-              <p className="text-muted-foreground text-xs mt-0.5">Detailed breakdown of views, submissions, and conversion metrics per form.</p>
+              <h2 className="font-outfit text-lg font-bold text-foreground">{t("submissionsTrend")}</h2>
+              <p className="text-muted-foreground text-xs mt-0.5">{t("subtitle")}</p>
             </div>
 
             {isFormsLoading ? (
@@ -92,8 +95,8 @@ export default function AnalyticsDashboardPage() {
                 <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mx-auto text-muted-foreground mb-4 border border-border">
                   <FileText className="h-6 w-6" />
                 </div>
-                <h3 className="font-outfit text-base font-bold text-foreground mb-1">No forms built yet</h3>
-                <p className="text-muted-foreground text-xs mb-6">Create a form to see conversion analytics populated in this dashboard.</p>
+                <h3 className="font-outfit text-base font-bold text-foreground mb-1">{tDashboard("noFormsTitle")}</h3>
+                <p className="text-muted-foreground text-xs mb-6">{tDashboard("noFormsDesc")}</p>
               </div>
             ) : (
               <div className="overflow-x-auto text-foreground">
@@ -177,13 +180,13 @@ function FormAnalyticsRow({ form }: { form: any }) {
             href={`/dashboard/builder/${form.id}?tab=analytics`}
             className="inline-flex h-8 items-center gap-1 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground px-3 text-xs font-bold text-muted-foreground transition-colors shadow-sm"
           >
-            <BarChart3 className="w-3.5 h-3.5" /> Full Stats
+            <BarChart3 className="w-3.5 h-3.5" /> Stats
           </Link>
           <Link
             href={`/dashboard/builder/${form.id}`}
             className="inline-flex h-8 items-center gap-1 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground px-3 text-xs font-bold text-muted-foreground transition-colors shadow-sm"
           >
-            <Pencil className="w-3.5 h-3.5" /> Edit Form
+            <Pencil className="w-3.5 h-3.5" /> Edit
           </Link>
         </div>
       </td>

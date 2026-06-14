@@ -2,8 +2,10 @@ import React from "react";
 import Link from "next/link";
 import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
+import { LocaleSwitcher } from "../LocaleSwitcher";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface DashboardSidebarProps {
   pathname: string;
@@ -22,22 +24,24 @@ export function DashboardSidebar({
   user,
   onSignOut,
 }: DashboardSidebarProps) {
+  const t = useTranslations("Dashboard");
+
   const navItems = [
     {
       href: "/dashboard",
-      label: "Dashboard",
+      label: t("navDashboard"),
       icon: LayoutDashboard,
       active: pathname === "/dashboard",
     },
     {
       href: "/dashboard/explore",
-      label: "Template Gallery",
+      label: t("navExplore"),
       icon: Compass,
       active: pathname === "/dashboard/explore",
     },
     {
       href: "/dashboard/analytics",
-      label: "Analytics",
+      label: t("navAnalytics"),
       icon: BarChart3,
       active: pathname === "/dashboard/analytics",
     },
@@ -91,7 +95,7 @@ export function DashboardSidebar({
               <PlusCircle className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
               {/* Tooltip on hover */}
               <div className="absolute left-16 scale-0 group-hover:scale-100 transition-all origin-left bg-slate-900 text-white text-xs rounded-md px-2.5 py-1.5 font-medium whitespace-nowrap shadow-lg border border-slate-700/50 z-50 pointer-events-none">
-                Create Form
+                {t("newForm")}
               </div>
             </Button>
           </nav>
@@ -108,7 +112,7 @@ export function DashboardSidebar({
             <Code className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
             {/* Tooltip on hover */}
             <div className="absolute left-16 scale-0 group-hover:scale-100 transition-all origin-left bg-slate-900 text-white text-xs rounded-md px-2.5 py-1.5 font-medium whitespace-nowrap shadow-lg border border-slate-700/50 z-50 pointer-events-none">
-              REST API Docs
+              {t("navDocs")}
             </div>
           </a>
         </div>
@@ -129,7 +133,7 @@ export function DashboardSidebar({
               />
             </button>
           </PopoverTrigger>
-          <PopoverContent side="right" align="end" className="w-56 rounded-xl border border-border bg-popover text-popover-foreground p-4 shadow-xl mb-4 ml-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <PopoverContent side="right" align="end" className="w-64 rounded-xl border border-border bg-popover text-popover-foreground p-4 shadow-xl mb-4 ml-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center gap-3 border-b border-border pb-3 mb-3">
               <img
                 src={user.image || "https://api.dicebear.com/7.x/adventurer/svg?seed=User"}
@@ -141,10 +145,14 @@ export function DashboardSidebar({
                 <div className="text-xs text-muted-foreground truncate">{user.email || ""}</div>
               </div>
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between px-2 py-1.5 text-xs text-muted-foreground">
-                <span>Theme</span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground">
+                <span>{t("themeLabel")}</span>
                 <ThemeToggle className="h-7 w-7 rounded-lg" />
+              </div>
+              <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground border-b border-border pb-2">
+                <span>Language</span>
+                <LocaleSwitcher />
               </div>
               <Button
                 variant="ghost"
@@ -152,7 +160,7 @@ export function DashboardSidebar({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors text-left justify-start h-auto"
               >
                 <LogOut className="h-4 w-4" />
-                <span>Sign out</span>
+                <span>{t("signOut")}</span>
               </Button>
             </div>
           </PopoverContent>

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -23,18 +24,20 @@ export function ShareModal({
   setIsOpen,
   publicFormUrl,
 }: ShareModalProps) {
+  const t = useTranslations("Builder");
+
   const handleCopy = () => {
     navigator.clipboard.writeText(publicFormUrl);
-    alert("Copied to clipboard!");
+    alert(t("shareCopied"));
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-md rounded-2xl border border-border bg-background p-6 shadow-xl text-foreground">
         <DialogHeader>
-          <DialogTitle className="font-outfit text-xl font-bold">Share Public Form</DialogTitle>
+          <DialogTitle className="font-outfit text-xl font-bold">{t("shareTitle")}</DialogTitle>
           <DialogDescription className="text-muted-foreground text-xs mt-1">
-            Your form is public and ready to receive responses. Share it using the QR Code or URL.
+            {t("shareDesc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -45,7 +48,7 @@ export function ShareModal({
 
           <div className="w-full space-y-2">
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block text-left">
-              Form URL
+              {t("shareLink")}
             </label>
             <div className="flex items-center rounded-xl border border-border overflow-hidden bg-muted/50 w-full">
               <Input
@@ -59,7 +62,7 @@ export function ShareModal({
                 className="h-9 rounded-none bg-primary hover:bg-primary/95 text-primary-foreground text-xs font-semibold flex items-center gap-1 transition-colors"
               >
                 <Copy className="h-3.5 w-3.5" />
-                <span>Copy</span>
+                <span>{t("shareCopy")}</span>
               </Button>
             </div>
           </div>

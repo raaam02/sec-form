@@ -17,6 +17,7 @@ import { TabBar } from "../TabBar";
 import { ThemePresetCard } from "./ThemePresetCard";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useTranslations } from "next-intl";
 
 interface BuilderSidebarLeftProps {
   leftTab: "builder" | "themes";
@@ -30,23 +31,6 @@ interface BuilderSidebarLeftProps {
   fields: FormField[];
 }
 
-const LEFT_TABS = [
-  { value: "builder", label: "Builder", icon: Plus, iconColorClass: "text-indigo-500" },
-  { value: "themes", label: "Themes", icon: Palette, iconColorClass: "text-purple-500" }
-] as const;
-
-const FIELD_TYPES = [
-  { type: "text", label: "Short Text", icon: Type, iconColor: "text-indigo-500", colSpan2: false },
-  { type: "textarea", label: "Long Text", icon: AlignLeft, iconColor: "text-blue-500", colSpan2: false },
-  { type: "email", label: "Email", icon: Mail, iconColor: "text-emerald-500", colSpan2: false },
-  { type: "number", label: "Number", icon: Hash, iconColor: "text-amber-500", colSpan2: false },
-  { type: "select", label: "Single Select", icon: List, iconColor: "text-orange-500", colSpan2: false },
-  { type: "multiselect", label: "Multi Select", icon: CheckSquare, iconColor: "text-teal-500", colSpan2: false },
-  { type: "checkbox", label: "Checkbox", icon: CheckSquare, iconColor: "text-purple-500", colSpan2: false },
-  { type: "rating", label: "Rating", icon: Star, iconColor: "text-yellow-500", colSpan2: false },
-  { type: "date", label: "Date", icon: Calendar, iconColor: "text-pink-500", colSpan2: true }
-] as const;
-
 export function BuilderSidebarLeft({
   leftTab,
   setLeftTab,
@@ -58,6 +42,25 @@ export function BuilderSidebarLeft({
   saveForm,
   fields,
 }: BuilderSidebarLeftProps) {
+  const t = useTranslations("Builder");
+
+  const LEFT_TABS = [
+    { value: "builder", label: t("tabBuild"), icon: Plus, iconColorClass: "text-indigo-500" },
+    { value: "themes", label: t("tabTheme"), icon: Palette, iconColorClass: "text-purple-500" }
+  ] as const;
+
+  const FIELD_TYPES = [
+    { type: "text", label: t("sidebarFieldText"), icon: Type, iconColor: "text-indigo-500", colSpan2: false },
+    { type: "textarea", label: t("sidebarFieldTextarea"), icon: AlignLeft, iconColor: "text-blue-500", colSpan2: false },
+    { type: "email", label: t("sidebarFieldEmail"), icon: Mail, iconColor: "text-emerald-500", colSpan2: false },
+    { type: "number", label: t("sidebarFieldNumber"), icon: Hash, iconColor: "text-amber-500", colSpan2: false },
+    { type: "select", label: t("sidebarFieldSelect"), icon: List, iconColor: "text-orange-500", colSpan2: false },
+    { type: "multiselect", label: "Multi Select", icon: CheckSquare, iconColor: "text-teal-500", colSpan2: false },
+    { type: "checkbox", label: t("sidebarFieldCheckbox"), icon: CheckSquare, iconColor: "text-purple-500", colSpan2: false },
+    { type: "rating", label: "Rating", icon: Star, iconColor: "text-yellow-500", colSpan2: false },
+    { type: "date", label: "Date", icon: Calendar, iconColor: "text-pink-500", colSpan2: true }
+  ] as const;
+
   return (
     <aside className="w-[340px] lg:w-[380px] border-r border-border bg-card overflow-hidden shrink-0 flex flex-col">
       {/* Tabs header */}
@@ -74,7 +77,7 @@ export function BuilderSidebarLeft({
           <>
             {/* Field adder */}
             <div className="space-y-3">
-              <h3 className="font-outfit font-extrabold text-foreground text-sm">Add Question Type</h3>
+              <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("sidebarAddFields")}</h3>
               <div className="grid grid-cols-2 gap-2 text-[11px] font-bold text-muted-foreground">
                 {FIELD_TYPES.map((field) => {
                   const Icon = field.icon;
@@ -99,11 +102,11 @@ export function BuilderSidebarLeft({
             <div className="border-t border-border pt-4">
               {focusedField ? (
                 <div className="space-y-4">
-                  <h3 className="font-outfit font-extrabold text-foreground text-sm">Edit Properties</h3>
+                  <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("sidebarSettings")}</h3>
                   
                   <div className="space-y-3.5 text-xs font-semibold text-muted-foreground">
                     <div>
-                      <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">Question Label</label>
+                      <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">{t("propLabel")}</label>
                       <Input
                         type="text"
                         value={focusedField.label}
@@ -113,7 +116,7 @@ export function BuilderSidebarLeft({
                     </div>
 
                     <div>
-                      <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">Description (optional)</label>
+                      <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">{t("propHelp")}</label>
                       <Input
                         type="text"
                         value={focusedField.description || ""}
@@ -124,7 +127,7 @@ export function BuilderSidebarLeft({
 
                     {["text", "textarea", "email"].includes(focusedField.type) && (
                       <div>
-                        <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">Placeholder (optional)</label>
+                        <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">{t("propPlaceholder")}</label>
                         <Input
                           type="text"
                           value={focusedField.placeholder || ""}
@@ -136,7 +139,7 @@ export function BuilderSidebarLeft({
 
                     {["select", "multiselect"].includes(focusedField.type) && (
                       <div>
-                        <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">Options (comma separated)</label>
+                        <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">{t("propOptions")}</label>
                         <Input
                           type="text"
                           value={focusedField.options ? focusedField.options.join(", ") : ""}
@@ -156,13 +159,13 @@ export function BuilderSidebarLeft({
                         onCheckedChange={(checked) => handleUpdateField(focusedField.id, { required: !!checked })}
                         className="rounded border-border text-indigo-655"
                       />
-                      <label htmlFor="required-toggle" className="text-foreground cursor-pointer select-none">Required Question</label>
+                      <label htmlFor="required-toggle" className="text-foreground cursor-pointer select-none">{t("propRequired")}</label>
                     </div>
                   </div>
                 </div>
               ) : (
                 <div className="text-center text-muted-foreground text-xs py-10">
-                  Select a question on the canvas to configure its validation settings.
+                  {t("sidebarSettingsDesc")}
                 </div>
               )}
             </div>
@@ -173,7 +176,7 @@ export function BuilderSidebarLeft({
           <>
             {/* Built-in Preset Themes */}
             <div className="space-y-4">
-              <h3 className="font-outfit font-extrabold text-foreground text-sm">Built-in Presets</h3>
+              <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("themePresets")}</h3>
               <div className="grid grid-cols-1 gap-3">
                 {BUILTIN_THEMES.map((theme) => (
                   <ThemePresetCard

@@ -12,11 +12,13 @@ import { FormCardGrid } from "@/components/dashboard/FormCardGrid";
 import { CreateFormModal } from "@/components/dashboard/CreateFormModal";
 import { AIFormModal } from "@/components/dashboard/AIFormModal";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const templateParam = searchParams.get("createTemplate");
+  const t = useTranslations("Dashboard");
 
   const utils = trpc.useUtils();
   
@@ -97,7 +99,7 @@ export default function DashboardPage() {
   };
 
   const handleDeleteForm = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this form? All submissions will be lost.")) return;
+    if (!confirm(t("cardConfirmDelete"))) return;
     
     try {
       await deleteFormMutation.mutateAsync({ id });
@@ -116,21 +118,21 @@ export default function DashboardPage() {
       {/* Page Header (Pinned & Harmonized) */}
       <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 sm:px-8 shrink-0 transition-colors duration-200">
         <div>
-          <h1 className="font-outfit text-xl font-bold text-foreground">Dashboard</h1>
+          <h1 className="font-outfit text-xl font-bold text-foreground">{t("navDashboard")}</h1>
         </div>
         <div className="flex gap-2">
           <Button
             onClick={() => setIsAIModalOpen(true)}
             className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
           >
-            <Sparkles className="h-4 w-4" /> Build with AI
+            <Sparkles className="h-4 w-4" /> {t("generateAi")}
           </Button>
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             variant="outline"
             className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
           >
-            <Plus className="h-4 w-4" /> Create Form
+            <Plus className="h-4 w-4" /> {t("newForm")}
           </Button>
         </div>
       </header>
@@ -143,7 +145,7 @@ export default function DashboardPage() {
 
           {/* FORMS LIST SECTION */}
           <div>
-            <h2 className="font-outfit text-xl font-bold text-foreground mb-4">My Forms</h2>
+            <h2 className="font-outfit text-xl font-bold text-foreground mb-4">{t("title")}</h2>
 
             <FormCardGrid
               formsList={formsList}
@@ -180,4 +182,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

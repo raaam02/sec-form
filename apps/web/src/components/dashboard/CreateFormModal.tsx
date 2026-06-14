@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { useTranslations } from "next-intl";
 
 interface CreateFormModalProps {
   isOpen: boolean;
@@ -25,6 +26,9 @@ export function CreateFormModal({
   setIsOpen,
   onCreate,
 }: CreateFormModalProps) {
+  const t = useTranslations("Dashboard");
+  const tCommon = useTranslations("Common");
+
   const [formTitle, setFormTitle] = useState("");
   const [formDesc, setFormDesc] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -52,9 +56,9 @@ export function CreateFormModal({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-md rounded-2xl border border-border bg-background p-6 shadow-xl text-foreground">
         <DialogHeader>
-          <DialogTitle className="font-outfit text-xl font-bold">Create New Form</DialogTitle>
+          <DialogTitle className="font-outfit text-xl font-bold">{t("modalCreateTitle")}</DialogTitle>
           <DialogDescription className="text-muted-foreground text-xs mt-1">
-            Enter details below to establish a blank form layout.
+            {t("modalCreateDesc")}
           </DialogDescription>
         </DialogHeader>
 
@@ -68,7 +72,7 @@ export function CreateFormModal({
         <form onSubmit={handleSubmit} className="space-y-4 my-2">
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-              Form Title
+              {t("modalInputTitle")}
             </Label>
             <Input
               type="text"
@@ -83,7 +87,7 @@ export function CreateFormModal({
 
           <div className="space-y-1.5">
             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
-              Description (optional)
+              {t("modalInputDesc")}
             </Label>
             <Textarea
               value={formDesc}
@@ -102,14 +106,14 @@ export function CreateFormModal({
               className="h-10 px-4 rounded-xl"
               disabled={isLoading}
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
             <Button
               type="submit"
               className="h-10 px-5 bg-primary text-primary-foreground font-semibold text-sm rounded-xl transition-all shadow-sm flex items-center justify-center"
               disabled={isLoading}
             >
-              {isLoading ? <LoadingSpinner className="w-4 h-4" color="text-primary-foreground" /> : "Create Form"}
+              {isLoading ? <LoadingSpinner className="w-4 h-4" color="text-primary-foreground" /> : tCommon("create")}
             </Button>
           </DialogFooter>
         </form>
