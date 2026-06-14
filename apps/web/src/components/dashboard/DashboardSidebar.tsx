@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle, Shield } from "lucide-react";
+import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle, Shield, Lock } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 import { LocaleSwitcher } from "../LocaleSwitcher";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 interface DashboardSidebarProps {
   pathname: string;
   setIsCreateModalOpen: (open: boolean) => void;
+  setIsChangePasswordModalOpen: (open: boolean) => void;
   user: {
     name?: string | null;
     email?: string | null;
@@ -22,6 +23,7 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({
   pathname,
   setIsCreateModalOpen,
+  setIsChangePasswordModalOpen,
   user,
   onSignOut,
 }: DashboardSidebarProps) {
@@ -164,6 +166,14 @@ export function DashboardSidebar({
                 <span>Language</span>
                 <LocaleSwitcher />
               </div>
+              <Button
+                variant="ghost"
+                onClick={() => setIsChangePasswordModalOpen(true)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-accent hover:text-accent-foreground transition-colors text-left justify-start h-auto text-foreground"
+              >
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                <span>Change Password</span>
+              </Button>
               <Button
                 variant="ghost"
                 onClick={onSignOut}

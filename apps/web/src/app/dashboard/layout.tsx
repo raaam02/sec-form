@@ -8,6 +8,7 @@ import { trpc } from "../../utils/trpc";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardMobileHeader } from "@/components/dashboard/DashboardMobileHeader";
 import { CreateFormModal } from "@/components/dashboard/CreateFormModal";
+import { ChangePasswordModal } from "@/components/dashboard/ChangePasswordModal";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
@@ -15,6 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
   const createFormMutation = trpc.forms.create.useMutation();
 
   const handleCreateForm = async (title: string, description: string) => {
@@ -53,6 +55,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <DashboardSidebar
         pathname={pathname}
         setIsCreateModalOpen={setIsCreateModalOpen}
+        setIsChangePasswordModalOpen={setIsChangePasswordModalOpen}
         user={session.user || {}}
         onSignOut={() => signOut({ callbackUrl: "/" })}
       />
@@ -63,6 +66,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <DashboardMobileHeader
           pathname={pathname}
           setIsCreateModalOpen={setIsCreateModalOpen}
+          setIsChangePasswordModalOpen={setIsChangePasswordModalOpen}
           user={session.user || {}}
           onSignOut={() => signOut({ callbackUrl: "/" })}
         />
@@ -78,6 +82,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         isOpen={isCreateModalOpen}
         setIsOpen={setIsCreateModalOpen}
         onCreate={handleCreateForm}
+      />
+
+      {/* MODAL: CHANGE PASSWORD */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        setIsOpen={setIsChangePasswordModalOpen}
+        userEmail={session.user.email || ""}
       />
     </div>
   );

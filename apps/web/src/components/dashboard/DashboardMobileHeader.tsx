@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { LayoutDashboard, Compass, BarChart3, PlusCircle, Code, LogOut, Shield } from "lucide-react";
+import { LayoutDashboard, Compass, BarChart3, PlusCircle, Code, LogOut, Shield, Lock } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 import { LocaleSwitcher } from "../LocaleSwitcher";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 interface DashboardMobileHeaderProps {
   pathname: string;
   setIsCreateModalOpen: (open: boolean) => void;
+  setIsChangePasswordModalOpen: (open: boolean) => void;
   user: {
     name?: string | null;
     email?: string | null;
@@ -22,6 +23,7 @@ interface DashboardMobileHeaderProps {
 export function DashboardMobileHeader({
   pathname,
   setIsCreateModalOpen,
+  setIsChangePasswordModalOpen,
   user,
   onSignOut,
 }: DashboardMobileHeaderProps) {
@@ -133,6 +135,14 @@ export function DashboardMobileHeader({
                 <Code className="h-4 w-4 text-muted-foreground" />
                 <span>{t("navDocs")}</span>
               </a>
+              <Button
+                variant="ghost"
+                onClick={() => setIsChangePasswordModalOpen(true)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-accent hover:text-accent-foreground transition-colors text-left justify-start h-auto text-foreground"
+              >
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                <span>Change Password</span>
+              </Button>
               <Button
                 variant="ghost"
                 onClick={onSignOut}
