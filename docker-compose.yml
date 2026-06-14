@@ -61,6 +61,7 @@ services:
       - API_URL=http://api:4000/trpc
       - NEXT_PUBLIC_APP_URL=http://localhost:3000
       - NEXTAUTH_SECRET=hackathon-secret-key-1234567890
+      - AUTH_SECRET=hackathon-secret-key-1234567890
       - NEXTAUTH_URL=http://localhost:3000
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}

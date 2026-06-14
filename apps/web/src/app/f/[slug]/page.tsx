@@ -1,12 +1,16 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { trpc } from "@/utils/trpc";
 import { FormField, buildSubmissionValidator } from "@sec-form/validators";
 import { LoadingSpinner } from "@sec-form/ui";
-import { CheckCircle2, AlertCircle, Calendar } from "lucide-react";
+import { CheckCircle2, AlertCircle } from "lucide-react";
 import confetti from "canvas-confetti";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 
 export default function PublicFormPage() {
   const params = useParams();
@@ -104,8 +108,8 @@ export default function PublicFormPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100">
-        <LoadingSpinner className="w-10 h-10" color="text-indigo-600" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <LoadingSpinner className="w-10 h-10" color="text-primary" />
       </div>
     );
   }
@@ -114,12 +118,12 @@ export default function PublicFormPage() {
   if (error || !form) {
     const isDraftError = error?.message?.includes("draft");
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-100 p-6 gap-4 text-center">
-        <AlertCircle className="h-12 w-12 text-rose-500" />
-        <h1 className="font-outfit text-2xl font-bold text-slate-800">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6 gap-4 text-center">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <h1 className="font-outfit text-2xl font-bold text-foreground">
           {isDraftError ? "Form is a Draft" : "Form Not Available"}
         </h1>
-        <p className="text-slate-500 max-w-sm text-sm">
+        <p className="text-muted-foreground max-w-sm text-sm">
           {isDraftError
             ? "This questionnaire is in draft mode and is not currently accepting submissions."
             : "The form you are trying to reach does not exist or has been deleted by the owner."}
@@ -144,7 +148,6 @@ export default function PublicFormPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 md:p-10 font-[family-name:var(--font-family)] transition-colors"
-      style-target="background"
       style={{
         ...customStyles,
         backgroundColor: "var(--background-color)",
@@ -183,8 +186,8 @@ export default function PublicFormPage() {
             </div>
 
             {submitError && (
-              <div className="rounded-lg bg-rose-50 border border-rose-100 text-rose-700 text-sm p-3 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
                 <span>{submitError}</span>
               </div>
             )}
@@ -194,51 +197,67 @@ export default function PublicFormPage() {
               {fields.map((field) => (
                 <div key={field.id} className="space-y-2 text-left">
                   <label className="text-sm font-semibold block">
-                    {field.label} {field.required && <span className="text-rose-500">*</span>}
+                    {field.label} {field.required && <span className="text-destructive">*</span>}
                   </label>
                   {field.description && <span className="text-xs opacity-60 block leading-tight">{field.description}</span>}
 
                   <div className="mt-1">
                     {/* SHORT TEXT */}
                     {field.type === "text" && (
-                      <input
+                      <Input
                         type="text"
                         value={answers[field.id] || ""}
                         onChange={(e) => handleInputChange(field.id, e.target.value)}
                         placeholder={field.placeholder || "Your answer..."}
-                        className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]/20 text-slate-900 bg-white"
+                        className="text-slate-900 bg-white"
+                        style={{
+                          borderRadius: "var(--border-radius)",
+                          borderColor: "rgba(128,128,128,0.2)"
+                        }}
                       />
                     )}
 
                     {/* LONG TEXT */}
                     {field.type === "textarea" && (
-                      <textarea
+                      <Textarea
                         value={answers[field.id] || ""}
                         onChange={(e) => handleInputChange(field.id, e.target.value)}
                         placeholder={field.placeholder || "Your response..."}
-                        className="w-full min-h-[100px] p-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]/20 text-slate-900 bg-white"
+                        className="text-slate-900 bg-white"
+                        style={{
+                          borderRadius: "var(--border-radius)",
+                          borderColor: "rgba(128,128,128,0.2)"
+                        }}
                       />
                     )}
 
                     {/* EMAIL */}
                     {field.type === "email" && (
-                      <input
+                      <Input
                         type="email"
                         value={answers[field.id] || ""}
                         onChange={(e) => handleInputChange(field.id, e.target.value)}
                         placeholder={field.placeholder || "you@example.com"}
-                        className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]/20 text-slate-900 bg-white"
+                        className="text-slate-900 bg-white"
+                        style={{
+                          borderRadius: "var(--border-radius)",
+                          borderColor: "rgba(128,128,128,0.2)"
+                        }}
                       />
                     )}
 
                     {/* NUMBER */}
                     {field.type === "number" && (
-                      <input
+                      <Input
                         type="number"
                         value={answers[field.id] === undefined ? "" : answers[field.id]}
                         onChange={(e) => handleInputChange(field.id, e.target.value)}
                         placeholder="0"
-                        className="w-full h-10 px-3 max-w-[150px] rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]/20 text-slate-900 bg-white"
+                        className="max-w-[150px] text-slate-900 bg-white"
+                        style={{
+                          borderRadius: "var(--border-radius)",
+                          borderColor: "rgba(128,128,128,0.2)"
+                        }}
                       />
                     )}
 
@@ -247,7 +266,11 @@ export default function PublicFormPage() {
                       <select
                         value={answers[field.id] || ""}
                         onChange={(e) => handleInputChange(field.id, e.target.value)}
-                        className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]/20 text-slate-900 bg-white"
+                        className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        style={{
+                          borderRadius: "var(--border-radius)",
+                          borderColor: "rgba(128,128,128,0.2)"
+                        }}
                       >
                         <option value="">Choose option...</option>
                         {field.options?.map((opt) => (
@@ -258,20 +281,20 @@ export default function PublicFormPage() {
 
                     {/* MULTI SELECT */}
                     {field.type === "multiselect" && (
-                      <div className="space-y-1.5 pl-1">
+                      <div className="space-y-2 pl-1">
                         {field.options?.map((opt) => {
                           const currentAnswers = (answers[field.id] as string[]) || [];
                           const isChecked = currentAnswers.includes(opt);
                           return (
-                            <label key={opt} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                              <input
-                                type="checkbox"
+                            <div key={opt} className="flex items-center gap-2 text-sm text-slate-700">
+                              <Checkbox
+                                id={`${field.id}-${opt}`}
                                 checked={isChecked}
-                                onChange={(e) => handleMultiSelectChange(field.id, opt, e.target.checked)}
-                                className="rounded border-slate-200"
+                                onCheckedChange={(checked) => handleMultiSelectChange(field.id, opt, !!checked)}
+                                className="border-slate-300"
                               />
-                              <span>{opt}</span>
-                            </label>
+                              <label htmlFor={`${field.id}-${opt}`} className="cursor-pointer font-medium select-none">{opt}</label>
+                            </div>
                           );
                         })}
                       </div>
@@ -279,15 +302,15 @@ export default function PublicFormPage() {
 
                     {/* CHECKBOX */}
                     {field.type === "checkbox" && (
-                      <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer pl-1">
-                        <input
-                          type="checkbox"
+                      <div className="flex items-center gap-2 text-sm text-slate-700 pl-1">
+                        <Checkbox
+                          id={field.id}
                           checked={answers[field.id] || false}
-                          onChange={(e) => handleCheckboxChange(field.id, e.target.checked)}
-                          className="rounded border-slate-200"
+                          onCheckedChange={(checked) => handleCheckboxChange(field.id, !!checked)}
+                          className="border-slate-300"
                         />
-                        <span>I confirm this detail</span>
-                      </label>
+                        <label htmlFor={field.id} className="cursor-pointer font-medium select-none">I confirm this detail</label>
+                      </div>
                     )}
 
                     {/* RATING */}
@@ -315,11 +338,15 @@ export default function PublicFormPage() {
                     {/* DATE */}
                     {field.type === "date" && (
                       <div className="relative max-w-[200px]">
-                        <input
+                        <Input
                           type="date"
                           value={answers[field.id] || ""}
                           onChange={(e) => handleInputChange(field.id, e.target.value)}
-                          className="w-full h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]/20 text-slate-900 bg-white"
+                          className="text-slate-900 bg-white"
+                          style={{
+                            borderRadius: "var(--border-radius)",
+                            borderColor: "rgba(128,128,128,0.2)"
+                          }}
                         />
                       </div>
                     )}
@@ -327,7 +354,7 @@ export default function PublicFormPage() {
 
                   {/* Inline Zod alert */}
                   {validationErrors[field.id] && (
-                    <span className="text-xs text-rose-600 font-semibold block">{validationErrors[field.id]}</span>
+                    <span className="text-xs text-destructive font-semibold block">{validationErrors[field.id]}</span>
                   )}
                 </div>
               ))}
@@ -335,17 +362,18 @@ export default function PublicFormPage() {
 
             {/* Submission triggers */}
             <div className="pt-6 border-t border-slate-100">
-              <button
+              <Button
                 type="submit"
                 disabled={submitMutation.isLoading}
                 className="w-full h-11 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
                 style={{
                   backgroundColor: "var(--primary)",
+                  borderRadius: "var(--border-radius)",
                   boxShadow: "0 10px 15px -3px rgba(var(--primary), 0.15)"
                 }}
               >
                 {submitMutation.isLoading ? <LoadingSpinner className="w-5 h-5" color="text-white" /> : "Submit Responses"}
-              </button>
+              </Button>
             </div>
           </form>
         )}
@@ -353,3 +381,4 @@ export default function PublicFormPage() {
     </div>
   );
 }
+

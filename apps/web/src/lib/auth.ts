@@ -63,6 +63,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     })
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && user.email) {
+        try {
+          const dbUser = await db.query.users.findFirst({
+            where: eq(users.email, user.email),
+          });
+          if (!dbUser) {
+            await db.insert(users).values({
+              id: user.id || crypto.randomUUID(),
+              email: user.email,
+              name: user.name || "Google User",
+              image: user.image || "",
+              passwordHash: "oauth-user",
+            });
+          }
+        } catch (e) {
+          console.error("Failed to sync Google user to database:", e);
+        }
+      }
+      return true;
+    },
     async session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
@@ -70,7 +91,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
     async jwt({ token, user }) {
-      if (user) {
+      if (user && user.email) {
+        try {
+          const dbUser = await db.query.users.findFirst({
+            where: eq(users.email, user.email),
+          });
+          if (dbUser) {
+            token.sub = dbUser.id;
+          } else {
+            token.sub = user.id;
+          }
+        } catch (e) {
+          token.sub = user.id;
+        }
+      } else if (user) {
         token.sub = user.id;
       }
       return token;
@@ -81,5 +115,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: "/login"
-  }
+  },
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || "hackathon-secret-key-1234567890"
 });
