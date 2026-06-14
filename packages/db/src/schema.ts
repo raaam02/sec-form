@@ -12,6 +12,7 @@ export const users = pgTable("users", {
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
   passwordHash: text("passwordHash"), // Standard helper for dev credentials
+  role: text("role").default("user").notNull(),
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
 });
@@ -120,6 +121,16 @@ export const formViews = pgTable(
     formIdIdx: index("formViews_formId_idx").on(table.formId),
   })
 );
+
+export const aiModels = pgTable("ai_models", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  isDefault: boolean("is_default").default(false).notNull(),
+  provider: text("provider").default("google").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+});
 
 // ----------------------------------------------------
 // RELATIONS

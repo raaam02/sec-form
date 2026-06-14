@@ -64,10 +64,23 @@
     "signingIn": "Signing in...",
     "or": "or",
     "googleBtn": "Sign in with Google",
+    "dontHaveAccount": "Don't have an account? Sign up",
     "demoTitle": "Hackathon Demo Credentials:",
     "demoCredentials": "Email: demo@demo.com | Password: demo123",
     "errorGeneric": "An unexpected error occurred. Please try again.",
     "errorInvalid": "Invalid email or password. Please use: demo@demo.com / demo123"
+  },
+  "Signup": {
+    "title": "Create your account",
+    "subtitle": "Sign up to start creating forms with AI",
+    "nameLabel": "Full Name",
+    "emailLabel": "Email Address",
+    "passwordLabel": "Password",
+    "signUpBtn": "Sign up",
+    "signingUp": "Creating account...",
+    "alreadyHaveAccount": "Already have an account? Log in",
+    "successMessage": "Account created successfully! Redirecting to login...",
+    "errorGeneric": "Something went wrong. Please try again."
   },
   "Dashboard": {
     "title": "My Forms",
@@ -78,6 +91,7 @@
     "navExplore": "Template Gallery",
     "navAnalytics": "Analytics",
     "navDocs": "REST API Docs",
+    "navAdmin": "Admin Panel",
     "signOut": "Sign out",
     "themeLabel": "Theme",
     "statForms": "Total Forms",

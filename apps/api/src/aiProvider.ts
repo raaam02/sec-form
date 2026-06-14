@@ -1,14 +1,28 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import crypto from "crypto";
+import { GoogleGenAI } from "@google/genai";
+import { db, aiModels, eq } from "@sec-form/db";
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
-let aiClient: GoogleGenerativeAI | null = null;
+let aiClient: GoogleGenAI | null = null;
 
 if (geminiApiKey) {
-  aiClient = new GoogleGenerativeAI(geminiApiKey);
-  console.log("Gemini AI Client initialized successfully.");
+  aiClient = new GoogleGenAI({ apiKey: geminiApiKey });
+  console.log("Gemini GenAI Client initialized successfully using @google/genai.");
 } else {
   console.log("No GEMINI_API_KEY environment variable found. AI features will run in Mock Mode.");
+}
+
+async function getActiveModelId(): Promise<string> {
+  try {
+    const defaultModel = await db.query.aiModels.findFirst({
+      where: eq(aiModels.isDefault, true),
+    });
+    if (defaultModel && defaultModel.isActive) {
+      return defaultModel.id;
+    }
+  } catch (e) {
+    console.warn("Failed to retrieve default model from DB, using fallback 'gemini-2.5-flash':", e);
+  }
+  return "gemini-2.5-flash";
 }
 
 // ----------------------------------------------------
@@ -18,7 +32,7 @@ if (geminiApiKey) {
 export async function generateAIForm(prompt: string): Promise<any> {
   if (aiClient) {
     try {
-      const model = aiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const activeModel = await getActiveModelId();
       const systemInstructions = `
         You are a staff form builder AI. Generate a complete form schema JSON based on the user's prompt.
         The returned JSON must follow this exact typescript structure:
@@ -35,9 +49,14 @@ export async function generateAIForm(prompt: string): Promise<any> {
         }
         Respond with ONLY the valid JSON object. Do not include markdown blocks, code formatting, or other commentary.
       `;
-      const result = await model.generateContent([systemInstructions, `Prompt: ${prompt}`]);
-      const response = await result.response;
-      let text = response.text().trim();
+      const result = await aiClient.models.generateContent({
+        model: activeModel,
+        contents: prompt,
+        config: {
+          systemInstruction: systemInstructions,
+        },
+      });
+      let text = result.text ? result.text.trim() : "";
       
       // Clean up markdown code blocks if the model ignored instructions
       if (text.startsWith("```json")) {
@@ -111,7 +130,7 @@ function generateMockForm(prompt: string): any {
 export async function generateAITheme(prompt: string): Promise<any> {
   if (aiClient) {
     try {
-      const model = aiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const activeModel = await getActiveModelId();
       const systemInstructions = `
         You are a staff UI theme generator. Based on the user's prompt (e.g. "retro sunset", "dark cyber punk"),
         generate a cohesive layout theme config JSON matching this structure:
@@ -126,9 +145,14 @@ export async function generateAITheme(prompt: string): Promise<any> {
         }
         Return ONLY the raw JSON object. Do not wrap in backticks or include markdown.
       `;
-      const result = await model.generateContent([systemInstructions, `Prompt: ${prompt}`]);
-      const response = await result.response;
-      let text = response.text().trim();
+      const result = await aiClient.models.generateContent({
+        model: activeModel,
+        contents: prompt,
+        config: {
+          systemInstruction: systemInstructions,
+        },
+      });
+      let text = result.text ? result.text.trim() : "";
       
       if (text.startsWith("```json")) text = text.substring(7);
       if (text.startsWith("```")) text = text.substring(3);
@@ -202,7 +226,7 @@ function generateMockTheme(prompt: string): any {
 export async function generateAISubmissionsInsights(formTitle: string, formSchema: any, submissions: any[]): Promise<any> {
   if (aiClient) {
     try {
-      const model = aiClient.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const activeModel = await getActiveModelId();
       const systemInstructions = `
         You are an advanced data analyst AI. You will receive a form's details (title, fields) and a JSON list of submissions.
         Analyze the submissions and return a concise, insightful report JSON matching this exact structure:
@@ -223,9 +247,14 @@ export async function generateAISubmissionsInsights(formTitle: string, formSchem
         submissions: submissions.map(s => s.answersJson)
       };
 
-      const result = await model.generateContent([systemInstructions, `Data: ${JSON.stringify(promptData)}`]);
-      const response = await result.response;
-      let text = response.text().trim();
+      const result = await aiClient.models.generateContent({
+        model: activeModel,
+        contents: `Data: ${JSON.stringify(promptData)}`,
+        config: {
+          systemInstruction: systemInstructions,
+        },
+      });
+      let text = result.text ? result.text.trim() : "";
       
       if (text.startsWith("```json")) text = text.substring(7);
       if (text.startsWith("```")) text = text.substring(3);

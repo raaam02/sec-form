@@ -1,7 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import * as trpcExpress from "@trpc/server/adapters/express";
-import dotenv from "dotenv";
 import { createContext } from "./trpc";
 import { appRouter } from "./routers";
 import { db, forms, submissions, formViews } from "@sec-form/db";
@@ -9,9 +9,6 @@ import { eq, and } from "@sec-form/db";
 import { buildSubmissionValidator } from "@sec-form/validators";
 import crypto from "crypto";
 import { cache } from "./redis";
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;

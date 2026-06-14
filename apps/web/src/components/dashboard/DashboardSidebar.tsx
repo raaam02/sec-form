@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle } from "lucide-react";
+import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle, Shield } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 import { LocaleSwitcher } from "../LocaleSwitcher";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,6 +14,7 @@ interface DashboardSidebarProps {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    role?: string | null;
   };
   onSignOut: () => void;
 }
@@ -46,6 +47,15 @@ export function DashboardSidebar({
       active: pathname === "/dashboard/analytics",
     },
   ];
+
+  if (user.role === "admin") {
+    navItems.push({
+      href: "/dashboard/admin",
+      label: t("navAdmin"),
+      icon: Shield,
+      active: pathname === "/dashboard/admin",
+    });
+  }
 
   return (
     <aside className="hidden md:flex md:w-20 bg-card border-r border-border flex-col justify-between shrink-0 transition-all duration-200">

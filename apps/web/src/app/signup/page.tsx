@@ -2,9 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { Sparkles, AlertCircle, Lock, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Sparkles, AlertCircle, Lock, Mail, User, CheckCircle2 } from "lucide-react";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { Card } from "@/components/ui/card";
@@ -12,44 +11,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LocaleSwitcher } from "../../components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
+import { signUpAction } from "../actions/auth";
 
-function LoginForm() {
+function SignupForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/dashboard";
-  const t = useTranslations("Login");
+  const t = useTranslations("Signup");
 
-  const [email, setEmail] = useState("demo@demo.com");
-  const [password, setPassword] = useState("demo123");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setSuccess("");
 
     try {
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false
-      });
+      const res = await signUpAction({ name, email, password });
 
-      if (res?.ok) {
-        router.push(redirect);
+      if (res.error) {
+        setError(res.error);
       } else {
-        setError(t("errorInvalid"));
+        setSuccess(t("successMessage"));
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
       }
     } catch (err) {
       setError(t("errorGeneric"));
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleGoogleLogin = () => {
-    signIn("google", { callbackUrl: redirect });
   };
 
   return (
@@ -84,7 +80,30 @@ function LoginForm() {
             </div>
           )}
 
+          {success && (
+            <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm p-3 mb-4 flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <span>{success}</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                {t("nameLabel")}
+              </label>
+              <div className="relative">
+                <Input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full h-10 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm"
+                  required
+                />
+                <User className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
                 {t("emailLabel")}
@@ -119,60 +138,22 @@ function LoginForm() {
 
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !!success}
               className="w-full h-11 bg-primary text-primary-foreground font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
             >
-              {isLoading ? t("signingIn") : t("signInBtn")}
+              {isLoading ? t("signingUp") : t("signUpBtn")}
             </Button>
           </form>
 
-          <div className="my-6 flex items-center justify-between">
-            <span className="border-t border-border flex-1" />
-            <span className="text-xs text-muted-foreground uppercase font-semibold px-3">{t("or")}</span>
-            <span className="border-t border-border flex-1" />
-          </div>
-
-          <Button
-            onClick={handleGoogleLogin}
-            variant="outline"
-            className="w-full h-11 border border-border hover:bg-accent hover:text-accent-foreground bg-card text-muted-foreground font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2"
-          >
-            {/* Google Icon SVG */}
-            <svg className="h-5 w-5" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-1.14 2.77-2.4 3.61v3h3.86c2.27-2.08 3.59-5.17 3.59-8.46z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 24c3.24 0 5.97-1.08 7.96-2.91l-3.86-3c-1.08.72-2.45 1.16-4.1 1.16-3.15 0-5.81-2.13-6.76-5.01H1.27v3.1A12 12 0 0 0 12 24z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.24 14.24a7.15 7.15 0 0 1 0-4.48V6.66H1.27a11.96 11.96 0 0 0 0 10.68l3.97-3.1z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.96 1.19 15.24 0 12 0 7.37 0 3.37 2.64 1.27 6.66l3.97 3.1c.95-2.88 3.61-5.01 6.76-5.01z"
-              />
-            </svg>
-            {t("googleBtn")}
-          </Button>
-
           <div className="mt-6 pt-4 border-t border-border text-center">
             <Link
-              href="/signup"
+              href="/login"
               className="text-xs font-bold text-primary hover:underline"
             >
-              {t("dontHaveAccount")}
+              {t("alreadyHaveAccount")}
             </Link>
           </div>
         </Card>
-
-        <div className="text-center mt-6 text-xs text-slate-500 dark:text-zinc-500 transition-colors">
-          <span className="font-bold">{t("demoTitle")}</span>
-          <span className="block mt-1 font-mono text-[11px] opacity-75">{t("demoCredentials")}</span>
-        </div>
       </div>
 
       {/* Footer */}
@@ -188,17 +169,17 @@ function LoginForm() {
   );
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-background flex flex-col justify-center items-center">
         <div className="flex flex-col items-center gap-2">
           <LoadingSpinner className="w-8 h-8" color="text-primary" />
-          <span className="text-xs text-muted-foreground font-semibold">Loading authentication panel...</span>
+          <span className="text-xs text-muted-foreground font-semibold">Loading registration panel...</span>
         </div>
       </div>
     }>
-      <LoginForm />
+      <SignupForm />
     </Suspense>
   );
 }

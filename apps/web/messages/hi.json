@@ -64,10 +64,23 @@
     "signingIn": "साइन इन हो रहा है...",
     "or": "या",
     "googleBtn": "गूगल के साथ साइन इन करें",
+    "dontHaveAccount": "अकाउंट नहीं है? साइन अप करें",
     "demoTitle": "हैकाथॉन डेमो क्रेडेंशियल्स:",
     "demoCredentials": "ईमेल: demo@demo.com | पासवर्ड: demo123",
     "errorGeneric": "कुछ गड़बड़ हुई। कृपया दोबारा ट्राई करें।",
     "errorInvalid": "अमान्य ईमेल या पासवर्ड। कृपया ट्राई करें: demo@demo.com / demo123"
+  },
+  "Signup": {
+    "title": "अपना अकाउंट बनाएं",
+    "subtitle": "एआई के साथ फॉर्म बनाना शुरू करने के लिए साइन अप करें",
+    "nameLabel": "पूरा नाम",
+    "emailLabel": "ईमेल एड्रेस",
+    "passwordLabel": "पासवर्ड",
+    "signUpBtn": "साइन अप",
+    "signingUp": "अकाउंट बन रहा है...",
+    "alreadyHaveAccount": "पहले से अकाउंट है? लॉग इन करें",
+    "successMessage": "अकाउंट सफलतापूर्वक बन गया है! लॉग इन पर रिडायरेक्ट हो रहा है...",
+    "errorGeneric": "कुछ गड़बड़ हुई। कृपया दोबारा ट्राई करें।"
   },
   "Dashboard": {
     "title": "मेरे फॉर्म्स",
@@ -78,6 +91,7 @@
     "navExplore": "टेम्पलेट गैलरी",
     "navAnalytics": "एनालिटिक्स",
     "navDocs": "रेस्ट एपीआई डॉक्स",
+    "navAdmin": "एडमिन पैनल",
     "signOut": "साइन आउट",
     "themeLabel": "थीम",
     "statForms": "कुल फॉर्म्स",

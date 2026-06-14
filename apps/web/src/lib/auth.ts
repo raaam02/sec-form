@@ -5,7 +5,7 @@ import { db, users } from "@sec-form/db";
 import { eq } from "@sec-form/db";
 import crypto from "crypto";
 
-function hashPassword(password: string) {
+export function hashPassword(password: string) {
   return crypto.createHash("sha256").update(password).digest("hex");
 }
 
@@ -85,8 +85,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async session({ session, token }) {
-      if (session.user && token.sub) {
-        session.user.id = token.sub;
+      if (session.user) {
+        if (token.sub) session.user.id = token.sub;
+        session.user.role = (token.role as string) || "user";
       }
       return session;
     },
@@ -98,14 +99,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           });
           if (dbUser) {
             token.sub = dbUser.id;
+            token.role = dbUser.role;
           } else {
             token.sub = user.id;
+            token.role = user.role || "user";
           }
         } catch (e) {
           token.sub = user.id;
+          token.role = "user";
         }
       } else if (user) {
         token.sub = user.id;
+        token.role = user.role || "user";
       }
       return token;
     }

@@ -17,7 +17,49 @@ async function main() {
   try {
     // 1. Clean existing data (safely using cascade references)
     await db.delete(schema.users);
+    await db.delete(schema.aiModels);
     console.log("Cleared existing database tables.");
+
+    // Seed AI Models
+    const initialModels = [
+      {
+        id: "gemini-2.5-flash",
+        name: "Gemini 2.5 Flash",
+        isActive: true,
+        isDefault: true,
+        provider: "google",
+      },
+      {
+        id: "gemini-2.5-pro",
+        name: "Gemini 2.5 Pro",
+        isActive: true,
+        isDefault: false,
+        provider: "google",
+      },
+      {
+        id: "gemini-2.0-flash",
+        name: "Gemini 2.0 Flash",
+        isActive: true,
+        isDefault: false,
+        provider: "google",
+      },
+      {
+        id: "gemini-1.5-flash",
+        name: "Gemini 1.5 Flash",
+        isActive: true,
+        isDefault: false,
+        provider: "google",
+      },
+      {
+        id: "gemini-1.5-pro",
+        name: "Gemini 1.5 Pro",
+        isActive: true,
+        isDefault: false,
+        provider: "google",
+      },
+    ];
+    await db.insert(schema.aiModels).values(initialModels as any);
+    console.log("Seeded default AI models.");
 
     // 2. Create Demo User
     const passwordHash = hashPassword("demo123");
@@ -29,10 +71,27 @@ async function main() {
         email: "demo@demo.com",
         passwordHash,
         image: "https://api.dicebear.com/7.x/adventurer/svg?seed=DemoUser",
+        role: "user",
       })
       .returning();
 
     console.log(`Created demo user: ${demoUser.email}`);
+
+    // Create Admin User
+    const adminPasswordHash = hashPassword("admin123");
+    const [adminUser] = await db
+      .insert(schema.users)
+      .values({
+        id: crypto.randomUUID() as any,
+        name: "Admin User",
+        email: "admin@admin.com",
+        passwordHash: adminPasswordHash,
+        image: "https://api.dicebear.com/7.x/adventurer/svg?seed=AdminUser",
+        role: "admin",
+      })
+      .returning();
+
+    console.log(`Created admin user: ${adminUser.email}`);
 
     // 3. Create Forms from Templates
     const createdForms = [];
@@ -123,20 +182,20 @@ async function main() {
             answers[field.id] = `+1 (555) ${100 + Math.floor(Math.random() * 900)}-${1000 + Math.floor(Math.random() * 9000)}`;
           } else if (field.id.includes("rating")) {
             answers[field.id] = 3 + Math.floor(Math.random() * 3); // ratings 3, 4, or 5
-          } else if (field.id.includes("hear")) {
-            answers[field.id] = field.options![Math.floor(Math.random() * field.options!.length)];
-          } else if (field.id.includes("features") || field.id.includes("interests") || field.id.includes("dietary")) {
+          } else if (field.id.includes("hear") && field.options && field.options.length > 0) {
+            answers[field.id] = field.options[Math.floor(Math.random() * field.options.length)];
+          } else if ((field.id.includes("features") || field.id.includes("interests") || field.id.includes("dietary")) && field.options && field.options.length > 0) {
             const count = 1 + Math.floor(Math.random() * 2);
             const selected = [];
-            const tempOpts = [...field.options!];
-            for (let c = 0; c < count; c++) {
+            const tempOpts = [...field.options];
+            for (let c = 0; c < Math.min(count, tempOpts.length); c++) {
               const idx = Math.floor(Math.random() * tempOpts.length);
               selected.push(tempOpts.splice(idx, 1)[0]);
             }
             answers[field.id] = selected;
-          } else if (field.id.includes("ticket") || field.id.includes("tshirt") || field.id.includes("role") || field.id.includes("order")) {
-            answers[field.id] = field.options![Math.floor(Math.random() * field.options!.length)];
-          } else if (field.id.includes("feedback") || field.id.includes("cover") || field.id.includes("comments")) {
+          } else if ((field.id.includes("ticket") || field.id.includes("tshirt") || field.id.includes("role") || field.id.includes("order")) && field.options && field.options.length > 0) {
+            answers[field.id] = field.options[Math.floor(Math.random() * field.options.length)];
+          } else if (field.id.includes("feedback") || field.id.includes("cover") || field.id.includes("comments") || field.id.includes("role")) {
             const reviews = [
               "Great experience overall! The interface is super clean.",
               "Really enjoyed using this service. Highly recommended.",
@@ -155,6 +214,8 @@ async function main() {
             const d = new Date();
             d.setDate(d.getDate() + Math.floor(Math.random() * 14)); // future date
             answers[field.id] = d.toISOString().split("T")[0];
+          } else {
+            answers[field.id] = "Sample text response";
           }
         }
 

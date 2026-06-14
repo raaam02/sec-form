@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { LayoutDashboard, Compass, BarChart3, PlusCircle, Code, LogOut } from "lucide-react";
+import { LayoutDashboard, Compass, BarChart3, PlusCircle, Code, LogOut, Shield } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 import { LocaleSwitcher } from "../LocaleSwitcher";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,6 +14,7 @@ interface DashboardMobileHeaderProps {
     name?: string | null;
     email?: string | null;
     image?: string | null;
+    role?: string | null;
   };
   onSignOut: () => void;
 }
@@ -66,6 +67,19 @@ export function DashboardMobileHeader({
           >
             <BarChart3 className="h-4.5 w-4.5" />
           </Link>
+          {user.role === "admin" && (
+            <Link
+              href="/dashboard/admin"
+              title={t("navAdmin")}
+              className={`p-2 rounded-lg transition-all ${
+                pathname === "/dashboard/admin"
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              <Shield className="h-4.5 w-4.5" />
+            </Link>
+          )}
           <Button
             variant="ghost"
             size="icon"
