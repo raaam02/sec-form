@@ -11,15 +11,18 @@ import {
   Settings, 
   CheckCircle2,
   Eye,
-  Percent
+  Percent,
+  Undo2,
+  Redo2
 } from "lucide-react";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from "recharts";
 import { FormField } from "@sec-form/validators";
 import { LoadingSpinner } from "@sec-form/ui";
 import { TabBar } from "../TabBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
 
 interface BuilderCanvasProps {
@@ -50,6 +53,10 @@ interface BuilderCanvasProps {
   slug: string;
   setSlug: (slug: string) => void;
   handleSaveSettings: (e: React.FormEvent) => void;
+  handleUndo: () => void;
+  handleRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 export function BuilderCanvas({
@@ -80,6 +87,10 @@ export function BuilderCanvas({
   slug,
   setSlug,
   handleSaveSettings,
+  handleUndo,
+  handleRedo,
+  canUndo,
+  canRedo,
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
   const tCommon = useTranslations("Common");
@@ -92,7 +103,7 @@ export function BuilderCanvas({
   ] as const;
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden min-w-0 bg-muted/5">
+    <div className="flex-1 flex flex-col overflow-hidden min-w-0 bg-muted/5 relative">
       {/* Tabs header */}
       <TabBar
         items={MIDDLE_TABS}
@@ -101,9 +112,9 @@ export function BuilderCanvas({
       />
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-w-0">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-10 min-w-0">
         {middleTab === "form" && (
-          <div className="max-w-2xl mx-auto space-y-6">
+          <div className="max-w-2xl mx-auto space-y-6 relative pb-10">
             <Card className="border-border bg-card p-6 shadow-sm flex flex-col gap-5">
               <div>
                 <input
@@ -249,6 +260,29 @@ export function BuilderCanvas({
           </div>
         )}
 
+        {/* Floating Undo/Redo Controls */}
+        {middleTab === "form" && (
+          <div className="absolute top-12 right-2 flex items-center gap-1 bg-card border border-border shadow-sm rounded-full z-50 animate-in fade-in zoom-in duration-200">
+             <Tooltip delayDuration={0}>
+               <TooltipTrigger asChild>
+                 <Button variant="ghost" size="icon" onClick={handleUndo} disabled={!canUndo} className="h-8 w-8 rounded-full">
+                   <Undo2 className="h-4 w-4" />
+                 </Button>
+               </TooltipTrigger>
+               <TooltipContent side="bottom">Undo [Ctrl+Z]</TooltipContent>
+             </Tooltip>
+             <div className="w-[1px] h-4 bg-border" />
+             <Tooltip delayDuration={0}>
+               <TooltipTrigger asChild>
+                 <Button variant="ghost" size="icon" onClick={handleRedo} disabled={!canRedo} className="h-8 w-8 rounded-full">
+                   <Redo2 className="h-4 w-4" />
+                 </Button>
+               </TooltipTrigger>
+               <TooltipContent side="bottom">Redo [Ctrl+Y]</TooltipContent>
+             </Tooltip>
+          </div>
+        )}
+
         {middleTab === "responses" && (
           <div className="max-w-3xl mx-auto space-y-6">
             <div className="flex justify-between items-center pb-2 border-b border-border">
@@ -373,7 +407,7 @@ export function BuilderCanvas({
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(200,200,200,0.1)" />
                           <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={8} tickLine={false} tickFormatter={(str) => str.split("-")[2] || ""} />
                           <YAxis stroke="hsl(var(--muted-foreground))" fontSize={8} tickLine={false} axisLine={false} width={12} />
-                          <Tooltip />
+                          <RechartsTooltip />
                           <Area type="monotone" dataKey="submissions" stroke="hsl(var(--chart-1))" strokeWidth={1.5} fillOpacity={1} fill="url(#colorSubSide)" name="Subs" />
                           <Area type="monotone" dataKey="views" stroke="hsl(var(--muted-foreground))" strokeWidth={1} strokeDasharray="3 3" fill="none" name="Views" />
                         </AreaChart>

@@ -18,6 +18,8 @@ import { TabBar } from "../TabBar";
 import { ThemePresetCard } from "./ThemePresetCard";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { useTranslations } from "next-intl";
 
 interface BuilderSidebarLeftProps {
@@ -28,7 +30,8 @@ interface BuilderSidebarLeftProps {
   handleAddField: (type: FormField["type"]) => void;
   activeTheme: ThemeConfig | null;
   setActiveTheme: (theme: ThemeConfig) => void;
-  saveForm: (fields: FormField[], theme?: ThemeConfig) => void;
+  saveForm: (fields: FormField[], theme?: ThemeConfig | null) => void;
+  pushToHistory?: (fields: FormField[], theme: ThemeConfig | null) => void;
   fields: FormField[];
 }
 
@@ -41,6 +44,7 @@ export function BuilderSidebarLeft({
   activeTheme,
   setActiveTheme,
   saveForm,
+  pushToHistory,
   fields,
 }: BuilderSidebarLeftProps) {
   const t = useTranslations("Builder");
@@ -51,17 +55,29 @@ export function BuilderSidebarLeft({
   ] as const;
 
   const FIELD_TYPES = [
-    { type: "text", label: t("sidebarFieldText"), icon: Type, iconColor: "text-indigo-500", colSpan2: false },
-    { type: "textarea", label: t("sidebarFieldTextarea"), icon: AlignLeft, iconColor: "text-blue-500", colSpan2: false },
-    { type: "email", label: t("sidebarFieldEmail"), icon: Mail, iconColor: "text-emerald-500", colSpan2: false },
-    { type: "number", label: t("sidebarFieldNumber"), icon: Hash, iconColor: "text-amber-500", colSpan2: false },
-    { type: "select", label: t("sidebarFieldSelect"), icon: List, iconColor: "text-orange-500", colSpan2: false },
-    { type: "multiselect", label: "Multi Select", icon: CheckSquare, iconColor: "text-teal-500", colSpan2: false },
-    { type: "checkbox", label: t("sidebarFieldCheckbox"), icon: CheckSquare, iconColor: "text-purple-500", colSpan2: false },
-    { type: "rating", label: "Rating", icon: Star, iconColor: "text-yellow-500", colSpan2: false },
-    { type: "date", label: "Date", icon: Calendar, iconColor: "text-pink-500", colSpan2: false },
-    { type: "time", label: "Time", icon: Clock, iconColor: "text-rose-500", colSpan2: false }
+    { type: "text", label: t("sidebarFieldText"), icon: Type, iconColor: "text-indigo-500", colSpan2: false, shortcut: "t" },
+    { type: "textarea", label: t("sidebarFieldTextarea"), icon: AlignLeft, iconColor: "text-blue-500", colSpan2: false, shortcut: "a" },
+    { type: "email", label: t("sidebarFieldEmail"), icon: Mail, iconColor: "text-emerald-500", colSpan2: false, shortcut: "e" },
+    { type: "number", label: t("sidebarFieldNumber"), icon: Hash, iconColor: "text-amber-500", colSpan2: false, shortcut: "n" },
+    { type: "select", label: t("sidebarFieldSelect"), icon: List, iconColor: "text-orange-500", colSpan2: false, shortcut: "s" },
+    { type: "multiselect", label: "Multi Select", icon: CheckSquare, iconColor: "text-teal-500", colSpan2: false, shortcut: "m" },
+    { type: "checkbox", label: t("sidebarFieldCheckbox"), icon: CheckSquare, iconColor: "text-purple-500", colSpan2: false, shortcut: "c" },
+    { type: "rating", label: "Rating", icon: Star, iconColor: "text-yellow-500", colSpan2: false, shortcut: "r" },
+    { type: "date", label: "Date", icon: Calendar, iconColor: "text-pink-500", colSpan2: false, shortcut: "d" },
+    { type: "time", label: "Time", icon: Clock, iconColor: "text-rose-500", colSpan2: false, shortcut: "i" }
   ] as const;
+
+  // Register shortcuts
+  useGlobalShortcut("add-field-text", "t", "Add Text Field", () => handleAddField("text"), "Builder Fields");
+  useGlobalShortcut("add-field-textarea", "a", "Add Textarea Field", () => handleAddField("textarea"), "Builder Fields");
+  useGlobalShortcut("add-field-email", "e", "Add Email Field", () => handleAddField("email"), "Builder Fields");
+  useGlobalShortcut("add-field-number", "n", "Add Number Field", () => handleAddField("number"), "Builder Fields");
+  useGlobalShortcut("add-field-select", "s", "Add Select Field", () => handleAddField("select"), "Builder Fields");
+  useGlobalShortcut("add-field-multiselect", "m", "Add Multi Select Field", () => handleAddField("multiselect"), "Builder Fields");
+  useGlobalShortcut("add-field-checkbox", "c", "Add Checkbox Field", () => handleAddField("checkbox"), "Builder Fields");
+  useGlobalShortcut("add-field-rating", "r", "Add Rating Field", () => handleAddField("rating"), "Builder Fields");
+  useGlobalShortcut("add-field-date", "d", "Add Date Field", () => handleAddField("date"), "Builder Fields");
+  useGlobalShortcut("add-field-time", "i", "Add Time Field", () => handleAddField("time"), "Builder Fields");
 
   return (
     <aside className="w-full h-full border-r border-border bg-card overflow-hidden flex flex-col">
@@ -84,17 +100,23 @@ export function BuilderSidebarLeft({
                 {FIELD_TYPES.map((field) => {
                   const Icon = field.icon;
                   return (
-                    <button
-                      key={field.type}
-                      type="button"
-                      onClick={() => handleAddField(field.type)}
-                      className={`flex items-center gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors ${
-                        field.colSpan2 ? "col-span-2 justify-center" : ""
-                      }`}
-                    >
-                      <Icon className={`h-4 w-4 ${field.iconColor} shrink-0`} />
-                      <span>{field.label}</span>
-                    </button>
+                    <Tooltip key={field.type} delayDuration={0}>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={() => handleAddField(field.type)}
+                          className={`flex items-center gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors ${
+                            field.colSpan2 ? "col-span-2 justify-center" : ""
+                          }`}
+                        >
+                          <Icon className={`h-4 w-4 ${field.iconColor} shrink-0`} />
+                          <span>{field.label}</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" sideOffset={14}>
+                        Add {field.label} [{field.shortcut.toUpperCase()}]
+                      </TooltipContent>
+                    </Tooltip>
                   );
                 })}
               </div>
@@ -188,6 +210,7 @@ export function BuilderSidebarLeft({
                     onClick={() => {
                       setActiveTheme(theme);
                       saveForm(fields, theme);
+                      if (pushToHistory) pushToHistory(fields, theme);
                     }}
                   />
                 ))}

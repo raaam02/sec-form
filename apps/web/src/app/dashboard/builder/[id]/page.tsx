@@ -73,6 +73,52 @@ export default function BuilderPage() {
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [, setSaveErrorMessage] = useState("");
 
+  // History state for Undo/Redo
+  const [formHistory, setFormHistory] = useState<{
+    states: { fields: FormField[]; theme: ThemeConfig | null }[];
+    index: number;
+  }>({ states: [], index: -1 });
+
+  const pushToHistory = (newFields: FormField[], newTheme: ThemeConfig | null) => {
+    setFormHistory((prev) => {
+      const currentStates = prev.states.slice(0, prev.index + 1);
+      currentStates.push({ 
+        fields: JSON.parse(JSON.stringify(newFields)), 
+        theme: newTheme ? JSON.parse(JSON.stringify(newTheme)) : null 
+      });
+      if (currentStates.length > 100) currentStates.shift();
+      return {
+        states: currentStates,
+        index: currentStates.length - 1
+      };
+    });
+  };
+
+  const handleUndo = () => {
+    if (formHistory.index > 0) {
+      const newIndex = formHistory.index - 1;
+      const prev = formHistory.states[newIndex];
+      setFields(prev.fields);
+      setActiveTheme(prev.theme);
+      setFormHistory((current) => ({ ...current, index: newIndex }));
+      saveForm(prev.fields, prev.theme);
+    }
+  };
+
+  const handleRedo = () => {
+    if (formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1) {
+      const newIndex = formHistory.index + 1;
+      const next = formHistory.states[newIndex];
+      setFields(next.fields);
+      setActiveTheme(next.theme);
+      setFormHistory((current) => ({ ...current, index: newIndex }));
+      saveForm(next.fields, next.theme);
+    }
+  };
+
+  useGlobalShortcut("undo-action", "ctrl+z", "Undo", handleUndo, "Builder Tools");
+  useGlobalShortcut("redo-action", "ctrl+y", "Redo", handleRedo, "Builder Tools");
+
   useGlobalShortcut("save-form", "ctrl+s", "Save Form", () => {
     saveForm(fields);
   }, "Builder Tools");
@@ -124,10 +170,23 @@ export default function BuilderPage() {
     if (form) {
       setTitle(form.title);
       setDescription(form.description || "");
-      setFields((form.schemaJson as any).fields || []);
-      setActiveTheme(form.themeJson as any);
+      
+      const loadedFields = (form.schemaJson as any).fields || [];
+      const loadedTheme = form.themeJson as any;
+      setFields(loadedFields);
+      setActiveTheme(loadedTheme);
       setSlug(form.slug);
       setVisibility(form.visibility as any);
+
+      setFormHistory((prev) => {
+        if (prev.states.length === 0) {
+          return {
+            states: [{ fields: loadedFields, theme: loadedTheme }],
+            index: 0
+          };
+        }
+        return prev;
+      });
     }
   }, [form]);
 
@@ -153,7 +212,7 @@ export default function BuilderPage() {
   }, [searchParams]);
 
   // Auto-Save Form Logic
-  const saveForm = async (updatedFields: FormField[], updatedTheme?: ThemeConfig) => {
+  const saveForm = async (updatedFields: FormField[], updatedTheme?: ThemeConfig | null) => {
     setSaveStatus("saving");
     try {
       await updateFormMutation.mutateAsync({
@@ -184,6 +243,7 @@ export default function BuilderPage() {
     setFields(updated);
     setSelectedFieldId(newField.id);
     saveForm(updated);
+    pushToHistory(updated, activeTheme);
   };
 
   const handleDeleteField = (fieldId: string) => {
@@ -191,6 +251,7 @@ export default function BuilderPage() {
     setFields(updated);
     if (selectedFieldId === fieldId) setSelectedFieldId(null);
     saveForm(updated);
+    pushToHistory(updated, activeTheme);
   };
 
   const handleUpdateField = (fieldId: string, updates: Partial<FormField>) => {
@@ -202,6 +263,7 @@ export default function BuilderPage() {
     });
     setFields(updated);
     saveForm(updated);
+    pushToHistory(updated, activeTheme);
   };
 
   const handleReorder = (index: number, direction: "up" | "down") => {
@@ -218,6 +280,7 @@ export default function BuilderPage() {
 
     setFields(updated);
     saveForm(updated);
+    pushToHistory(updated, activeTheme);
   };
 
   const handleGenerateInsights = async () => {
@@ -344,7 +407,7 @@ export default function BuilderPage() {
       <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden min-h-0 bg-muted/20">
         
         {/* PANEL A: LEFT SIDEBAR (Builder / Themes) */}
-        <ResizablePanel defaultSize="25" minSize="22" maxSize="30" className="flex flex-col">
+        <ResizablePanel defaultSize="18" minSize="20" maxSize="25" className="flex flex-col">
           <BuilderSidebarLeft
             leftTab={leftTab}
             setLeftTab={setLeftTab}
@@ -354,6 +417,7 @@ export default function BuilderPage() {
             activeTheme={activeTheme}
             setActiveTheme={setActiveTheme}
             saveForm={saveForm}
+            pushToHistory={pushToHistory}
             fields={fields}
           />
         </ResizablePanel>
@@ -390,13 +454,17 @@ export default function BuilderPage() {
             slug={slug}
             setSlug={setSlug}
             handleSaveSettings={handleSaveSettings}
+            handleUndo={handleUndo}
+            handleRedo={handleRedo}
+            canUndo={formHistory.index > 0}
+            canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
           />
         </ResizablePanel>
 
         <ResizableHandle />
 
         {/* PANEL C: RIGHT SIDEBAR (Preview / Embed) */}
-        <ResizablePanel defaultSize="30" minSize="25" maxSize="40" className="flex flex-col">
+        <ResizablePanel defaultSize="25" minSize="25" maxSize="40" className="flex flex-col">
           <BuilderSidebarRight
             rightTab={rightTab}
             setRightTab={setRightTab}
