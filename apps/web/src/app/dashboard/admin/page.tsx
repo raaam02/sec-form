@@ -8,6 +8,10 @@ import { LoadingSpinner } from "@sec-form/ui";
 import { trpc } from "../../../utils/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -15,6 +19,12 @@ export default function AdminPage() {
 
   // tRPC hooks
   const utils = trpc.useUtils();
+  
+  useGlobalShortcut("refresh-models", "ctrl+r", "Refresh Models", () => {
+    utils.admin.getModels.invalidate();
+    toast.info("Refreshing models...");
+  }, "Admin Tools");
+
   const { data: models, isLoading, isError } = trpc.admin.getModels.useQuery(undefined, {
     enabled: status === "authenticated" && session?.user?.role === "admin",
   });
@@ -26,12 +36,14 @@ export default function AdminPage() {
   const toggleMutation = trpc.admin.toggleModelActive.useMutation({
     onSuccess: () => {
       utils.admin.getModels.invalidate();
+      toast.success("Model status updated");
     },
   });
 
   const setDefaultMutation = trpc.admin.setDefaultModel.useMutation({
     onSuccess: () => {
       utils.admin.getModels.invalidate();
+      toast.success("Default model updated");
     },
   });
 
@@ -78,7 +90,7 @@ export default function AdminPage() {
     try {
       await toggleMutation.mutateAsync({ id: modelId, isActive: !currentActive });
     } catch (e: any) {
-      alert(e.message || "Failed to update model status.");
+      toast.error(e.message || "Failed to update model status.");
     }
   };
 
@@ -86,33 +98,24 @@ export default function AdminPage() {
     try {
       await setDefaultMutation.mutateAsync({ id: modelId });
     } catch (e: any) {
-      alert(e.message || "Failed to set default model.");
+      toast.error(e.message || "Failed to set default model.");
     }
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-50/30 dark:bg-zinc-950/20 p-6 md:p-8">
+    <div className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-slate-50/30 dark:bg-zinc-950/20">
       {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="flex items-center justify-center h-7 w-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-              <Shield className="h-4 w-4" />
-            </div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
-              System Admin
-            </span>
+      <DashboardHeader 
+        title="AI Generative Models"
+        description="Manage available Google GenAI models and select the default engine for form generation."
+        icon={
+          <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+            <Shield className="h-5 w-5" />
           </div>
-          <h1 className="font-outfit text-3xl font-extrabold tracking-tight text-foreground">
-            AI Generative Models
-          </h1>
-          <p className="text-sm text-muted-foreground font-medium mt-1">
-            Manage available Google GenAI models and select the default engine for form generation.
-          </p>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="p-6 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* MODELS LIST CARD */}
         <div className="lg:col-span-2 space-y-4">
           <h2 className="font-outfit text-lg font-bold flex items-center gap-2 px-1 text-foreground">

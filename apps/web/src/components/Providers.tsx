@@ -8,6 +8,8 @@ import superjson from "superjson";
 import { trpc, getBaseUrl } from "../utils/trpc";
 
 import { ThemeProvider } from "./ThemeProvider";
+import { GlobalShortcutProvider } from "./providers/GlobalShortcutProvider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -35,13 +37,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider>
-      <SessionProvider>
-        <trpc.Provider client={trpcClient} queryClient={queryClient}>
-          <QueryClientProvider client={queryClient}>
-            {children}
-          </QueryClientProvider>
-        </trpc.Provider>
-      </SessionProvider>
+      <GlobalShortcutProvider>
+        <SessionProvider>
+          <trpc.Provider client={trpcClient} queryClient={queryClient}>
+            <QueryClientProvider client={queryClient}>
+              <TooltipProvider delayDuration={300}>
+                {children}
+              </TooltipProvider>
+            </QueryClientProvider>
+          </trpc.Provider>
+        </SessionProvider>
+      </GlobalShortcutProvider>
     </ThemeProvider>
   );
 }

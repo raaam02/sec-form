@@ -6,6 +6,7 @@ import { FormField } from "@sec-form/validators";
 import { TabBar } from "../TabBar";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface BuilderSidebarRightProps {
   rightTab: "preview" | "embed";
@@ -34,17 +35,17 @@ export function BuilderSidebarRight({
   const tCommon = useTranslations("Common");
 
   const RIGHT_TABS = [
-    { value: "preview", label: t("preview"), icon: Smartphone, iconColorClass: "text-indigo-500" },
-    { value: "embed", label: t("shareEmbed"), icon: Code, iconColorClass: "text-teal-500" }
+    { value: "preview", label: t("preview"), icon: Smartphone, iconColorClass: "text-indigo-500", shortcut: "ctrl+7" },
+    { value: "embed", label: t("shareEmbed"), icon: Code, iconColorClass: "text-teal-500", shortcut: "ctrl+8" }
   ] as const;
 
   const handleCopyCode = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert(t("shareCopied"));
+    toast.success(t("shareCopied"));
   };
 
   return (
-    <aside className="w-[340px] lg:w-[380px] border-l border-border bg-card overflow-hidden shrink-0 flex flex-col">
+    <aside className="w-full h-full border-l border-border bg-card overflow-hidden flex flex-col">
       {/* Tabs header */}
       <TabBar
         items={RIGHT_TABS}
@@ -115,6 +116,19 @@ export function BuilderSidebarRight({
                               type="text" 
                               placeholder={field.placeholder || "Enter answer..."}
                               className="h-8 w-full px-2.5 rounded border text-[10px] focus:outline-none" 
+                              style={{ 
+                                borderColor: "rgba(128,128,128,0.25)",
+                                backgroundColor: activeTheme?.backgroundColor || "#ffffff",
+                                color: activeTheme?.textColor || "#0f172a",
+                                borderRadius: activeTheme?.borderRadius || "0.25rem"
+                              }}
+                              disabled
+                            />
+                          )}
+                          {field.type === "time" && (
+                            <input 
+                              type="time" 
+                              className="h-8 w-24 px-2.5 rounded border text-[10px] focus:outline-none" 
                               style={{ 
                                 borderColor: "rgba(128,128,128,0.25)",
                                 backgroundColor: activeTheme?.backgroundColor || "#ffffff",

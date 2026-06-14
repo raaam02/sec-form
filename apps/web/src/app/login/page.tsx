@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Sparkles, AlertCircle, Lock, Mail } from "lucide-react";
+import { Sparkles, AlertCircle, Lock, Mail, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { Card } from "@/components/ui/card";
@@ -24,6 +25,12 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const [capsLockActive, setCapsLockActive] = useState(false);
+
+  const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLockActive(e.getModifierState("CapsLock"));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -39,10 +46,10 @@ function LoginForm() {
       if (res?.ok) {
         router.push(redirect);
       } else {
-        setError(t("errorInvalid"));
+        toast.error(t("errorInvalid"));
       }
     } catch (err) {
-      setError(t("errorGeneric"));
+      toast.error(t("errorGeneric"));
     } finally {
       setIsLoading(false);
     }
@@ -77,12 +84,6 @@ function LoginForm() {
         </div>
 
         <Card className="bg-card rounded-2xl border border-border p-8 shadow-md">
-          {error && (
-            <div className="rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 mb-4 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              <span>{error}</span>
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -110,10 +111,17 @@ function LoginForm() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-10 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm"
+                  onKeyDown={checkCapsLock}
+                  onKeyUp={checkCapsLock}
+                  className="w-full h-10 px-3 pl-10 pr-10 rounded-xl border border-border bg-background text-foreground text-sm"
                   required
                 />
                 <Lock className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+                {capsLockActive && (
+                  <div className="absolute right-3 top-3" title="Caps Lock is ON">
+                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                  </div>
+                )}
               </div>
             </div>
 

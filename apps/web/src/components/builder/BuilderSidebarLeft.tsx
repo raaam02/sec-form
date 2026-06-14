@@ -9,7 +9,8 @@ import {
   List, 
   CheckSquare, 
   Star, 
-  Calendar 
+  Calendar,
+  Clock
 } from "lucide-react";
 import { BUILTIN_THEMES, ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
@@ -45,8 +46,8 @@ export function BuilderSidebarLeft({
   const t = useTranslations("Builder");
 
   const LEFT_TABS = [
-    { value: "builder", label: t("tabBuild"), icon: Plus, iconColorClass: "text-indigo-500" },
-    { value: "themes", label: t("tabTheme"), icon: Palette, iconColorClass: "text-purple-500" }
+    { value: "builder", label: t("tabBuild"), icon: Plus, iconColorClass: "text-indigo-500", shortcut: "ctrl+1" },
+    { value: "themes", label: t("tabTheme"), icon: Palette, iconColorClass: "text-purple-500", shortcut: "ctrl+2" }
   ] as const;
 
   const FIELD_TYPES = [
@@ -58,11 +59,12 @@ export function BuilderSidebarLeft({
     { type: "multiselect", label: "Multi Select", icon: CheckSquare, iconColor: "text-teal-500", colSpan2: false },
     { type: "checkbox", label: t("sidebarFieldCheckbox"), icon: CheckSquare, iconColor: "text-purple-500", colSpan2: false },
     { type: "rating", label: "Rating", icon: Star, iconColor: "text-yellow-500", colSpan2: false },
-    { type: "date", label: "Date", icon: Calendar, iconColor: "text-pink-500", colSpan2: true }
+    { type: "date", label: "Date", icon: Calendar, iconColor: "text-pink-500", colSpan2: false },
+    { type: "time", label: "Time", icon: Clock, iconColor: "text-rose-500", colSpan2: false }
   ] as const;
 
   return (
-    <aside className="w-[340px] lg:w-[380px] border-r border-border bg-card overflow-hidden shrink-0 flex flex-col">
+    <aside className="w-full h-full border-r border-border bg-card overflow-hidden flex flex-col">
       {/* Tabs header */}
       <TabBar
         items={LEFT_TABS}

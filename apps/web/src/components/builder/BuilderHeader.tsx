@@ -11,10 +11,13 @@ import {
   ExternalLink, 
   Globe, 
   EyeOff, 
-  Lock 
+  Lock,
+  Keyboard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
+import { useGlobalShortcutHelp } from "@/components/providers/GlobalShortcutProvider";
 
 interface BuilderHeaderProps {
   title: string;
@@ -36,6 +39,7 @@ export function BuilderHeader({
   publicFormUrl,
 }: BuilderHeaderProps) {
   const t = useTranslations("Builder");
+  const showShortcutsHelp = useGlobalShortcutHelp();
   const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
 
   const getVisibilityIcon = (vis: string) => {
@@ -53,7 +57,7 @@ export function BuilderHeader({
           <Button 
             variant="outline" 
             size="icon"
-            className="h-8 w-8 rounded-xl border border-border bg-card text-muted-foreground shrink-0"
+            className="h-8 w-8 rounded-xl p-1.5 border border-border bg-card text-muted-foreground shrink-0"
             title={t("backToDashboard")}
             asChild
           >
@@ -94,7 +98,7 @@ export function BuilderHeader({
             className="h-9 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-bold text-muted-foreground transition-colors"
           >
             {getVisibilityIcon(visibility)}
-            <span className="capitalize hidden xs:inline">{visibility}</span>
+            <span className="capitalize">{visibility}</span>
             <ChevronDown className="h-3 w-3 text-muted-foreground" />
           </Button>
 
@@ -115,7 +119,10 @@ export function BuilderHeader({
                         : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     }`}
                   >
-                    <span className="capitalize">{mode}</span>
+                    <div className="flex items-center gap-1.5">
+                      {getVisibilityIcon(mode)}
+                      <span className="capitalize">{mode}</span>
+                    </div>
                     {visibility === mode && <Check className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />}
                   </button>
                 ))}
@@ -126,28 +133,38 @@ export function BuilderHeader({
 
         {/* Share Button (triggers modal) */}
         {(visibility === "public" || visibility === "unlisted") && (
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setIsShareModalOpen(true)}
-            className="h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors"
-            title={t("share")}
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsShareModalOpen(true)}
+                className="h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors"
+                title={t("share")}
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Share / Embed [Ctrl + E]</TooltipContent>
+          </Tooltip>
         )}
         
         {/* Live Preview Redirection Link */}
-        <Button
-          size="sm"
-          className="h-9 items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-sm transition-colors"
-          asChild
-        >
-          <a href={publicFormUrl} target="_blank" rel="noopener noreferrer">
-            <span>{t("preview")}</span>
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              className="h-9 items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-sm transition-colors"
+              asChild
+            >
+              <a href={publicFormUrl} target="_blank" rel="noopener noreferrer">
+                <span>{t("preview")}</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Preview Form [Ctrl + P]</TooltipContent>
+        </Tooltip>
       </div>
     </header>
   );

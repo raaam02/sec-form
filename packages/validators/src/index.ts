@@ -9,7 +9,8 @@ export const FieldTypeSchema = z.enum([
   "multiselect",  // Multi Select
   "checkbox",     // Checkbox
   "rating",       // Rating
-  "date"          // Date
+  "date",         // Date
+  "time"          // Time
 ]);
 
 export type FieldType = z.infer<typeof FieldTypeSchema>;
@@ -190,9 +191,10 @@ export function buildSubmissionValidator(fields: FormField[]) {
         break;
 
       case "date":
+      case "time":
         fieldSchema = z.string();
         if (field.required) {
-          fieldSchema = (fieldSchema as z.ZodString).min(1, `${field.label} date is required`);
+          fieldSchema = (fieldSchema as z.ZodString).min(1, `${field.label} is required`);
         } else {
           fieldSchema = fieldSchema.optional().or(z.literal(""));
         }

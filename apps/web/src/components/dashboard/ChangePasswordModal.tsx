@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AlertCircle, CheckCircle2, Lock, Send, KeyRound } from "lucide-react";
+import { AlertCircle, CheckCircle2, Lock, Send, KeyRound, AlertTriangle } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import {
   Dialog,
@@ -31,6 +31,11 @@ export function ChangePasswordModal({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [capsLockActive, setCapsLockActive] = useState(false);
+
+  const checkCapsLock = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    setCapsLockActive(e.getModifierState("CapsLock"));
+  };
 
   // tRPC mutations
   const requestOtpMutation = trpc.auth.requestPasswordResetOtp.useMutation();
@@ -200,29 +205,47 @@ export function ChangePasswordModal({
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   New Password
                 </Label>
-                <Input
-                  type="password"
-                  placeholder="At least 6 characters"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-border bg-background text-foreground text-sm"
-                  required
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <Input
+                    type="password"
+                    placeholder="At least 6 characters"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    onKeyDown={checkCapsLock}
+                    onKeyUp={checkCapsLock}
+                    className="w-full h-10 px-3 pr-10 rounded-xl border border-border bg-background text-foreground text-sm"
+                    required
+                    disabled={isLoading}
+                  />
+                  {capsLockActive && (
+                    <div className="absolute right-3 top-3" title="Caps Lock is ON">
+                      <AlertTriangle className="h-4 w-4 text-amber-500" />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-1.5">
                 <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   Confirm New Password
                 </Label>
-                <Input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-border bg-background text-foreground text-sm"
-                  required
-                  disabled={isLoading}
-                />
+                <div className="relative">
+                  <Input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onKeyDown={checkCapsLock}
+                    onKeyUp={checkCapsLock}
+                    className="w-full h-10 px-3 pr-10 rounded-xl border border-border bg-background text-foreground text-sm"
+                    required
+                    disabled={isLoading}
+                  />
+                  {capsLockActive && (
+                    <div className="absolute right-3 top-3" title="Caps Lock is ON">
+                      <AlertTriangle className="h-4 w-4 text-amber-500" />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <DialogFooter className="flex gap-3 justify-end pt-4 border-t border-border mt-6">

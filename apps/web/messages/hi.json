@@ -103,7 +103,7 @@
     "cardViews": "व्यूज",
     "cardSubmissions": "सबमिशन",
     "cardDelete": "फॉर्म डिलीट करें",
-    "cardConfirmDelete": "क्या आप वाकई इस फॉर्म को डिलीट करना चाहते हैं? इसे वापस नहीं लाया जा सकेगा।",
+    "cardConfirmDelete": "इस फॉर्म को डिलीट करें?",
     "cardOpen": "खोलें",
     "cardPublicLink": "पब्लिक लिंक",
     "cardAnalytics": "एनालिटिक्स",
@@ -163,6 +163,7 @@
     "applyTheme": "थीम लगाएं"
   },
   "Analytics": {
+    "navAnalytics": "एनालिटिक्स",
     "title": "एनालिटिक्स डैशबोर्ड",
     "subtitle": "अपने फॉर्म्स के परफॉरमेंस और सबमिशन रिस्पॉन्स का ओवरव्यू देखें",
     "metricViews": "कुल व्यूज",

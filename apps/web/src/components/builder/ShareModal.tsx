@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -28,7 +29,7 @@ export function ShareModal({
 
   const handleCopy = () => {
     navigator.clipboard.writeText(publicFormUrl);
-    alert(t("shareCopied"));
+    toast.success(t("shareCopied"));
   };
 
   return (

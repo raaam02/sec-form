@@ -14,6 +14,8 @@ import { BuilderSidebarLeft } from "@/components/builder/BuilderSidebarLeft";
 import { BuilderCanvas } from "@/components/builder/BuilderCanvas";
 import { BuilderSidebarRight } from "@/components/builder/BuilderSidebarRight";
 import { ShareModal } from "@/components/builder/ShareModal";
+import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 
 // Cast trpc to bypass Next.js 15 type collision checks
 const trpcAny = trpc as any;
@@ -70,6 +72,52 @@ export default function BuilderPage() {
   // Notification banner / Auto-save status
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [, setSaveErrorMessage] = useState("");
+
+  useGlobalShortcut("save-form", "ctrl+s", "Save Form", () => {
+    saveForm(fields);
+  }, "Builder Tools");
+
+  useGlobalShortcut("share-form", "ctrl+e", "Share / Embed", () => {
+    setIsShareModalOpen(true);
+  }, "Builder Tools");
+
+  useGlobalShortcut("preview-form", "ctrl+p", "Preview Form", () => {
+    setRightTab("preview");
+  }, "Builder Tools");
+
+  useGlobalShortcut("build-tab-1", "ctrl+1", "Build Canvas", () => {
+    setLeftTab("builder");
+    setMiddleTab("form");
+  }, "Builder Navigation");
+
+  useGlobalShortcut("theme-tab", "ctrl+2", "Theme Presets", () => {
+    setLeftTab("themes");
+  }, "Builder Navigation");
+
+  useGlobalShortcut("build-tab-3", "ctrl+3", "Build Canvas", () => {
+    setLeftTab("builder");
+    setMiddleTab("form");
+  }, "Builder Navigation");
+
+  useGlobalShortcut("responses-tab", "ctrl+4", "Submissions", () => {
+    setMiddleTab("responses");
+  }, "Builder Navigation");
+
+  useGlobalShortcut("insights-tab", "ctrl+5", "AI Insights", () => {
+    setMiddleTab("analytics");
+  }, "Builder Navigation");
+
+  useGlobalShortcut("settings-tab", "ctrl+6", "Settings", () => {
+    setMiddleTab("settings");
+  }, "Builder Navigation");
+
+  useGlobalShortcut("preview-tab", "ctrl+7", "Preview Mode", () => {
+    setRightTab("preview");
+  }, "Builder Navigation");
+
+  useGlobalShortcut("embed-tab", "ctrl+8", "Embed Mode", () => {
+    setRightTab("embed");
+  }, "Builder Navigation");
 
   // Sync state from query load
   useEffect(() => {
@@ -293,65 +341,76 @@ export default function BuilderPage() {
       />
 
       {/* WORKSPACE 3-PANE CONTAINER */}
-      <div className="flex-1 flex overflow-hidden min-h-0 bg-muted/20">
+      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden min-h-0 bg-muted/20">
         
         {/* PANEL A: LEFT SIDEBAR (Builder / Themes) */}
-        <BuilderSidebarLeft
-          leftTab={leftTab}
-          setLeftTab={setLeftTab}
-          focusedField={focusedField || null}
-          handleUpdateField={handleUpdateField}
-          handleAddField={handleAddField}
-          activeTheme={activeTheme}
-          setActiveTheme={setActiveTheme}
-          saveForm={saveForm}
-          fields={fields}
-        />
+        <ResizablePanel defaultSize="25" minSize="22" maxSize="30" className="flex flex-col">
+          <BuilderSidebarLeft
+            leftTab={leftTab}
+            setLeftTab={setLeftTab}
+            focusedField={focusedField || null}
+            handleUpdateField={handleUpdateField}
+            handleAddField={handleAddField}
+            activeTheme={activeTheme}
+            setActiveTheme={setActiveTheme}
+            saveForm={saveForm}
+            fields={fields}
+          />
+        </ResizablePanel>
+
+        <ResizableHandle />
 
         {/* PANEL B: MIDDLE CANVAS (Form Editor / Responses / Analytics / Settings) */}
-        <BuilderCanvas
-          middleTab={middleTab}
-          setMiddleTab={setMiddleTab}
-          title={title}
-          setTitle={setTitle}
-          description={description}
-          setDescription={setDescription}
-          fields={fields}
-          selectedFieldId={selectedFieldId}
-          setSelectedFieldId={setSelectedFieldId}
-          handleReorder={handleReorder}
-          handleDeleteField={handleDeleteField}
-          saveForm={saveForm}
-          responses={responses}
-          isResponsesLoading={isResponsesLoading}
-          handleExportCSV={handleExportCSV}
-          analytics={analytics}
-          isAnalyticsLoading={isAnalyticsLoading}
-          aiInsights={aiInsights}
-          isInsightsGenerating={isInsightsGenerating}
-          insightsError={insightsError}
-          handleGenerateInsights={handleGenerateInsights}
-          visibility={visibility}
-          setVisibility={setVisibility}
-          slug={slug}
-          setSlug={setSlug}
-          handleSaveSettings={handleSaveSettings}
-        />
+        <ResizablePanel defaultSize="50" minSize="30" className="flex flex-col">
+          <BuilderCanvas
+            middleTab={middleTab}
+            setMiddleTab={setMiddleTab}
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            fields={fields}
+            selectedFieldId={selectedFieldId}
+            setSelectedFieldId={setSelectedFieldId}
+            handleReorder={handleReorder}
+            handleDeleteField={handleDeleteField}
+            handleUpdateField={handleUpdateField}
+            saveForm={saveForm}
+            responses={responses}
+            isResponsesLoading={isResponsesLoading}
+            handleExportCSV={handleExportCSV}
+            analytics={analytics}
+            isAnalyticsLoading={isAnalyticsLoading}
+            aiInsights={aiInsights}
+            isInsightsGenerating={isInsightsGenerating}
+            insightsError={insightsError}
+            handleGenerateInsights={handleGenerateInsights}
+            visibility={visibility}
+            setVisibility={setVisibility}
+            slug={slug}
+            setSlug={setSlug}
+            handleSaveSettings={handleSaveSettings}
+          />
+        </ResizablePanel>
+
+        <ResizableHandle />
 
         {/* PANEL C: RIGHT SIDEBAR (Preview / Embed) */}
-        <BuilderSidebarRight
-          rightTab={rightTab}
-          setRightTab={setRightTab}
-          title={title}
-          description={description}
-          fields={fields}
-          activeTheme={activeTheme}
-          publicFormUrl={publicFormUrl}
-          id={id}
-          hostOrigin={hostOrigin}
-        />
+        <ResizablePanel defaultSize="30" minSize="25" maxSize="40" className="flex flex-col">
+          <BuilderSidebarRight
+            rightTab={rightTab}
+            setRightTab={setRightTab}
+            title={title}
+            description={description}
+            fields={fields}
+            activeTheme={activeTheme}
+            publicFormUrl={publicFormUrl}
+            id={id}
+            hostOrigin={hostOrigin}
+          />
+        </ResizablePanel>
 
-      </div>
+      </ResizablePanelGroup>
 
       {/* SHARE MODAL */}
       <ShareModal

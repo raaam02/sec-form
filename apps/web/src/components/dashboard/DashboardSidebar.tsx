@@ -4,8 +4,12 @@ import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle
 import { ThemeToggle } from "../ThemeToggle";
 import { LocaleSwitcher } from "../LocaleSwitcher";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { useGlobalShortcutHelp, useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
+import { Keyboard } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface DashboardSidebarProps {
   pathname: string;
@@ -28,23 +32,38 @@ export function DashboardSidebar({
   onSignOut,
 }: DashboardSidebarProps) {
   const t = useTranslations("Dashboard");
+  const showShortcutsHelp = useGlobalShortcutHelp();
+  const router = useRouter();
+  const [isUserPopoverOpen, setIsUserPopoverOpen] = React.useState(false);
+
+  // Navigation Shortcuts
+  useGlobalShortcut("nav-dash", "alt+1", "Go to Dashboard", () => router.push("/dashboard"), "Navigation");
+  useGlobalShortcut("nav-explore", "alt+2", "Go to Explore", () => router.push("/dashboard/explore"), "Navigation");
+  useGlobalShortcut("nav-analytics", "alt+3", "Go to Analytics", () => router.push("/dashboard/analytics"), "Navigation");
+  useGlobalShortcut("nav-admin", "alt+4", "Go to Admin", () => {
+    if (user.role === "admin") {
+      router.push("/dashboard/admin");
+    }
+  }, "Navigation");
+  
+  useGlobalShortcut("user-settings", "alt+u", "User Settings", () => setIsUserPopoverOpen(prev => !prev), "Settings");
 
   const navItems = [
     {
       href: "/dashboard",
-      label: t("navDashboard"),
+      label: `${t("navDashboard")} [Alt+1]`,
       icon: LayoutDashboard,
       active: pathname === "/dashboard",
     },
     {
       href: "/dashboard/explore",
-      label: t("navExplore"),
+      label: `${t("navExplore")} [Alt+2]`,
       icon: Compass,
       active: pathname === "/dashboard/explore",
     },
     {
       href: "/dashboard/analytics",
-      label: t("navAnalytics"),
+      label: `${t("navAnalytics")} [Alt+3]`,
       icon: BarChart3,
       active: pathname === "/dashboard/analytics",
     },
@@ -53,7 +72,7 @@ export function DashboardSidebar({
   if (user.role === "admin") {
     navItems.push({
       href: "/dashboard/admin",
-      label: t("navAdmin"),
+      label: `${t("navAdmin")} [Alt+4]`,
       icon: Shield,
       active: pathname === "/dashboard/admin",
     });
@@ -75,76 +94,100 @@ export function DashboardSidebar({
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-sm font-semibold transition-all ${
-                    item.active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  <Icon className={`h-5 w-5 shrink-0 transition-colors duration-200 ${
-                    item.active
-                      ? "text-primary"
-                      : "group-hover:text-primary"
-                  }`} />
-                  {/* Tooltip on hover */}
-                  <div className="absolute left-16 scale-0 group-hover:scale-100 transition-all origin-left bg-slate-900 text-white text-xs rounded-md px-2.5 py-1.5 font-medium whitespace-nowrap shadow-lg border border-slate-700/50 z-50 pointer-events-none">
-                    {item.label}
-                  </div>
-                </Link>
+                <Tooltip key={item.href} delayDuration={0}>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={item.href}
+                      className={`group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-sm font-semibold transition-all ${
+                        item.active
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      }`}
+                    >
+                      <Icon className={`h-5 w-5 shrink-0 transition-colors duration-200 ${
+                        item.active
+                          ? "text-primary"
+                          : "group-hover:text-primary"
+                      }`} />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" sideOffset={14}>{item.label}</TooltipContent>
+                </Tooltip>
               );
             })}
 
             {/* Create Form Button (opens Modal) */}
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setIsCreateModalOpen(true)}
-              className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-muted-foreground hover:bg-accent hover:text-accent-foreground p-0"
-            >
-              <PlusCircle className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
-              {/* Tooltip on hover */}
-              <div className="absolute left-16 scale-0 group-hover:scale-100 transition-all origin-left bg-slate-900 text-white text-xs rounded-md px-2.5 py-1.5 font-medium whitespace-nowrap shadow-lg border border-slate-700/50 z-50 pointer-events-none">
-                {t("newForm")}
-              </div>
-            </Button>
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-muted-foreground hover:bg-accent hover:text-accent-foreground p-0"
+                >
+                  <PlusCircle className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" sideOffset={14}>{t("newForm")} [N]</TooltipContent>
+            </Tooltip>
           </nav>
         </div>
 
-        {/* Sticky Bottom Docs Menu */}
-        <div className="p-4 border-t border-border">
-          <a
-            href="http://localhost:4000/docs"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all"
-          >
-            <Code className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
-            {/* Tooltip on hover */}
-            <div className="absolute left-16 scale-0 group-hover:scale-100 transition-all origin-left bg-slate-900 text-white text-xs rounded-md px-2.5 py-1.5 font-medium whitespace-nowrap shadow-lg border border-slate-700/50 z-50 pointer-events-none">
-              {t("navDocs")}
-            </div>
-          </a>
+        {/* Sticky Bottom Menus */}
+        <div className="p-4 border-t border-border space-y-2">
+          {/* Keyboard Shortcuts */}
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={showShortcutsHelp}
+                className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-muted-foreground hover:bg-accent hover:text-accent-foreground p-0"
+              >
+                <Keyboard className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={14}>Shortcuts [Ctrl + Space]</TooltipContent>
+          </Tooltip>
+
+          {/* API Docs */}
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <a
+                href="http://localhost:4000/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all"
+              >
+                <Code className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
+              </a>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={14}>{t("navDocs")}</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
       {/* User profile footer */}
       <div className="p-4 border-t border-border flex flex-col items-center justify-center shrink-0 relative">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              className="h-9 w-9 rounded-full bg-muted overflow-hidden shrink-0 ring-1 ring-border hover:ring-primary focus:outline-none transition-all"
-              title="User Settings"
-            >
-              <img
-                src={user.image || "https://api.dicebear.com/7.x/adventurer/svg?seed=User"}
-                alt="Avatar"
-                className="h-full w-full object-cover"
-              />
-            </button>
-          </PopoverTrigger>
+        <Popover open={isUserPopoverOpen} onOpenChange={setIsUserPopoverOpen}>
+          <Tooltip delayDuration={0}>
+            <TooltipTrigger asChild>
+              <div className="relative">
+                <PopoverTrigger asChild>
+                  <button
+                    className="h-9 w-9 rounded-full bg-muted overflow-hidden shrink-0 ring-1 ring-border hover:ring-primary focus:outline-none transition-all block"
+                  >
+                    <img
+                      src={user.image || "https://api.dicebear.com/7.x/adventurer/svg?seed=User"}
+                      alt="Avatar"
+                      className="h-full w-full object-cover"
+                    />
+                  </button>
+                </PopoverTrigger>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={14}>User Settings [Alt+U]</TooltipContent>
+          </Tooltip>
           <PopoverContent side="right" align="end" className="w-64 rounded-xl border border-border bg-popover text-popover-foreground p-4 shadow-xl mb-4 ml-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <div className="flex items-center gap-3 border-b border-border pb-3 mb-3">
               <img
@@ -159,7 +202,7 @@ export function DashboardSidebar({
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground">
-                <span>{t("themeLabel")}</span>
+                <span>{t("themeLabel")} [Ctrl + M]</span>
                 <ThemeToggle className="h-7 w-7 rounded-lg" />
               </div>
               <div className="flex items-center justify-between px-2 py-1 text-xs text-muted-foreground border-b border-border pb-2">

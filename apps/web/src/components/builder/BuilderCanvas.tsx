@@ -34,6 +34,7 @@ interface BuilderCanvasProps {
   setSelectedFieldId: (id: string | null) => void;
   handleReorder: (index: number, direction: "up" | "down") => void;
   handleDeleteField: (id: string) => void;
+  handleUpdateField: (id: string, updates: Partial<FormField>) => void;
   saveForm: (fields: FormField[]) => void;
   responses: any;
   isResponsesLoading: boolean;
@@ -63,6 +64,7 @@ export function BuilderCanvas({
   setSelectedFieldId,
   handleReorder,
   handleDeleteField,
+  handleUpdateField,
   saveForm,
   responses,
   isResponsesLoading,
@@ -83,10 +85,10 @@ export function BuilderCanvas({
   const tCommon = useTranslations("Common");
 
   const MIDDLE_TABS = [
-    { value: "form", label: t("tabBuild"), icon: FileText, iconColorClass: "text-indigo-500" },
-    { value: "responses", label: t("tabSubmissions"), icon: CheckCircle2, iconColorClass: "text-emerald-500" },
-    { value: "analytics", label: "Analytics", icon: BarChart3, iconColorClass: "text-amber-500" },
-    { value: "settings", label: "Settings", icon: Settings, iconColorClass: "text-rose-500" }
+    { value: "form", label: t("tabBuild"), icon: FileText, iconColorClass: "text-indigo-500", shortcut: "ctrl+3" },
+    { value: "responses", label: t("tabSubmissions"), icon: CheckCircle2, iconColorClass: "text-emerald-500", shortcut: "ctrl+4" },
+    { value: "analytics", label: "Analytics", icon: BarChart3, iconColorClass: "text-amber-500", shortcut: "ctrl+5" },
+    { value: "settings", label: "Settings", icon: Settings, iconColorClass: "text-rose-500", shortcut: "ctrl+6" }
   ] as const;
 
   return (
@@ -99,7 +101,7 @@ export function BuilderCanvas({
       />
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 min-w-0">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-w-0">
         {middleTab === "form" && (
           <div className="max-w-2xl mx-auto space-y-6">
             <Card className="border-border bg-card p-6 shadow-sm flex flex-col gap-5">
@@ -147,13 +149,30 @@ export function BuilderCanvas({
                           <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
                             {field.type} {field.required && <span className="text-destructive">*</span>}
                           </span>
-                          <div className="font-semibold text-foreground mt-0.5 truncate">{field.label}</div>
-                          {field.description && <p className="text-muted-foreground text-xs mt-0.5 truncate">{field.description}</p>}
+                          <input
+                            type="text"
+                            value={field.label}
+                            onChange={(e) => handleUpdateField(field.id, { label: e.target.value })}
+                            onClick={(e) => e.stopPropagation()}
+                            className="font-semibold text-foreground mt-0.5 w-full bg-transparent border-b border-transparent focus:border-primary focus:outline-none transition-colors"
+                            placeholder="Field Label"
+                          />
+                          <input
+                            type="text"
+                            value={field.description || ""}
+                            onChange={(e) => handleUpdateField(field.id, { description: e.target.value })}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-muted-foreground text-xs mt-0.5 w-full bg-transparent border-b border-transparent focus:border-primary focus:outline-none transition-colors"
+                            placeholder="Field description (optional)"
+                          />
                           
                           {/* Card Field Input Template Previews */}
                           <div className="mt-3">
                             {["text", "email", "date"].includes(field.type) && (
                               <Input type="text" className="h-9 w-full max-w-sm rounded-lg border border-border bg-background/40 px-3 text-xs" placeholder={field.placeholder || "Response goes here..."} disabled />
+                            )}
+                            {field.type === "time" && (
+                              <Input type="time" className="h-9 w-32 rounded-lg border border-border bg-background/40 px-3 text-xs" disabled />
                             )}
                             {field.type === "textarea" && (
                               <textarea className="w-full max-w-md h-16 rounded-lg border border-border bg-background/40 p-2 text-xs focus:outline-none focus:ring-0" placeholder={field.placeholder || "Write long response..."} disabled />

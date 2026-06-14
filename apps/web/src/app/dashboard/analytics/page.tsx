@@ -6,6 +6,7 @@ import { trpc } from "../../../utils/trpc";
 import { FileText, Eye, BarChart3, Percent, Pencil, Inbox } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { useTranslations } from "next-intl";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function AnalyticsDashboardPage() {
@@ -43,15 +44,9 @@ export default function AnalyticsDashboardPage() {
   ];
 
   return (
-    <div className="flex flex-col h-full overflow-hidden w-full bg-transparent">
-      {/* Page Header */}
-      <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 sm:px-8 shrink-0 transition-colors duration-200">
-        <div>
-          <h1 className="font-outfit text-xl font-bold text-foreground">{t("title")}</h1>
-        </div>
-      </header>
+    <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
+      <DashboardHeader title={t("navAnalytics")} />
 
-      {/* Scrollable Body */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* STATS OVERVIEW CARDS */}

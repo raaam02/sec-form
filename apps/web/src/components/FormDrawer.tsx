@@ -27,6 +27,16 @@ export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerP
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [aiInsights, setAiInsights] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   // Queries
   const { data: analytics, isLoading: isAnalyticsLoading } = trpc.analytics.getFormAnalytics.useQuery(
     { formId: form.id },

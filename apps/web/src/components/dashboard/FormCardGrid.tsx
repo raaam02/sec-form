@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
+import { ConfirmationPopover } from "@/components/ui/confirmation-popover";
 
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -116,23 +117,24 @@ export function FormCardGrid({
                   {form.visibility}
                 </span>
                 
-                {/* Delete Button with Tooltip */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteForm(form.id);
-                      }}
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("cardDelete")}</TooltipContent>
-                </Tooltip>
+                {/* Delete Button with Confirmation Popover */}
+                <ConfirmationPopover
+                  title={t("cardConfirmDelete")}
+                  description="This will permanently delete the form."
+                  confirmText="Delete"
+                  onConfirm={() => handleDeleteForm(form.id)}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </ConfirmationPopover>
               </div>
 
               <h3 className="mt-4 font-outfit text-lg font-bold text-foreground truncate">{form.title}</h3>

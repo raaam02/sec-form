@@ -6,11 +6,15 @@ import { trpc } from "../../utils/trpc";
 import { FORM_TEMPLATES, BUILTIN_THEMES } from "@sec-form/shared";
 import { Sparkles, Plus } from "lucide-react";
 import { FormDrawer } from "../../components/FormDrawer";
+import { toast } from "sonner";
 
 import { StatsCardGrid } from "@/components/dashboard/StatsCardGrid";
 import { FormCardGrid } from "@/components/dashboard/FormCardGrid";
 import { CreateFormModal } from "@/components/dashboard/CreateFormModal";
 import { AIFormModal } from "@/components/dashboard/AIFormModal";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 
@@ -36,6 +40,15 @@ export default function DashboardPage() {
   const [selectedFormForDrawer, setSelectedFormForDrawer] = useState<any | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+
+  // Keyboard Shortcuts
+  useGlobalShortcut("new-form", "n", "Create New Form", () => {
+    setIsCreateModalOpen(true);
+  }, "Global Actions");
+  
+  useGlobalShortcut("ai-form", "g", "Generate AI Form", () => {
+    setIsAIModalOpen(true);
+  }, "Global Actions");
 
   // Handle template import from query parameter on load
   useEffect(() => {
@@ -65,7 +78,7 @@ export default function DashboardPage() {
 
       router.push(`/dashboard/builder/${newForm.id}`);
     } catch (e: any) {
-      alert(e.message || "Failed to import template");
+      toast.error(e.message || "Failed to import template");
     }
   };
 
@@ -99,8 +112,6 @@ export default function DashboardPage() {
   };
 
   const handleDeleteForm = async (id: string) => {
-    if (!confirm(t("cardConfirmDelete"))) return;
-    
     try {
       await deleteFormMutation.mutateAsync({ id });
       utils.forms.list.invalidate();
@@ -108,8 +119,9 @@ export default function DashboardPage() {
       if (selectedFormForDrawer?.id === id) {
         setSelectedFormForDrawer(null);
       }
+      toast.success("Form deleted successfully");
     } catch (e: any) {
-      alert(e.message || "Failed to delete form");
+      toast.error(e.message || "Failed to delete form");
     }
   };
 
@@ -118,26 +130,32 @@ export default function DashboardPage() {
       {/* Main dashboard content (Left side) */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Page Header (Pinned & Harmonized) */}
-        <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 sm:px-8 shrink-0 transition-colors duration-200">
-          <div>
-            <h1 className="font-outfit text-xl font-bold text-foreground">{t("navDashboard")}</h1>
-          </div>
-          <div className="flex gap-2">
-            <Button
-              onClick={() => setIsAIModalOpen(true)}
-              className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
-            >
-              <Sparkles className="h-4 w-4" /> {t("generateAi")}
-            </Button>
-            <Button
-              onClick={() => setIsCreateModalOpen(true)}
-              variant="outline"
-              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
-            >
-              <Plus className="h-4 w-4" /> {t("newForm")}
-            </Button>
-          </div>
-        </header>
+        <DashboardHeader title={t("navDashboard")}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => setIsAIModalOpen(true)}
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
+              >
+                <Sparkles className="h-4 w-4" /> {t("generateAi")}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Generate AI Form [G]</TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={() => setIsCreateModalOpen(true)}
+                variant="outline"
+                className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
+              >
+                <Plus className="h-4 w-4" /> {t("newForm")}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Create New Form [N]</TooltipContent>
+          </Tooltip>
+        </DashboardHeader>
 
         {/* Scrollable Body area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">

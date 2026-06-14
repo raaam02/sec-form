@@ -2,12 +2,15 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { trpc } from "../../../utils/trpc";
 import { FORM_TEMPLATES, BUILTIN_THEMES } from "@sec-form/shared";
-import { FileText, Copy, Compass, AlertCircle } from "lucide-react";
+import { Copy, Compass, AlertCircle } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 
 export default function DashboardExplorePage() {
+  const t = useTranslations("Dashboard");
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -61,13 +64,7 @@ export default function DashboardExplorePage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden w-full bg-transparent text-foreground">
-      {/* Page Header (Pinned & Harmonized) */}
-      <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 sm:px-8 shrink-0 transition-colors duration-200">
-        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-          <Compass className="h-5 w-5" />
-          <h1 className="font-outfit text-xl font-bold text-foreground">Template Gallery</h1>
-        </div>
-      </header>
+      <DashboardHeader title={t("navExplore")} />
 
       {errorMessage && (
         <div className="mx-6 sm:mx-8 mt-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs p-3.5 flex items-center gap-2 shrink-0">

@@ -5,6 +5,7 @@ export interface TabItem<T> {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   iconColorClass?: string;
+  shortcut?: string;
 }
 
 interface TabBarProps<T> {
@@ -13,6 +14,8 @@ interface TabBarProps<T> {
   onChange: (value: T) => void;
   fullWidth?: boolean;
 }
+
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function TabBar<T extends string>({
   items,
@@ -23,14 +26,14 @@ export function TabBar<T extends string>({
   return (
     <div className="bg-card border-b border-border p-3 shrink-0 flex justify-center items-center">
       <div
-        className={`flex bg-muted p-1 rounded-xl text-xs font-bold text-muted-foreground max-w-full overflow-x-auto no-scrollbar gap-1 border border-border ${
+        className={`flex bg-muted p-1 rounded-2xl text-xs font-bold text-muted-foreground max-w-full overflow-x-auto no-scrollbar gap-1 border border-border ${
           fullWidth ? "w-full" : ""
         }`}
       >
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = selectedValue === item.value;
-          return (
+          const button = (
             <button
               key={item.value}
               type="button"
@@ -47,6 +50,21 @@ export function TabBar<T extends string>({
               <span>{item.label}</span>
             </button>
           );
+
+          if (item.shortcut) {
+            return (
+              <Tooltip key={item.value}>
+                <TooltipTrigger asChild>
+                  {button}
+                </TooltipTrigger>
+                <TooltipContent>
+                  {item.label} <kbd className="ml-1 text-[10px] font-mono opacity-80 uppercase">[{item.shortcut}]</kbd>
+                </TooltipContent>
+              </Tooltip>
+            );
+          }
+
+          return button;
         })}
       </div>
     </div>
