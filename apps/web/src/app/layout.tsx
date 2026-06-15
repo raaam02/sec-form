@@ -5,6 +5,8 @@ import Providers from "../components/Providers";
 import { getLocale, getMessages } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
 import { Toaster } from "@/components/ui/sonner";
+import { Suspense } from "react";
+import { NavigationProgress } from "@/components/NavigationProgress";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -29,7 +31,12 @@ export default async function RootLayout({
       <head />
       <body className="antialiased font-sans h-full bg-background text-foreground transition-colors duration-200">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>{children}</Providers>
+          <Providers>
+            <Suspense fallback={null}>
+              <NavigationProgress />
+            </Suspense>
+            {children}
+          </Providers>
           <Toaster position="top-center" richColors />
         </NextIntlClientProvider>
       </body>

@@ -27,36 +27,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push(`/dashboard/builder/${form.id}`);
   };
 
+  // Redirect only when explicitly unauthenticated — never block render on "loading"
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login?redirect=/dashboard");
     }
   }, [status, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background transition-colors duration-200">
-        <div className="flex flex-col items-center gap-3">
-          <LoadingSpinner className="w-10 h-10" color="text-primary" />
-          <span className="text-sm text-muted-foreground font-medium">Checking credentials...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return null;
-  }
+  // Optimistic shell: render the layout immediately.
+  // While auth is loading we show a placeholder sidebar + spinner in content.
+  const isAuthChecking = status === "loading";
+  const user = session?.user ?? {};
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-background text-foreground flex flex-col md:flex-row transition-all duration-300">
-      
+
       {/* SIDEBAR NAVIGATION (Desktop) */}
       <DashboardSidebar
         pathname={pathname}
         setIsCreateModalOpen={setIsCreateModalOpen}
         setIsChangePasswordModalOpen={setIsChangePasswordModalOpen}
-        user={session.user || {}}
+        user={user}
         onSignOut={() => signOut({ callbackUrl: "/" })}
       />
 
@@ -67,13 +58,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           pathname={pathname}
           setIsCreateModalOpen={setIsCreateModalOpen}
           setIsChangePasswordModalOpen={setIsChangePasswordModalOpen}
-          user={session.user || {}}
+          user={user}
           onSignOut={() => signOut({ callbackUrl: "/" })}
         />
 
-        {/* Main content container (no global scroll) */}
+        {/* Main content container */}
         <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-transparent">
-          {children}
+          {isAuthChecking ? (
+            <div className="h-full w-full flex items-center justify-center">
+              <div className="flex flex-col items-center gap-3">
+                <LoadingSpinner className="w-8 h-8" color="text-primary" />
+                <span className="text-sm text-muted-foreground font-medium animate-pulse">Loading…</span>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
 
@@ -85,12 +85,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       />
 
       {/* MODAL: CHANGE PASSWORD */}
-      <ChangePasswordModal
-        isOpen={isChangePasswordModalOpen}
-        setIsOpen={setIsChangePasswordModalOpen}
-        userEmail={session.user.email || ""}
-      />
+      {session && (
+        <ChangePasswordModal
+          isOpen={isChangePasswordModalOpen}
+          setIsOpen={setIsChangePasswordModalOpen}
+          userEmail={session.user.email || ""}
+        />
+      )}
     </div>
   );
 }
-
