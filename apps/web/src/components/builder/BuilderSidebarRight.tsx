@@ -83,7 +83,7 @@ export function BuilderSidebarRight({
   }, [layoutMode, fields.length]);
 
   return (
-    <aside className="relative w-full h-full border-l border-border bg-card overflow-hidden flex flex-col">
+    <aside className="relative w-full h-full border-l border-border bg-sidebar overflow-hidden flex flex-col">
       {/* Tabs header */}
       <TabBar
         items={RIGHT_TABS}

@@ -51,7 +51,7 @@ export function BuilderHeader({
   };
 
   return (
-    <header className="h-16 border-b border-border bg-card px-6 shrink-0 flex items-center justify-between gap-4 transition-colors duration-200">
+    <header className="h-16 border-b border-border bg-sidebar px-6 shrink-0 flex items-center justify-between gap-4 transition-colors duration-200">
       <div className="flex items-center gap-3 min-w-0">
         <Link href="/dashboard" passHref>
           <Button 

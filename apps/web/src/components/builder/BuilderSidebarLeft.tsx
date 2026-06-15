@@ -85,7 +85,7 @@ export function BuilderSidebarLeft({
   useGlobalShortcut("add-field-stepbreak", "b", "Add Step Break", () => handleAddField("step_break"), "Builder Fields");
 
   return (
-    <aside className="@container relative w-full h-full border-r border-border bg-card overflow-hidden flex flex-col">
+    <aside className="@container relative w-full h-full border-r border-border bg-sidebar overflow-hidden flex flex-col">
       {/* Tabs header */}
       <TabBar
         items={LEFT_TABS}

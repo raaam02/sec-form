@@ -79,11 +79,11 @@ export function DashboardSidebar({
   }
 
   return (
-    <aside className="hidden md:flex md:w-20 bg-card border-r border-border flex-col justify-between shrink-0 transition-all duration-200">
+    <aside className="hidden md:flex md:w-20 bg-sidebar border-r border-border flex-col justify-between shrink-0 transition-all duration-200">
       <div className="flex flex-col h-full justify-between">
         <div>
           {/* Brand header - same height as fixed headers (h-16) */}
-          <div className="h-16 border-b border-border flex items-center justify-center shrink-0 bg-card">
+          <div className="h-16 border-b border-border flex items-center justify-center shrink-0 bg-sidebar">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-600 shrink-0 shadow-sm">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
