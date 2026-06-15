@@ -106,11 +106,28 @@ export function buildSubmissionValidator(fields: FormField[]) {
     switch (field.type) {
       case "text":
       case "textarea":
+      case "phone":
         fieldSchema = z.string();
         if (field.required) {
           fieldSchema = (fieldSchema as z.ZodString).min(1, `${field.label} is required`);
         } else {
           fieldSchema = fieldSchema.optional().or(z.literal(""));
+        }
+        if (field.validation?.pattern) {
+          try {
+            const regex = new RegExp(field.validation.pattern);
+            const errMsg = field.validation.errorMessage || `${field.label} format is invalid`;
+            if (field.required) {
+              fieldSchema = (fieldSchema as z.ZodString).regex(regex, errMsg);
+            } else {
+              fieldSchema = z.string().optional().or(z.literal("")).refine(
+                (val) => !val || regex.test(val),
+                { message: errMsg }
+              );
+            }
+          } catch (e) {
+            // Ignore syntax errors in custom regex
+          }
         }
         break;
 
@@ -123,15 +140,6 @@ export function buildSubmissionValidator(fields: FormField[]) {
             z.literal(""),
             z.string().email("Invalid email format").optional()
           ]);
-        }
-        break;
-        
-      case "phone":
-        fieldSchema = z.string();
-        if (field.required) {
-          fieldSchema = (fieldSchema as z.ZodString).min(1, `${field.label} is required`);
-        } else {
-          fieldSchema = fieldSchema.optional().or(z.literal(""));
         }
         break;
 

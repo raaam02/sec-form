@@ -83,7 +83,7 @@ export function BuilderSidebarRight({
   }, [layoutMode, fields.length]);
 
   return (
-    <aside className="w-full h-full border-l border-border bg-card overflow-hidden flex flex-col">
+    <aside className="relative w-full h-full border-l border-border bg-card overflow-hidden flex flex-col">
       {/* Tabs header */}
       <TabBar
         items={RIGHT_TABS}
@@ -93,7 +93,7 @@ export function BuilderSidebarRight({
       />
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6 bg-muted/10">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 pt-16 space-y-6 bg-muted/10">
         {rightTab === "preview" && (
           <div className="flex flex-col items-stretch">
             {/* Native preview container (No smartphone frame) */}

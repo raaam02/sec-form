@@ -65,7 +65,7 @@ export default function BuilderPage() {
   // Settings state
   const [slug, setSlug] = useState("");
   const [visibility, setVisibility] = useState<"draft" | "public" | "unlisted">("draft");
-  const [layoutMode, setLayoutMode] = useState<"standard" | "single_field" | "custom_steps">("standard");
+  const [layoutMode, setLayoutMode] = useState<"standard" | "single_field" | "custom_steps">("single_field");
   
   // Share state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -178,7 +178,7 @@ export default function BuilderPage() {
       setActiveTheme(loadedTheme);
       setSlug(form.slug);
       setVisibility(form.visibility as any);
-      setLayoutMode((form.schemaJson as any).layout?.mode || "standard");
+      setLayoutMode((form.schemaJson as any).layout?.mode || "single_field");
 
       setFormHistory((prev) => {
         if (prev.states.length === 0) {
@@ -424,7 +424,7 @@ export default function BuilderPage() {
       <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden min-h-0 bg-muted/20">
         
         {/* PANEL A: LEFT SIDEBAR (Builder / Themes) */}
-        <ResizablePanel defaultSize="20" minSize="12" maxSize="20" className="flex flex-col">
+        <ResizablePanel defaultSize="10" minSize="12" maxSize="20" className="flex flex-col">
           <BuilderSidebarLeft
             leftTab={leftTab}
             setLeftTab={setLeftTab}
@@ -442,7 +442,7 @@ export default function BuilderPage() {
         <ResizableHandle />
 
         {/* PANEL B: MIDDLE CANVAS (Form Editor / Responses / Analytics / Settings) */}
-        <ResizablePanel defaultSize="50" minSize="30" className="flex flex-col">
+        <ResizablePanel defaultSize="65" minSize="40" className="flex flex-col">
           <BuilderCanvas
             middleTab={middleTab}
             setMiddleTab={setMiddleTab}
@@ -487,7 +487,7 @@ export default function BuilderPage() {
         <ResizableHandle />
 
         {/* PANEL C: RIGHT SIDEBAR (Preview / Embed) */}
-        <ResizablePanel defaultSize="25" minSize="25" maxSize="40" className="flex flex-col">
+        <ResizablePanel defaultSize="25" minSize="25" maxSize="30" className="flex flex-col">
           <BuilderSidebarRight
             rightTab={rightTab}
             setRightTab={setRightTab}

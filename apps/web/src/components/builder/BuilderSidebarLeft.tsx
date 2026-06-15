@@ -85,7 +85,7 @@ export function BuilderSidebarLeft({
   useGlobalShortcut("add-field-stepbreak", "b", "Add Step Break", () => handleAddField("step_break"), "Builder Fields");
 
   return (
-    <aside className="w-full h-full border-r border-border bg-card overflow-hidden flex flex-col">
+    <aside className="@container relative w-full h-full border-r border-border bg-card overflow-hidden flex flex-col">
       {/* Tabs header */}
       <TabBar
         items={LEFT_TABS}
@@ -95,13 +95,13 @@ export function BuilderSidebarLeft({
       />
 
       {/* Scrollable Container Content */}
-      <div className="@container flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 pt-16 space-y-6">
         {leftTab === "builder" && (
           <>
             {/* Field adder */}
             <div className="space-y-3">
               <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("sidebarAddFields")}</h3>
-              <div className="grid grid-cols-1 @[180px]:grid-cols-2 gap-2 text-[11px] font-bold text-muted-foreground">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2 text-[11px] font-bold text-muted-foreground">
                 {FIELD_TYPES.map((field) => {
                   const Icon = field.icon;
                   return (
@@ -110,12 +110,12 @@ export function BuilderSidebarLeft({
                         <button
                           type="button"
                           onClick={() => handleAddField(field.type)}
-                          className={`flex items-center gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors ${
-                            field.colSpan2 ? "col-span-2 justify-center" : ""
+                          className={`flex items-center gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors min-w-0 ${
+                            field.colSpan2 ? "col-span-full justify-center" : ""
                           }`}
                         >
                           <Icon className={`h-4 w-4 ${field.iconColor} shrink-0`} />
-                          <span>{field.label}</span>
+                          <span className="truncate min-w-0">{field.label}</span>
                         </button>
                       </TooltipTrigger>
                       <TooltipContent side="top" sideOffset={14}>

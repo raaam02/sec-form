@@ -13,6 +13,8 @@ interface TabBarProps<T> {
   selectedValue: T;
   onChange: (value: T) => void;
   fullWidth?: boolean;
+  leftElement?: React.ReactNode;
+  rightElement?: React.ReactNode;
 }
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -22,14 +24,23 @@ export function TabBar<T extends string>({
   selectedValue,
   onChange,
   fullWidth = false,
+  leftElement,
+  rightElement,
 }: TabBarProps<T>) {
   return (
-    <div className="@container bg-card border-b border-border p-3 shrink-0 flex justify-center items-center">
-      <div
-        className={`flex bg-muted p-1 rounded-2xl text-xs font-bold text-muted-foreground max-w-full overflow-x-auto no-scrollbar gap-1 border border-border ${
-          fullWidth ? "w-full" : ""
-        }`}
-      >
+    <div className="@container bg-transparent p-3 shrink-0 flex items-center justify-between absolute top-0 left-0 right-0 z-30 pointer-events-none">
+      {/* Left Column */}
+      <div className="flex-1 flex items-center justify-start min-w-0 pointer-events-auto">
+        {leftElement}
+      </div>
+
+      {/* Middle Column */}
+      <div className="flex-initial flex items-center justify-center min-w-0 mx-2 pointer-events-auto">
+        <div
+          className={`flex p-1 rounded-2xl text-xs bg-secondary/50 backdrop-blur-sm font-bold text-muted-foreground max-w-full overflow-x-auto no-scrollbar gap-1 ${
+            fullWidth ? "w-full" : ""
+          }`}
+        >
         {items.map((item) => {
           const Icon = item.icon;
           const isActive = selectedValue === item.value;
@@ -66,6 +77,12 @@ export function TabBar<T extends string>({
 
           return button;
         })}
+      </div>
+      </div>
+
+      {/* Right Column */}
+      <div className="flex-1 flex items-center justify-end min-w-0 pointer-events-auto">
+        {rightElement}
       </div>
     </div>
   );

@@ -214,6 +214,7 @@
     "propAllowedTypes": "Allowed File Types",
     "canvasEmptyTitle": "Empty Form Canvas",
     "canvasEmptyDesc": "Drag fields from the left sidebar or select from templates to populate fields.",
+    "previewEmptyDesc": "Your form preview will appear here when you add fields.",
     "canvasTitlePlaceholder": "click to edit form title...",
     "canvasDescPlaceholder": "click to edit form description...",
     "themePresets": "Preset Themes",
@@ -230,7 +231,8 @@
     "aiInsightsNoData": "Generate a few responses first to let Gemini analyze patterns.",
     "aiInsightsGenerate": "Generate AI Report",
     "aiInsightsLoading": "Analyzing responses with Gemini...",
-    "submissionsTrend": "Submissions Trend"
+    "submissionsTrend": "Submissions Trend",
+    "submitBtn": "Submit Form"
   },
   "PublicForm": {
     "submitSuccess": "Submission Successful!",
