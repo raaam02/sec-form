@@ -1,4 +1,7 @@
+"use client";
+
 import React from "react";
+import { motion } from "motion/react";
 
 export interface TabItem<T> {
   value: T;
@@ -27,6 +30,9 @@ export function TabBar<T extends string>({
   leftElement,
   rightElement,
 }: TabBarProps<T>) {
+  const uniqueId = React.useId();
+  const activeLayoutId = `active-tab-bg-${uniqueId}`;
+
   return (
     <div className="@container bg-transparent p-3 shrink-0 flex items-center justify-between absolute top-0 left-0 right-0 z-30 pointer-events-none">
       {/* Left Column */}
@@ -49,16 +55,23 @@ export function TabBar<T extends string>({
               key={item.value}
               type="button"
               onClick={() => onChange(item.value)}
-              className={`px-3.5 py-1.5 rounded-lg flex items-center justify-center gap-1.5 transition-all shrink-0 ${
+              className={`px-3.5 py-1.5 rounded-lg flex items-center justify-center gap-1.5 relative transition-colors duration-200 shrink-0 ${
                 fullWidth ? "flex-1" : ""
               } ${
                 isActive
-                  ? "bg-background text-foreground shadow-sm"
+                  ? "text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon className={`h-3.5 w-3.5 ${item.iconColorClass || "text-indigo-500"} shrink-0`} />
-              <span className="hidden @[250px]:inline whitespace-nowrap">{item.label}</span>
+              {isActive && (
+                <motion.span
+                  layoutId={activeLayoutId}
+                  className="absolute inset-0 bg-background shadow-sm rounded-lg -z-10"
+                  transition={{ type: "tween", ease: "linear", duration: 0.16 }}
+                />
+              )}
+              <Icon className={`h-3.5 w-3.5 ${item.iconColorClass || "text-indigo-500"} shrink-0 z-10`} />
+              <span className="hidden @[250px]:inline whitespace-nowrap z-10">{item.label}</span>
             </button>
           );
 

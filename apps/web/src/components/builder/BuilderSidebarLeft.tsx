@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "motion/react";
 import { 
   Plus, 
   Palette, 
@@ -107,8 +108,10 @@ export function BuilderSidebarLeft({
                   return (
                     <Tooltip key={field.type} delayDuration={0}>
                       <TooltipTrigger asChild>
-                        <button
+                        <motion.button
                           type="button"
+                          whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                          whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                           onClick={() => handleAddField(field.type)}
                           className={`flex items-center gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors min-w-0 ${
                             field.colSpan2 ? "col-span-full justify-center" : ""
@@ -116,7 +119,7 @@ export function BuilderSidebarLeft({
                         >
                           <Icon className={`h-4 w-4 ${field.iconColor} shrink-0`} />
                           <span className="truncate min-w-0">{field.label}</span>
-                        </button>
+                        </motion.button>
                       </TooltipTrigger>
                       <TooltipContent side="top" sideOffset={14}>
                         Add {field.label} [{field.shortcut.toUpperCase()}]
@@ -138,16 +141,21 @@ export function BuilderSidebarLeft({
               <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("themePresets")}</h3>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-3">
                 {BUILTIN_THEMES.map((theme) => (
-                  <ThemePresetCard
+                  <motion.div
                     key={theme.id}
-                    theme={theme}
-                    isActive={activeTheme?.id === theme.id}
-                    onClick={() => {
-                      setActiveTheme(theme);
-                      saveForm(fields, theme);
-                      if (pushToHistory) pushToHistory(fields, theme);
-                    }}
-                  />
+                    whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                    whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                  >
+                    <ThemePresetCard
+                      theme={theme}
+                      isActive={activeTheme?.id === theme.id}
+                      onClick={() => {
+                        setActiveTheme(theme);
+                        saveForm(fields, theme);
+                        if (pushToHistory) pushToHistory(fields, theme);
+                      }}
+                    />
+                  </motion.div>
                 ))}
               </div>
             </div>
@@ -164,14 +172,16 @@ export function BuilderSidebarLeft({
                       "#ffffff", "#f8fafc", "#f1f5f9", "#fdf4ff", "#eff6ff", "#f0fdf4", // Light
                       "#020617", "#0f172a", "#1e1e24", "#18181b", "#171717", "#09090b"  // Dark
                     ].map((color) => (
-                      <button
+                      <motion.button
                         key={color}
+                        whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
+                        whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                         onClick={() => {
                           const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", backgroundColor: color } as ThemeConfig;
                           setActiveTheme(newTheme);
                           saveForm(fields, newTheme);
                         }}
-                        className={`h-8 w-8 shrink-0 rounded-md border-2 transition-all ${activeTheme?.backgroundColor === color ? "border-primary scale-105" : "border-border hover:scale-105"}`}
+                        className={`h-8 w-8 shrink-0 rounded-md border-2 transition-colors duration-200 ${activeTheme?.backgroundColor === color ? "border-primary scale-105" : "border-border"}`}
                         style={{ backgroundColor: color }}
                         title={color}
                       />
@@ -190,8 +200,10 @@ export function BuilderSidebarLeft({
                       { label: "lg", value: "16px" },
                       { label: "full", value: "9999px" },
                     ].map((radius) => (
-                      <button
+                      <motion.button
                         key={radius.value}
+                        whileHover={{ scale: 1.02, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
+                        whileTap={{ scale: 0.98, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                         onClick={() => {
                           const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", borderRadius: radius.value } as ThemeConfig;
                           setActiveTheme(newTheme);
@@ -204,7 +216,7 @@ export function BuilderSidebarLeft({
                         }`}
                       >
                         {radius.label}
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>

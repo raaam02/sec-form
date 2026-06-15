@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
+import { motion } from "motion/react";
 import {
   Sparkles, FileText, BarChart3, Shield, Palette, Code,
   ArrowRight, Zap, CheckCircle2, MousePointer2, Globe2, GitBranch, Lock
@@ -11,6 +12,30 @@ import {
 import { ThemeToggle } from "../components/ThemeToggle";
 import { LocaleSwitcher } from "../components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.05,
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "tween" as const,
+      ease: "linear" as const,
+      duration: 0.22,
+    }
+  }
+};
 
 export default function LandingPage() {
   const { data: session } = useSession();
@@ -58,7 +83,12 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-200 overflow-x-hidden">
 
       {/* ─── FLOATING HEADER ─── */}
-      <header className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6">
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.2 }}
+        className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6"
+      >
         <div className="mx-auto max-w-6xl w-full rounded-2xl border border-border/70 bg-card/80 backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-black/30">
           <div className="flex h-14 items-center justify-between px-4 sm:px-5">
             {/* Logo */}
@@ -93,19 +123,22 @@ export default function LandingPage() {
                   <Link href="/login" className="inline-flex h-8 items-center justify-center rounded-lg px-3 text-[13px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors">
                     {t("login")}
                   </Link>
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.12 }}
                     onClick={handleDemoLogin}
                     disabled={isLoggingIn}
                     className="inline-flex h-8 items-center justify-center rounded-lg bg-violet-600 px-4 text-[13px] font-semibold text-white hover:bg-violet-500 transition-colors disabled:opacity-60"
                   >
                     {isLoggingIn ? t("loggingIn") : t("tryDemo")}
-                  </button>
+                  </motion.button>
                 </>
               )}
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* ─── HERO ─── */}
       <main className="flex-1 pt-24">
@@ -128,54 +161,88 @@ export default function LandingPage() {
           </div>
 
           <div className="container mx-auto px-4 sm:px-6 py-20">
-            <div className="max-w-5xl mx-auto">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="max-w-5xl mx-auto"
+            >
 
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 rounded-full border border-violet-300/40 dark:border-violet-600/30 bg-violet-50 dark:bg-violet-950/30 px-3.5 py-1.5 text-[11px] font-bold text-violet-700 dark:text-violet-300 tracking-wider uppercase mb-8">
+              <motion.div
+                variants={itemVariants}
+                className="inline-flex items-center gap-2 rounded-full border border-violet-300/40 dark:border-violet-600/30 bg-violet-50 dark:bg-violet-950/30 px-3.5 py-1.5 text-[11px] font-bold text-violet-700 dark:text-violet-300 tracking-wider uppercase mb-8"
+              >
                 <Zap className="h-3 w-3" />
                 {t("badgeText")}
-              </div>
+              </motion.div>
 
               {/* Main headline — split layout */}
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 <div>
-                  <h1 className="font-outfit text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.07]">
+                  <motion.h1
+                    variants={itemVariants}
+                    className="font-outfit text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.07]"
+                  >
                     {t("heroTitle")}
-                  </h1>
-                  <p className="mt-6 text-[17px] text-muted-foreground leading-relaxed max-w-lg">
+                  </motion.h1>
+                  <motion.p
+                    variants={itemVariants}
+                    className="mt-6 text-[17px] text-muted-foreground leading-relaxed max-w-lg"
+                  >
                     {t("heroDescription")}
-                  </p>
+                  </motion.p>
 
-                  <div className="mt-10 flex flex-wrap gap-3">
-                    <button
+                  <motion.div
+                    variants={itemVariants}
+                    className="mt-10 flex flex-wrap gap-3"
+                  >
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.12 }}
                       onClick={handleDemoLogin}
                       disabled={isLoggingIn}
                       className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-6 text-[14px] font-bold text-white shadow-lg shadow-violet-400/25 dark:shadow-violet-800/30 hover:opacity-90 transition-opacity disabled:opacity-60"
                     >
                       {isLoggingIn ? t("loggingIn") : t("ctaStart")}
                       <ArrowRight className="h-4 w-4" />
-                    </button>
-                    <Link
-                      href="/explore"
-                      className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-6 text-[14px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                    </motion.button>
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.12 }}
                     >
-                      {t("navExplore")}
-                    </Link>
-                  </div>
+                      <Link
+                        href="/explore"
+                        className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-6 text-[14px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors w-full h-full"
+                      >
+                        {t("navExplore")}
+                      </Link>
+                    </motion.div>
+                  </motion.div>
 
                   {/* Trust signals */}
-                  <div className="mt-8 flex flex-wrap gap-4">
+                  <motion.div
+                    variants={itemVariants}
+                    className="mt-8 flex flex-wrap gap-4"
+                  >
                     {["No credit card", "1-min setup", "Open source"].map((item) => (
                       <span key={item} className="flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                         {item}
                       </span>
                     ))}
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Right side — Dashboard preview card */}
-                <div className="relative hidden lg:block">
+                <motion.div
+                  variants={itemVariants}
+                  whileHover={{ y: -4 }}
+                  transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.2 }}
+                  className="relative hidden lg:block"
+                >
                   {/* Glow behind card */}
                   <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-400/20 to-indigo-400/20 dark:from-violet-600/10 dark:to-indigo-600/10 blur-2xl scale-95" />
 
@@ -236,23 +303,33 @@ export default function LandingPage() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* ─── STATS STRIP ─── */}
         <section className="border-y border-border bg-card/70">
           <div className="container mx-auto px-4 sm:px-6 py-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+            >
               {stats.map(({ value, label }) => (
-                <div key={label} className="text-center">
+                <motion.div
+                  variants={itemVariants}
+                  key={label}
+                  className="text-center"
+                >
                   <div className="font-outfit text-3xl font-extrabold text-foreground">{value}</div>
                   <div className="mt-1 text-[12px] font-medium text-muted-foreground uppercase tracking-wider">{label}</div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -261,7 +338,13 @@ export default function LandingPage() {
           <div className="container mx-auto px-4 sm:px-6">
 
             {/* Section label */}
-            <div className="max-w-2xl mx-auto text-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.22 }}
+              className="max-w-2xl mx-auto text-center mb-16"
+            >
               <div className="inline-flex items-center gap-1.5 rounded-full border border-indigo-300/30 dark:border-indigo-600/20 bg-indigo-50 dark:bg-indigo-950/20 px-3 py-1 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-4">
                 <GitBranch className="h-3 w-3" />
                 Features
@@ -272,26 +355,52 @@ export default function LandingPage() {
               <p className="mt-4 text-[16px] text-muted-foreground leading-relaxed">
                 {t("featuresSubtitle")}
               </p>
-            </div>
+            </motion.div>
 
-            <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-60px" }}
+              className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+            >
               {features.map(({ icon: Icon, color, bg, label, desc }) => (
-                <div
+                <motion.div
                   key={label}
-                  className="group relative flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover:border-border/80 hover:-translate-y-0.5 transition-all duration-200"
+                  whileHover="hover"
+                  whileTap="tap"
+                  variants={{
+                    hidden: { opacity: 0, y: 12 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { type: "tween" as const, ease: "linear" as const, duration: 0.22 }
+                    },
+                    hover: {
+                      y: -4,
+                      borderColor: "var(--border-hover, hsl(var(--border) / 0.8))",
+                      boxShadow: "0 10px 30px -10px rgba(0,0,0,0.08)",
+                      transition: { type: "tween" as const, ease: "linear" as const, duration: 0.15 }
+                    },
+                    tap: {
+                      scale: 0.98,
+                      transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 }
+                    }
+                  }}
+                  className="group relative flex flex-col gap-4 rounded-2xl border border-border bg-card p-6 shadow-sm cursor-pointer select-none overflow-hidden"
                 >
                   {/* Subtle gradient on hover */}
                   <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br from-transparent to-muted/30 pointer-events-none" />
-                  <div className={`h-10 w-10 rounded-xl ${bg} flex items-center justify-center shrink-0`}>
+                  <div className={`h-10 w-10 rounded-xl ${bg} flex items-center justify-center shrink-0 z-10`}>
                     <Icon className={`h-5 w-5 ${color}`} />
                   </div>
-                  <div>
+                  <div className="z-10">
                     <h3 className="font-outfit font-bold text-foreground text-[15px] mb-1.5">{label}</h3>
                     <p className="text-[13px] text-muted-foreground leading-relaxed">{desc}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
@@ -300,10 +409,20 @@ export default function LandingPage() {
           <div className="absolute inset-0 -z-10">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[400px] w-[600px] rounded-full bg-violet-400/10 dark:bg-violet-600/8 blur-[100px]" />
           </div>
-          <div className="container mx-auto px-4 text-center max-w-2xl">
-            <div className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-400/25 dark:shadow-violet-800/20 mb-6 mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.25 }}
+            className="container mx-auto px-4 text-center max-w-2xl"
+          >
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.12 }}
+              className="inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-gradient-to-br from-violet-500 to-indigo-600 shadow-lg shadow-violet-400/25 dark:shadow-violet-800/20 mb-6 mx-auto cursor-pointer"
+            >
               <Globe2 className="h-6 w-6 text-white" />
-            </div>
+            </motion.div>
             <h2 className="font-outfit text-3xl sm:text-4xl font-extrabold text-foreground tracking-tight">
               Ready to build your next form?
             </h2>
@@ -311,21 +430,30 @@ export default function LandingPage() {
               Start free. No credit card required. Ship in minutes.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.12 }}
                 onClick={handleDemoLogin}
                 disabled={isLoggingIn}
                 className="inline-flex h-11 items-center gap-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-7 text-[14px] font-bold text-white shadow-lg shadow-violet-400/25 dark:shadow-violet-800/25 hover:opacity-90 transition-opacity disabled:opacity-60"
               >
                 {isLoggingIn ? t("loggingIn") : "Try the Demo"} <ArrowRight className="h-4 w-4" />
-              </button>
-              <Link
-                href="/pricing"
-                className="inline-flex h-11 items-center rounded-xl border border-border bg-card px-7 text-[14px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+              </motion.button>
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.12 }}
               >
-                View Pricing
-              </Link>
+                <Link
+                  href="/pricing"
+                  className="inline-flex h-11 items-center rounded-xl border border-border bg-card px-7 text-[14px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors w-full h-full"
+                >
+                  View Pricing
+                </Link>
+              </motion.div>
             </div>
-          </div>
+          </motion.div>
         </section>
       </main>
 

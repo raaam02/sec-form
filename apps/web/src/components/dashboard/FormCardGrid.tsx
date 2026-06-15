@@ -7,8 +7,31 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
 import { ConfirmationPopover } from "@/components/ui/confirmation-popover";
-
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "motion/react";
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "tween" as const,
+      ease: "linear" as const,
+      duration: 0.2,
+    }
+  }
+};
 
 interface FormCard {
   id: string;
@@ -104,12 +127,24 @@ export function FormCardGrid({
 
   return (
     <TooltipProvider>
-      <div className={`grid gap-6 ${gridColsClass}`}>
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className={`grid gap-6 ${gridColsClass}`}
+      >
         {formsList.map((form) => (
-          <Card
+          <motion.div
             key={form.id}
+            variants={cardVariants}
+            whileHover={{
+              y: -3,
+              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
+              transition: { type: "tween" as const, ease: "linear" as const, duration: 0.15 }
+            }}
+            whileTap={{ scale: 0.99, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
             onClick={() => setSelectedFormForDrawer(form)}
-            className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md hover:border-border/80 transition-all flex flex-col justify-between relative group cursor-pointer text-card-foreground"
+            className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:border-border/80 transition-colors flex flex-col justify-between relative group cursor-pointer text-card-foreground"
           >
             <div>
               <div className="flex items-center justify-between">
@@ -117,23 +152,37 @@ export function FormCardGrid({
                   {form.visibility}
                 </span>
                 
-                {/* Delete Button with Confirmation Popover */}
                 <ConfirmationPopover
                   title={t("cardConfirmDelete")}
                   description="This will permanently delete the form."
                   confirmText="Delete"
                   onConfirm={() => handleDeleteForm(form.id)}
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
+                  <motion.div
+                    whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                    whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                    onPointerDown={(e) => {
+                      e.stopPropagation();
+                      if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                        e.nativeEvent.stopPropagation();
+                      }
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
+                      if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                        e.nativeEvent.stopPropagation();
+                      }
                     }}
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 flex items-center justify-center"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-full w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
                 </ConfirmationPopover>
               </div>
 
@@ -150,19 +199,33 @@ export function FormCardGrid({
                 {/* Edit Button with Tooltip */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
+                    <motion.div
+                      whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                      whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                          e.nativeEvent.stopPropagation();
+                        }
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                          e.nativeEvent.stopPropagation();
+                        }
                       }}
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      asChild
                     >
-                      <Link href={`/dashboard/builder/${form.id}`}>
-                        <Pencil className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        asChild
+                      >
+                        <Link href={`/dashboard/builder/${form.id}`}>
+                          <Pencil className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </motion.div>
                   </TooltipTrigger>
                   <TooltipContent>Edit Form</TooltipContent>
                 </Tooltip>
@@ -170,19 +233,33 @@ export function FormCardGrid({
                 {/* View Public Button with Tooltip */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
+                    <motion.div
+                      whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                      whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                          e.nativeEvent.stopPropagation();
+                        }
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                          e.nativeEvent.stopPropagation();
+                        }
                       }}
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      asChild
                     >
-                      <Link href={`/f/${form.slug}`} target="_blank">
-                        <Eye className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        asChild
+                      >
+                        <Link href={`/f/${form.slug}`} target="_blank">
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </motion.div>
                   </TooltipTrigger>
                   <TooltipContent>{t("cardPublicLink")}</TooltipContent>
                 </Tooltip>
@@ -190,27 +267,41 @@ export function FormCardGrid({
                 {/* View Analytics Button with Tooltip */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
+                    <motion.div
+                      whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                      whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                          e.nativeEvent.stopPropagation();
+                        }
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
+                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                          e.nativeEvent.stopPropagation();
+                        }
                       }}
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                      asChild
                     >
-                      <Link href={`/dashboard/builder/${form.id}?tab=analytics`}>
-                        <BarChart2 className="h-4 w-4" />
-                      </Link>
-                    </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        asChild
+                      >
+                        <Link href={`/dashboard/builder/${form.id}?tab=analytics`}>
+                          <BarChart2 className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </motion.div>
                   </TooltipTrigger>
                   <TooltipContent>{t("cardAnalytics")}</TooltipContent>
                 </Tooltip>
               </div>
             </div>
-          </Card>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </TooltipProvider>
   );
 }

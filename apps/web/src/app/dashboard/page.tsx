@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion } from "motion/react";
 import { trpc } from "../../utils/trpc";
 import { FORM_TEMPLATES, BUILTIN_THEMES } from "@sec-form/shared";
 import { Sparkles, Plus } from "lucide-react";
@@ -133,25 +134,37 @@ export default function DashboardPage() {
         <DashboardHeader title={t("navDashboard")}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                onClick={() => setIsAIModalOpen(true)}
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
+              <motion.div
+                whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
+                whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                className="inline-block"
               >
-                <Sparkles className="h-4 w-4" /> {t("generateAi")}
-              </Button>
+                <Button
+                  onClick={() => setIsAIModalOpen(true)}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
+                >
+                  <Sparkles className="h-4 w-4" /> {t("generateAi")}
+                </Button>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>Generate AI Form [G]</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button
-                onClick={() => setIsCreateModalOpen(true)}
-                variant="outline"
-                className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
+              <motion.div
+                whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
+                whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                className="inline-block"
               >
-                <Plus className="h-4 w-4" /> {t("newForm")}
-              </Button>
+                <Button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  variant="outline"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
+                >
+                  <Plus className="h-4 w-4" /> {t("newForm")}
+                </Button>
+              </motion.div>
             </TooltipTrigger>
             <TooltipContent>Create New Form [N]</TooltipContent>
           </Tooltip>
