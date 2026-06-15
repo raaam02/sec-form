@@ -176,10 +176,21 @@ export default function ExplorePage() {
                           <div className="h-10 w-full rounded border border-border bg-card px-2 py-1 text-[9px] text-muted-foreground flex items-start truncate select-none pointer-events-none">
                             {f.placeholder || "Enter details..."}
                           </div>
-                        ) : f.type === "select" || f.type === "multiselect" ? (
+                        ) : f.type === "select" ? (
                           <div className="h-7 w-full rounded border border-border bg-card px-2 text-[9px] text-muted-foreground flex items-center justify-between select-none pointer-events-none">
                             <span className="truncate">Select option...</span>
                             <span className="text-[8px] text-muted-foreground shrink-0">▼</span>
+                          </div>
+                        ) : f.type === "multiselect" ? (
+                          <div className="space-y-1 mt-1 select-none pointer-events-none">
+                            <div className="flex items-center gap-2 py-0.5">
+                              <div className="h-3 w-3 rounded border border-border bg-card shrink-0" />
+                              <span className="text-[9px] text-muted-foreground truncate">Option 1</span>
+                            </div>
+                            <div className="flex items-center gap-2 py-0.5">
+                              <div className="h-3 w-3 rounded border border-border bg-card shrink-0" />
+                              <span className="text-[9px] text-muted-foreground truncate">Option 2</span>
+                            </div>
                           </div>
                         ) : f.type === "checkbox" ? (
                           <div className="flex items-center gap-2 py-0.5 select-none pointer-events-none">

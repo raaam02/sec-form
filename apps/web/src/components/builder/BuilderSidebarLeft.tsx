@@ -10,7 +10,8 @@ import {
   CheckSquare, 
   Star, 
   Calendar,
-  Clock
+  Clock,
+  Phone
 } from "lucide-react";
 import { BUILTIN_THEMES, ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
@@ -58,19 +59,22 @@ export function BuilderSidebarLeft({
     { type: "text", label: t("sidebarFieldText"), icon: Type, iconColor: "text-indigo-500", colSpan2: false, shortcut: "t" },
     { type: "textarea", label: t("sidebarFieldTextarea"), icon: AlignLeft, iconColor: "text-blue-500", colSpan2: false, shortcut: "a" },
     { type: "email", label: t("sidebarFieldEmail"), icon: Mail, iconColor: "text-emerald-500", colSpan2: false, shortcut: "e" },
+    { type: "phone", label: "Phone Number", icon: Phone, iconColor: "text-rose-500", colSpan2: false, shortcut: "p" },
     { type: "number", label: t("sidebarFieldNumber"), icon: Hash, iconColor: "text-amber-500", colSpan2: false, shortcut: "n" },
     { type: "select", label: t("sidebarFieldSelect"), icon: List, iconColor: "text-orange-500", colSpan2: false, shortcut: "s" },
     { type: "multiselect", label: "Multi Select", icon: CheckSquare, iconColor: "text-teal-500", colSpan2: false, shortcut: "m" },
     { type: "checkbox", label: t("sidebarFieldCheckbox"), icon: CheckSquare, iconColor: "text-purple-500", colSpan2: false, shortcut: "c" },
     { type: "rating", label: "Rating", icon: Star, iconColor: "text-yellow-500", colSpan2: false, shortcut: "r" },
     { type: "date", label: "Date", icon: Calendar, iconColor: "text-pink-500", colSpan2: false, shortcut: "d" },
-    { type: "time", label: "Time", icon: Clock, iconColor: "text-rose-500", colSpan2: false, shortcut: "i" }
+    { type: "time", label: "Time", icon: Clock, iconColor: "text-rose-500", colSpan2: false, shortcut: "i" },
+    { type: "step_break", label: "Step Break", icon: AlignLeft, iconColor: "text-slate-500", colSpan2: true, shortcut: "b" }
   ] as const;
 
   // Register shortcuts
   useGlobalShortcut("add-field-text", "t", "Add Text Field", () => handleAddField("text"), "Builder Fields");
   useGlobalShortcut("add-field-textarea", "a", "Add Textarea Field", () => handleAddField("textarea"), "Builder Fields");
   useGlobalShortcut("add-field-email", "e", "Add Email Field", () => handleAddField("email"), "Builder Fields");
+  useGlobalShortcut("add-field-phone", "p", "Add Phone Field", () => handleAddField("phone"), "Builder Fields");
   useGlobalShortcut("add-field-number", "n", "Add Number Field", () => handleAddField("number"), "Builder Fields");
   useGlobalShortcut("add-field-select", "s", "Add Select Field", () => handleAddField("select"), "Builder Fields");
   useGlobalShortcut("add-field-multiselect", "m", "Add Multi Select Field", () => handleAddField("multiselect"), "Builder Fields");
@@ -78,6 +82,7 @@ export function BuilderSidebarLeft({
   useGlobalShortcut("add-field-rating", "r", "Add Rating Field", () => handleAddField("rating"), "Builder Fields");
   useGlobalShortcut("add-field-date", "d", "Add Date Field", () => handleAddField("date"), "Builder Fields");
   useGlobalShortcut("add-field-time", "i", "Add Time Field", () => handleAddField("time"), "Builder Fields");
+  useGlobalShortcut("add-field-stepbreak", "b", "Add Step Break", () => handleAddField("step_break"), "Builder Fields");
 
   return (
     <aside className="w-full h-full border-r border-border bg-card overflow-hidden flex flex-col">
@@ -90,13 +95,13 @@ export function BuilderSidebarLeft({
       />
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
+      <div className="@container flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
         {leftTab === "builder" && (
           <>
             {/* Field adder */}
             <div className="space-y-3">
               <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("sidebarAddFields")}</h3>
-              <div className="grid grid-cols-2 gap-2 text-[11px] font-bold text-muted-foreground">
+              <div className="grid grid-cols-1 @[180px]:grid-cols-2 gap-2 text-[11px] font-bold text-muted-foreground">
                 {FIELD_TYPES.map((field) => {
                   const Icon = field.icon;
                   return (
@@ -122,77 +127,7 @@ export function BuilderSidebarLeft({
               </div>
             </div>
 
-            {/* Properties editor */}
-            <div className="border-t border-border pt-4">
-              {focusedField ? (
-                <div className="space-y-4">
-                  <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("sidebarSettings")}</h3>
-                  
-                  <div className="space-y-3.5 text-xs font-semibold text-muted-foreground">
-                    <div>
-                      <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">{t("propLabel")}</label>
-                      <Input
-                        type="text"
-                        value={focusedField.label}
-                        onChange={(e) => handleUpdateField(focusedField.id, { label: e.target.value })}
-                        className="h-9 w-full px-3 rounded-lg border border-border bg-background font-medium text-foreground focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">{t("propHelp")}</label>
-                      <Input
-                        type="text"
-                        value={focusedField.description || ""}
-                        onChange={(e) => handleUpdateField(focusedField.id, { description: e.target.value })}
-                        className="h-9 w-full px-3 rounded-lg border border-border bg-background font-medium text-foreground focus:outline-none"
-                      />
-                    </div>
-
-                    {["text", "textarea", "email"].includes(focusedField.type) && (
-                      <div>
-                        <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">{t("propPlaceholder")}</label>
-                        <Input
-                          type="text"
-                          value={focusedField.placeholder || ""}
-                          onChange={(e) => handleUpdateField(focusedField.id, { placeholder: e.target.value })}
-                          className="h-9 w-full px-3 rounded-lg border border-border bg-background font-medium text-foreground focus:outline-none"
-                        />
-                      </div>
-                    )}
-
-                    {["select", "multiselect"].includes(focusedField.type) && (
-                      <div>
-                        <label className="uppercase tracking-wider text-[9px] block mb-1 text-muted-foreground">{t("propOptions")}</label>
-                        <Input
-                          type="text"
-                          value={focusedField.options ? focusedField.options.join(", ") : ""}
-                          onChange={(e) => {
-                            const opts = e.target.value.split(",").map((o) => o.trim()).filter((o) => o.length > 0);
-                            handleUpdateField(focusedField.id, { options: opts });
-                          }}
-                          className="h-9 w-full px-3 rounded-lg border border-border bg-background font-medium text-foreground focus:outline-none"
-                        />
-                      </div>
-                    )}
-
-                    <div className="flex items-center gap-2 pt-2">
-                      <Checkbox
-                        id="required-toggle"
-                        checked={focusedField.required || false}
-                        onCheckedChange={(checked) => handleUpdateField(focusedField.id, { required: !!checked })}
-                        className="rounded border-border text-indigo-655"
-                      />
-                      <label htmlFor="required-toggle" className="text-foreground cursor-pointer select-none">{t("propRequired")}</label>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center text-muted-foreground text-xs py-10">
-                  {t("sidebarSettingsDesc")}
-                </div>
-              )}
-            </div>
+            {/* Properties editor removed, moved to canvas */}
           </>
         )}
 
@@ -201,7 +136,7 @@ export function BuilderSidebarLeft({
             {/* Built-in Preset Themes */}
             <div className="space-y-4">
               <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("themePresets")}</h3>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-3">
                 {BUILTIN_THEMES.map((theme) => (
                   <ThemePresetCard
                     key={theme.id}
@@ -214,6 +149,65 @@ export function BuilderSidebarLeft({
                     }}
                   />
                 ))}
+              </div>
+            </div>
+
+            {/* Custom Theme Editor */}
+            <div className="space-y-4 pt-6 border-t border-border mt-6 pb-6">
+              <h3 className="font-outfit font-extrabold text-foreground text-sm">Custom Styling</h3>
+              
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Background Color</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      "#ffffff", "#f8fafc", "#f1f5f9", "#fdf4ff", "#eff6ff", "#f0fdf4", // Light
+                      "#020617", "#0f172a", "#1e1e24", "#18181b", "#171717", "#09090b"  // Dark
+                    ].map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => {
+                          const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", backgroundColor: color } as ThemeConfig;
+                          setActiveTheme(newTheme);
+                          saveForm(fields, newTheme);
+                        }}
+                        className={`h-8 w-8 shrink-0 rounded-md border-2 transition-all ${activeTheme?.backgroundColor === color ? "border-primary scale-105" : "border-border hover:scale-105"}`}
+                        style={{ backgroundColor: color }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 pt-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Border Radius</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: "none", value: "0px" },
+                      { label: "xs", value: "2px" },
+                      { label: "sm", value: "4px" },
+                      { label: "md", value: "8px" },
+                      { label: "lg", value: "16px" },
+                      { label: "full", value: "9999px" },
+                    ].map((radius) => (
+                      <button
+                        key={radius.value}
+                        onClick={() => {
+                          const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", borderRadius: radius.value } as ThemeConfig;
+                          setActiveTheme(newTheme);
+                          saveForm(fields, newTheme);
+                        }}
+                        className={`flex-1 min-w-[60px] py-1.5 text-[10px] font-medium rounded-md border transition-colors ${
+                          (activeTheme?.borderRadius || "0.5rem") === radius.value || (radius.value === "8px" && activeTheme?.borderRadius === "0.5rem")
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-card text-muted-foreground hover:bg-accent"
+                        }`}
+                      >
+                        {radius.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </>

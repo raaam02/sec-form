@@ -2,11 +2,15 @@ import React from "react";
 import { Copy, QrCode, Smartphone, Code } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { ThemeConfig } from "@sec-form/shared";
-import { FormField } from "@sec-form/validators";
-import { TabBar } from "../TabBar";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { TabBar } from "../TabBar";
+import { FormField } from "@sec-form/validators";
+import { Button } from "../ui/button";
 
 interface BuilderSidebarRightProps {
   rightTab: "preview" | "embed";
@@ -18,6 +22,7 @@ interface BuilderSidebarRightProps {
   publicFormUrl: string;
   id: string;
   hostOrigin: string;
+  layoutMode?: "standard" | "single_field" | "custom_steps";
 }
 
 export function BuilderSidebarRight({
@@ -30,6 +35,7 @@ export function BuilderSidebarRight({
   publicFormUrl,
   id,
   hostOrigin,
+  layoutMode = "standard",
 }: BuilderSidebarRightProps) {
   const t = useTranslations("Builder");
   const tCommon = useTranslations("Common");
@@ -43,6 +49,38 @@ export function BuilderSidebarRight({
     navigator.clipboard.writeText(text);
     toast.success(t("shareCopied"));
   };
+
+  // Pre-process steps
+  const pages: FormField[][] = React.useMemo(() => {
+    const validFields = fields.filter((f) => f.type !== "step_break");
+    if (layoutMode === "single_field") {
+      return validFields.length > 0 ? validFields.map(f => [f]) : [[]];
+    }
+    if (layoutMode === "custom_steps") {
+      const result: FormField[][] = [];
+      let currentStep: FormField[] = [];
+      for (const field of fields) {
+        if (field.type === "step_break") {
+          if (currentStep.length > 0) result.push(currentStep);
+          currentStep = [];
+        } else {
+          currentStep.push(field);
+        }
+      }
+      if (currentStep.length > 0) result.push(currentStep);
+      return result.length > 0 ? result : [[]];
+    }
+    return [validFields];
+  }, [fields, layoutMode]);
+
+  const [currentStepIndex, setCurrentStepIndex] = React.useState(0);
+  const currentFields = pages[currentStepIndex] || [];
+  const isLastStep = currentStepIndex === pages.length - 1;
+
+  // Reset step if layout mode or fields change significantly
+  React.useEffect(() => {
+    setCurrentStepIndex(0);
+  }, [layoutMode, fields.length]);
 
   return (
     <aside className="w-full h-full border-l border-border bg-card overflow-hidden flex flex-col">
@@ -89,12 +127,12 @@ export function BuilderSidebarRight({
 
                 {/* Form Fields Card list */}
                 <div className="space-y-4">
-                  {fields.length === 0 ? (
-                    <div className="text-center py-10 text-[10px] opacity-50">
-                      {t("canvasEmptyTitle")}
+                  {currentFields.length === 0 ? (
+                    <div className="text-center py-6 text-[10px] text-muted-foreground italic bg-muted/20 border border-dashed rounded-lg border-border">
+                      {t("previewEmptyDesc")}
                     </div>
                   ) : (
-                    fields.map((field) => (
+                    currentFields.map((field) => (
                       <div 
                         key={field.id}
                         className="p-4 border transition-all duration-200 space-y-2"
@@ -110,103 +148,94 @@ export function BuilderSidebarRight({
                         </label>
 
                         {/* Interactive fields inside preview */}
-                        <div className="text-xs">
-                          {["text", "email", "date"].includes(field.type) && (
-                            <input 
-                              type="text" 
-                              placeholder={field.placeholder || "Enter answer..."}
-                              className="h-8 w-full px-2.5 rounded border text-[10px] focus:outline-none" 
+                        <div className="mt-1">
+                          {["text", "email", "date", "phone"].includes(field.type) && (
+                            <Input 
+                              type={field.type === "email" ? "email" : field.type === "phone" ? "tel" : "text"} 
+                              placeholder={field.placeholder || "Your answer..."}
+                              className="text-foreground bg-transparent pointer-events-none transition-colors" 
                               style={{ 
-                                borderColor: "rgba(128,128,128,0.25)",
-                                backgroundColor: activeTheme?.backgroundColor || "#ffffff",
-                                color: activeTheme?.textColor || "#0f172a",
-                                borderRadius: activeTheme?.borderRadius || "0.25rem"
+                                borderColor: "rgba(128,128,128,0.2)",
+                                borderRadius: activeTheme?.borderRadius || "0.5rem"
                               }}
-                              disabled
-                            />
-                          )}
-                          {field.type === "time" && (
-                            <input 
-                              type="time" 
-                              className="h-8 w-24 px-2.5 rounded border text-[10px] focus:outline-none" 
-                              style={{ 
-                                borderColor: "rgba(128,128,128,0.25)",
-                                backgroundColor: activeTheme?.backgroundColor || "#ffffff",
-                                color: activeTheme?.textColor || "#0f172a",
-                                borderRadius: activeTheme?.borderRadius || "0.25rem"
-                              }}
-                              disabled
-                            />
-                          )}
-                          {field.type === "textarea" && (
-                            <textarea 
-                              placeholder={field.placeholder || "Enter answer..."}
-                              className="w-full h-12 p-2 rounded border text-[10px] focus:outline-none" 
-                              style={{ 
-                                borderColor: "rgba(128,128,128,0.25)",
-                                backgroundColor: activeTheme?.backgroundColor || "#ffffff",
-                                color: activeTheme?.textColor || "#0f172a",
-                                borderRadius: activeTheme?.borderRadius || "0.25rem"
-                              }}
-                              disabled
+                              readOnly
                             />
                           )}
                           {field.type === "number" && (
-                            <input 
+                            <Input 
                               type="number" 
                               placeholder="0"
-                              className="h-8 w-24 px-2.5 rounded border text-[10px] focus:outline-none" 
+                              className="max-w-[150px] text-foreground bg-transparent pointer-events-none transition-colors" 
                               style={{ 
-                                borderColor: "rgba(128,128,128,0.25)",
-                                backgroundColor: activeTheme?.backgroundColor || "#ffffff",
-                                color: activeTheme?.textColor || "#0f172a",
-                                borderRadius: activeTheme?.borderRadius || "0.25rem"
+                                borderColor: "rgba(128,128,128,0.2)",
+                                borderRadius: activeTheme?.borderRadius || "0.5rem"
                               }}
-                              disabled
+                              readOnly
                             />
                           )}
-                          {field.type === "checkbox" && (
-                            <div className="flex items-center gap-1.5">
-                              <input type="checkbox" className="rounded" style={{ accentColor: activeTheme?.primaryColor || "#6366f1" }} disabled />
-                              <span className="text-[10px] opacity-80">Agree</span>
+                          {field.type === "time" && (
+                            <Input 
+                              type="time" 
+                              className="max-w-[150px] text-foreground bg-transparent pointer-events-none transition-colors" 
+                              style={{ 
+                                borderColor: "rgba(128,128,128,0.2)",
+                                borderRadius: activeTheme?.borderRadius || "0.5rem"
+                              }}
+                              readOnly
+                            />
+                          )}
+                          {field.type === "textarea" && (
+                            <Textarea 
+                              placeholder={field.placeholder || "Your response..."}
+                              className="text-foreground bg-transparent pointer-events-none transition-colors" 
+                              style={{ 
+                                borderColor: "rgba(128,128,128,0.2)",
+                                borderRadius: activeTheme?.borderRadius || "0.5rem"
+                              }}
+                              readOnly
+                            />
+                          )}
+                          {field.type === "select" && field.options && (
+                            <div className="pointer-events-none">
+                              <Select disabled>
+                                <SelectTrigger
+                                  className="w-full text-foreground bg-transparent transition-colors"
+                                  style={{
+                                    borderRadius: activeTheme?.borderRadius || "0.5rem",
+                                    borderColor: "rgba(128,128,128,0.2)"
+                                  }}
+                                >
+                                  <SelectValue placeholder="Choose option..." />
+                                </SelectTrigger>
+                              </Select>
                             </div>
                           )}
+                          {field.type === "multiselect" && field.options && (
+                            <div className="space-y-1.5 pl-1 pointer-events-none">
+                              {field.options.map((opt) => (
+                                <label key={opt} className="flex items-center gap-3 p-2 rounded-lg transition-colors group">
+                                  <Checkbox className="border-slate-300" checked={false} />
+                                  <span className="font-medium select-none text-sm text-foreground">{opt}</span>
+                                </label>
+                              ))}
+                            </div>
+                          )}
+                          {field.type === "checkbox" && (
+                            <label className="flex items-center gap-3 p-2 rounded-lg transition-colors group w-fit pointer-events-none">
+                              <Checkbox className="border-slate-300" checked={false} />
+                              <span className="font-medium select-none text-sm text-foreground">I confirm this detail</span>
+                            </label>
+                          )}
                           {field.type === "rating" && (
-                            <div className="flex gap-1">
+                            <div className="flex gap-2 pl-1 pointer-events-none">
                               {Array.from({ length: 5 }).map((_, i) => (
                                 <button 
                                   key={i} 
-                                  className="text-base transition-transform hover:scale-110 active:scale-95 text-slate-300" 
-                                  style={{ color: activeTheme?.primaryColor || "#e2e8f0" }}
-                                  disabled
+                                  type="button"
+                                  className="text-2xl text-slate-300" 
                                 >
                                   ★
                                 </button>
-                              ))}
-                            </div>
-                          )}
-                          {field.type === "select" && field.options && (
-                            <select 
-                              className="h-8 w-full px-2 rounded border text-[10px] focus:outline-none bg-transparent"
-                              style={{ 
-                                borderColor: "rgba(128,128,128,0.25)",
-                                borderRadius: activeTheme?.borderRadius || "0.25rem"
-                              }}
-                              disabled
-                            >
-                              <option value="">Select option...</option>
-                              {field.options.map((opt) => (
-                                <option key={opt} value={opt}>{opt}</option>
-                              ))}
-                            </select>
-                          )}
-                          {field.type === "multiselect" && field.options && (
-                            <div className="flex flex-col gap-1">
-                              {field.options.map((opt) => (
-                                <div key={opt} className="flex items-center gap-1.5">
-                                  <input type="checkbox" className="rounded" style={{ accentColor: activeTheme?.primaryColor || "#6366f1" }} disabled />
-                                  <span className="text-[9px] opacity-85">{opt}</span>
-                                </div>
                               ))}
                             </div>
                           )}
@@ -214,19 +243,46 @@ export function BuilderSidebarRight({
                       </div>
                     ))
                   )}
+                  
+                  <div className="pt-2 flex gap-2">
+                    {currentStepIndex > 0 && (
+                      <Button 
+                        disabled
+                        variant="outline"
+                        className="flex-1 h-8 text-[10px] uppercase font-bold rounded-xl transition-all shadow-sm"
+                        style={{
+                          borderRadius: activeTheme?.borderRadius || "0.5rem"
+                        }}
+                      >
+                        Previous
+                      </Button>
+                    )}
+                    
+                    {isLastStep ? (
+                      <Button 
+                        disabled
+                        className="flex-1 h-8 text-white text-[10px] uppercase font-bold rounded-xl transition-all shadow-md opacity-50 cursor-not-allowed"
+                        style={{
+                          backgroundColor: activeTheme?.primaryColor || "#4f46e5",
+                          borderRadius: activeTheme?.borderRadius || "0.5rem"
+                        }}
+                      >
+                        {t("submitBtn")}
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={() => setCurrentStepIndex(p => p + 1)}
+                        className="flex-1 h-8 text-white text-[10px] uppercase font-bold rounded-xl transition-all shadow-md"
+                        style={{
+                          backgroundColor: activeTheme?.primaryColor || "#4f46e5",
+                          borderRadius: activeTheme?.borderRadius || "0.5rem"
+                        }}
+                      >
+                        Next
+                      </Button>
+                    )}
+                  </div>
                 </div>
-
-                {/* Submit button inside preview */}
-                <button
-                  className="w-full py-2.5 text-xs font-bold text-white shadow-sm flex items-center justify-center transition-opacity"
-                  style={{
-                    backgroundColor: activeTheme?.primaryColor || "#6366f1",
-                    borderRadius: activeTheme?.borderRadius || "0.5rem"
-                  }}
-                  disabled
-                >
-                  {tCommon("submit")}
-                </button>
               </div>
             </div>
           </div>

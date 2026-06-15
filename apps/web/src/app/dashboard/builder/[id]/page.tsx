@@ -65,6 +65,7 @@ export default function BuilderPage() {
   // Settings state
   const [slug, setSlug] = useState("");
   const [visibility, setVisibility] = useState<"draft" | "public" | "unlisted">("draft");
+  const [layoutMode, setLayoutMode] = useState<"standard" | "single_field" | "custom_steps">("standard");
   
   // Share state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -177,6 +178,7 @@ export default function BuilderPage() {
       setActiveTheme(loadedTheme);
       setSlug(form.slug);
       setVisibility(form.visibility as any);
+      setLayoutMode((form.schemaJson as any).layout?.mode || "standard");
 
       setFormHistory((prev) => {
         if (prev.states.length === 0) {
@@ -212,14 +214,17 @@ export default function BuilderPage() {
   }, [searchParams]);
 
   // Auto-Save Form Logic
-  const saveForm = async (updatedFields: FormField[], updatedTheme?: ThemeConfig | null) => {
+  const saveForm = async (updatedFields: FormField[], updatedTheme?: ThemeConfig | null, updatedLayoutMode?: "standard" | "single_field" | "custom_steps") => {
     setSaveStatus("saving");
     try {
       await updateFormMutation.mutateAsync({
         id,
         title,
         description,
-        schemaJson: { fields: updatedFields },
+        schemaJson: { 
+          fields: updatedFields,
+          layout: { mode: updatedLayoutMode || layoutMode }
+        },
         themeJson: updatedTheme || activeTheme || undefined,
       });
       setSaveStatus("saved");
@@ -278,6 +283,18 @@ export default function BuilderPage() {
     updated[index] = updated[targetIndex];
     updated[targetIndex] = temp;
 
+    setFields(updated);
+    saveForm(updated);
+    pushToHistory(updated, activeTheme);
+  };
+
+  const handleDragReorder = (oldIndex: number, newIndex: number) => {
+    if (oldIndex === newIndex) return;
+    
+    const updated = [...fields];
+    const [movedItem] = updated.splice(oldIndex, 1);
+    updated.splice(newIndex, 0, movedItem);
+    
     setFields(updated);
     saveForm(updated);
     pushToHistory(updated, activeTheme);
@@ -407,7 +424,7 @@ export default function BuilderPage() {
       <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden min-h-0 bg-muted/20">
         
         {/* PANEL A: LEFT SIDEBAR (Builder / Themes) */}
-        <ResizablePanel defaultSize="18" minSize="20" maxSize="25" className="flex flex-col">
+        <ResizablePanel defaultSize="20" minSize="12" maxSize="20" className="flex flex-col">
           <BuilderSidebarLeft
             leftTab={leftTab}
             setLeftTab={setLeftTab}
@@ -436,7 +453,13 @@ export default function BuilderPage() {
             fields={fields}
             selectedFieldId={selectedFieldId}
             setSelectedFieldId={setSelectedFieldId}
+            layoutMode={layoutMode}
+            setLayoutMode={(mode: "standard" | "single_field" | "custom_steps") => {
+              setLayoutMode(mode);
+              saveForm(fields, activeTheme, mode);
+            }}
             handleReorder={handleReorder}
+            handleDragReorder={handleDragReorder}
             handleDeleteField={handleDeleteField}
             handleUpdateField={handleUpdateField}
             saveForm={saveForm}
@@ -472,6 +495,7 @@ export default function BuilderPage() {
             description={description}
             fields={fields}
             activeTheme={activeTheme}
+            layoutMode={layoutMode}
             publicFormUrl={publicFormUrl}
             id={id}
             hostOrigin={hostOrigin}

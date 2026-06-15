@@ -4,13 +4,15 @@ export const FieldTypeSchema = z.enum([
   "text",         // Short Text
   "textarea",     // Long Text
   "email",        // Email
+  "phone",        // Phone Number
   "number",       // Number
   "select",       // Single Select
   "multiselect",  // Multi Select
   "checkbox",     // Checkbox
   "rating",       // Rating
   "date",         // Date
-  "time"          // Time
+  "time",         // Time
+  "step_break"    // Step Break (Custom form steps divider)
 ]);
 
 export type FieldType = z.infer<typeof FieldTypeSchema>;
@@ -18,7 +20,7 @@ export type FieldType = z.infer<typeof FieldTypeSchema>;
 export const FormFieldSchema = z.object({
   id: z.string(),
   type: FieldTypeSchema,
-  label: z.string().min(1, "Label is required"),
+  label: z.string(),
   description: z.string().optional(),
   placeholder: z.string().optional(),
   required: z.boolean().default(false),
@@ -34,7 +36,10 @@ export const FormFieldSchema = z.object({
 export type FormField = z.infer<typeof FormFieldSchema>;
 
 export const FormSchemaJSON = z.object({
-  fields: z.array(FormFieldSchema)
+  fields: z.array(FormFieldSchema),
+  layout: z.object({
+    mode: z.enum(["standard", "single_field", "custom_steps"]).default("standard")
+  }).optional()
 });
 
 export type FormSchemaType = z.infer<typeof FormSchemaJSON>;
@@ -94,6 +99,8 @@ export function buildSubmissionValidator(fields: FormField[]) {
   const shape: Record<string, z.ZodTypeAny> = {};
 
   for (const field of fields) {
+    if (field.type === "step_break") continue;
+
     let fieldSchema: z.ZodTypeAny;
 
     switch (field.type) {
@@ -116,6 +123,15 @@ export function buildSubmissionValidator(fields: FormField[]) {
             z.literal(""),
             z.string().email("Invalid email format").optional()
           ]);
+        }
+        break;
+        
+      case "phone":
+        fieldSchema = z.string();
+        if (field.required) {
+          fieldSchema = (fieldSchema as z.ZodString).min(1, `${field.label} is required`);
+        } else {
+          fieldSchema = fieldSchema.optional().or(z.literal(""));
         }
         break;
 

@@ -13,7 +13,8 @@ import {
   Eye,
   Percent,
   Undo2,
-  Redo2
+  Redo2,
+  Plus
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from "recharts";
 import { FormField } from "@sec-form/validators";
@@ -22,6 +23,7 @@ import { TabBar } from "../TabBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
 
@@ -36,6 +38,7 @@ interface BuilderCanvasProps {
   selectedFieldId: string | null;
   setSelectedFieldId: (id: string | null) => void;
   handleReorder: (index: number, direction: "up" | "down") => void;
+  handleDragReorder?: (oldIndex: number, newIndex: number) => void;
   handleDeleteField: (id: string) => void;
   handleUpdateField: (id: string, updates: Partial<FormField>) => void;
   saveForm: (fields: FormField[]) => void;
@@ -50,6 +53,8 @@ interface BuilderCanvasProps {
   handleGenerateInsights: () => void;
   visibility: "draft" | "public" | "unlisted";
   setVisibility: (mode: "draft" | "public" | "unlisted") => void;
+  layoutMode?: "standard" | "single_field" | "custom_steps";
+  setLayoutMode?: (mode: "standard" | "single_field" | "custom_steps") => void;
   slug: string;
   setSlug: (slug: string) => void;
   handleSaveSettings: (e: React.FormEvent) => void;
@@ -70,6 +75,7 @@ export function BuilderCanvas({
   selectedFieldId,
   setSelectedFieldId,
   handleReorder,
+  handleDragReorder,
   handleDeleteField,
   handleUpdateField,
   saveForm,
@@ -84,6 +90,8 @@ export function BuilderCanvas({
   handleGenerateInsights,
   visibility,
   setVisibility,
+  layoutMode,
+  setLayoutMode,
   slug,
   setSlug,
   handleSaveSettings,
@@ -157,25 +165,33 @@ export function BuilderCanvas({
                     >
                       <div className="flex justify-between items-start gap-4">
                         <div className="min-w-0 flex-1">
-                          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                            {field.type} {field.required && <span className="text-destructive">*</span>}
-                          </span>
-                          <input
-                            type="text"
-                            value={field.label}
-                            onChange={(e) => handleUpdateField(field.id, { label: e.target.value })}
-                            onClick={(e) => e.stopPropagation()}
-                            className="font-semibold text-foreground mt-0.5 w-full bg-transparent border-b border-transparent focus:border-primary focus:outline-none transition-colors"
-                            placeholder="Field Label"
-                          />
-                          <input
-                            type="text"
-                            value={field.description || ""}
-                            onChange={(e) => handleUpdateField(field.id, { description: e.target.value })}
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-muted-foreground text-xs mt-0.5 w-full bg-transparent border-b border-transparent focus:border-primary focus:outline-none transition-colors"
-                            placeholder="Field description (optional)"
-                          />
+                          {field.type === "step_break" ? (
+                            <span className="font-semibold text-muted-foreground italic flex items-center justify-center py-2 mt-2 w-full">
+                              --- Page Break ---
+                            </span>
+                          ) : (
+                            <>
+                              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                                {field.type} {field.required && <span className="text-destructive">*</span>}
+                              </span>
+                              <input
+                                type="text"
+                                value={field.label}
+                                onChange={(e) => handleUpdateField(field.id, { label: e.target.value })}
+                                onClick={(e) => e.stopPropagation()}
+                                className="font-semibold text-foreground mt-0.5 w-full bg-transparent border-b border-transparent focus:border-primary focus:outline-none transition-colors"
+                                placeholder="Field Label"
+                              />
+                              <input
+                                type="text"
+                                value={field.description || ""}
+                                onChange={(e) => handleUpdateField(field.id, { description: e.target.value })}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-muted-foreground text-xs mt-0.5 w-full bg-transparent border-b border-transparent focus:border-primary focus:outline-none transition-colors"
+                                placeholder="Field description (optional)"
+                              />
+                            </>
+                          )}
                           
                           {/* Card Field Input Template Previews */}
                           <div className="mt-3">
@@ -208,6 +224,67 @@ export function BuilderCanvas({
                                     {opt}
                                   </span>
                                 ))}
+                              </div>
+                            )}
+                            {/* Advanced Options & Required Switch (Only if selected) */}
+                            {selectedFieldId === field.id && field.type !== "step_break" && (
+                              <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4" onClick={e => e.stopPropagation()}>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs font-semibold text-foreground">Required Field</span>
+                                  <Switch 
+                                    checked={field.required}
+                                    onCheckedChange={(checked) => handleUpdateField(field.id, { required: checked })}
+                                  />
+                                </div>
+                                {["select", "multiselect"].includes(field.type) && (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-semibold text-foreground">Options</span>
+                                      <Button 
+                                        type="button"
+                                        variant="outline" 
+                                        size="sm" 
+                                        className="h-6 px-2 text-[10px]"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const currentOptions = field.options || [];
+                                          handleUpdateField(field.id, { options: [...currentOptions, `Option ${currentOptions.length + 1}`] });
+                                        }}
+                                      >
+                                        <Plus className="h-3 w-3 mr-1" /> Add Option
+                                      </Button>
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                      {(field.options || []).map((opt, optIndex) => (
+                                        <div key={optIndex} className="flex items-center gap-2">
+                                          <Input 
+                                            value={opt}
+                                            onChange={(e) => {
+                                              const newOptions = [...(field.options || [])];
+                                              newOptions[optIndex] = e.target.value;
+                                              handleUpdateField(field.id, { options: newOptions });
+                                            }}
+                                            className="h-7 text-xs bg-card"
+                                          />
+                                          <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-7 w-7 text-destructive hover:bg-destructive/10 shrink-0"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const newOptions = [...(field.options || [])];
+                                              newOptions.splice(optIndex, 1);
+                                              handleUpdateField(field.id, { options: newOptions });
+                                            }}
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -504,6 +581,32 @@ export function BuilderCanvas({
                   {visibility === "draft" && "Draft forms are not accessible publicly and do not accept responses."}
                   {visibility === "public" && "Public forms are visible in the explore page/gallery and accept responses."}
                   {visibility === "unlisted" && "Unlisted forms accept responses, but are hidden from general explore listings."}
+                </p>
+              </div>
+
+              <div className="pt-2">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Form Display Layout</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { mode: "standard", label: "Standard (1 Page)" },
+                    { mode: "single_field", label: "Single Field per Step" },
+                    { mode: "custom_steps", label: "Custom Steps" }
+                  ].map((option) => (
+                    <Button
+                      key={option.mode}
+                      type="button"
+                      variant={layoutMode === option.mode ? "default" : "outline"}
+                      onClick={() => setLayoutMode && setLayoutMode(option.mode as any)}
+                      className={`h-9 w-full font-bold text-[10px] uppercase transition-colors rounded-xl`}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+                <p className="text-[9px] text-muted-foreground mt-2 font-normal leading-normal">
+                  {layoutMode === "standard" && "All fields are displayed on a single page."}
+                  {layoutMode === "single_field" && "Each field gets its own separate page with Next/Back buttons."}
+                  {layoutMode === "custom_steps" && "Drag and drop 'Step Break' fields into the canvas to split the form into custom pages."}
                 </p>
               </div>
 

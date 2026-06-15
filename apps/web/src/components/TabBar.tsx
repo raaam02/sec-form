@@ -24,7 +24,7 @@ export function TabBar<T extends string>({
   fullWidth = false,
 }: TabBarProps<T>) {
   return (
-    <div className="bg-card border-b border-border p-3 shrink-0 flex justify-center items-center">
+    <div className="@container bg-card border-b border-border p-3 shrink-0 flex justify-center items-center">
       <div
         className={`flex bg-muted p-1 rounded-2xl text-xs font-bold text-muted-foreground max-w-full overflow-x-auto no-scrollbar gap-1 border border-border ${
           fullWidth ? "w-full" : ""
@@ -46,8 +46,8 @@ export function TabBar<T extends string>({
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon className={`h-3.5 w-3.5 ${item.iconColorClass || "text-indigo-500"}`} />
-              <span>{item.label}</span>
+              <Icon className={`h-3.5 w-3.5 ${item.iconColorClass || "text-indigo-500"} shrink-0`} />
+              <span className="hidden @[250px]:inline whitespace-nowrap">{item.label}</span>
             </button>
           );
 
