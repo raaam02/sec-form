@@ -1,7 +1,7 @@
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { CreateFormInput, UpdateFormInput } from "@sec-form/validators";
-import { forms, formViews } from "@sec-form/db";
-import { eq, and, ne } from "@sec-form/db";
+import { forms, formViews, submissions } from "@sec-form/db";
+import { eq, and, ne, count } from "@sec-form/db";
 import { z } from "zod";
 import crypto from "crypto";
 import { BUILTIN_THEMES } from "@sec-form/shared";
@@ -9,10 +9,22 @@ import { TRPCError } from "@trpc/server";
 
 export const formsRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
-    return ctx.db.query.forms.findMany({
+    const userForms = await ctx.db.query.forms.findMany({
       where: eq(forms.userId, ctx.user.id),
       orderBy: (forms, { desc }) => [desc(forms.updatedAt)],
     });
+
+    const formsWithCounts = await Promise.all(userForms.map(async (form) => {
+      const viewsCount = await ctx.db.select({ count: count() }).from(formViews).where(eq(formViews.formId, form.id));
+      const subsCount = await ctx.db.select({ count: count() }).from(submissions).where(eq(submissions.formId, form.id));
+      return {
+        ...form,
+        totalViews: Number(viewsCount[0]?.count || 0),
+        totalResponses: Number(subsCount[0]?.count || 0),
+      };
+    }));
+
+    return formsWithCounts;
   }),
 
   get: protectedProcedure

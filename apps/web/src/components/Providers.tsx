@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { httpBatchLink } from "@trpc/client";
 import { SessionProvider } from "next-auth/react";
 import superjson from "superjson";
@@ -20,7 +21,23 @@ export function Providers({ children }: { children: React.ReactNode }) {
             refetchOnWindowFocus: false,
             retry: false,
           },
+          mutations: {
+            onError: (error) => {
+              toast.error(error.message || "An error occurred");
+            },
+          },
         },
+        queryCache: new QueryCache({
+          onError: (error) => {
+            toast.error(error.message || "An error occurred");
+          },
+        }),
+        mutationCache: new MutationCache({
+          onError: (error) => {
+            // Toast is handled in defaultOptions.mutations.onError, or we can do it here.
+            // Let's rely on defaultOptions.mutations for mutations.
+          },
+        }),
       })
   );
   

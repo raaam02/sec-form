@@ -57,7 +57,7 @@ function SignupForm() {
       <div className="max-w-md w-full relative z-10 my-auto">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 justify-center mb-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-50 to-violet-600 shadow-md">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-primary/20 to-primary shadow-md">
               <Sparkles className="h-4.5 w-4.5 text-white" />
             </div>
             <span className="font-outfit text-xl font-bold tracking-tight text-foreground">

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle, Shield, Lock } from "lucide-react";
+import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle, Shield, Lock, FileText } from "lucide-react";
 import { motion } from "motion/react";
 import { ThemeToggle } from "../ThemeToggle";
 import { LocaleSwitcher } from "../LocaleSwitcher";
@@ -39,9 +39,10 @@ export function DashboardSidebar({
 
   // Navigation Shortcuts
   useGlobalShortcut("nav-dash", "alt+1", "Go to Dashboard", () => router.push("/dashboard"), "Navigation");
-  useGlobalShortcut("nav-explore", "alt+2", "Go to Explore", () => router.push("/dashboard/explore"), "Navigation");
-  useGlobalShortcut("nav-analytics", "alt+3", "Go to Analytics", () => router.push("/dashboard/analytics"), "Navigation");
-  useGlobalShortcut("nav-admin", "alt+4", "Go to Admin", () => {
+  useGlobalShortcut("nav-my-forms", "alt+2", "Go to My Forms", () => router.push("/dashboard/my-forms"), "Navigation");
+  useGlobalShortcut("nav-explore", "alt+3", "Go to Explore", () => router.push("/dashboard/explore"), "Navigation");
+  useGlobalShortcut("nav-analytics", "alt+4", "Go to Analytics", () => router.push("/dashboard/analytics"), "Navigation");
+  useGlobalShortcut("nav-admin", "alt+5", "Go to Admin", () => {
     if (user.role === "admin") {
       router.push("/dashboard/admin");
     }
@@ -57,14 +58,20 @@ export function DashboardSidebar({
       active: pathname === "/dashboard",
     },
     {
+      href: "/dashboard/my-forms",
+      label: `My Forms [Alt+2]`,
+      icon: FileText,
+      active: pathname === "/dashboard/my-forms" || pathname.startsWith("/dashboard/my-forms/"),
+    },
+    {
       href: "/dashboard/explore",
-      label: `${t("navExplore")} [Alt+2]`,
+      label: `${t("navExplore")} [Alt+3]`,
       icon: Compass,
       active: pathname === "/dashboard/explore",
     },
     {
       href: "/dashboard/analytics",
-      label: `${t("navAnalytics")} [Alt+3]`,
+      label: `${t("navAnalytics")} [Alt+4]`,
       icon: BarChart3,
       active: pathname === "/dashboard/analytics",
     },
@@ -73,7 +80,7 @@ export function DashboardSidebar({
   if (user.role === "admin") {
     navItems.push({
       href: "/dashboard/admin",
-      label: `${t("navAdmin")} [Alt+4]`,
+      label: `${t("navAdmin")} [Alt+5]`,
       icon: Shield,
       active: pathname === "/dashboard/admin",
     });
@@ -85,7 +92,7 @@ export function DashboardSidebar({
         <div>
           {/* Brand header - same height as fixed headers (h-16) */}
           <div className="h-16 border-b border-border flex items-center justify-center shrink-0 bg-sidebar">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-indigo-500 to-violet-600 shrink-0 shadow-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-rose-400 shrink-0 shadow-sm">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
           </div>

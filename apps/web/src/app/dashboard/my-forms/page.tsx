@@ -3,21 +3,23 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
-import { trpc } from "../../utils/trpc";
 import { FORM_TEMPLATES, BUILTIN_THEMES } from "@sec-form/shared";
-import { Sparkles, Plus } from "lucide-react";
-import { FormDrawer } from "../../components/FormDrawer";
+import { Sparkles, Plus, Search, Filter, Layers, Globe, FileEdit, LinkIcon } from "lucide-react";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { StatsCardGrid } from "@/components/dashboard/StatsCardGrid";
 import { FormCardGrid } from "@/components/dashboard/FormCardGrid";
 import { CreateFormModal } from "@/components/dashboard/CreateFormModal";
 import { AIFormModal } from "@/components/dashboard/AIFormModal";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
+import { TabBar } from "@/components/TabBar";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { FormDrawer } from "@/components/FormDrawer";
+import trpc from "@/utils/trpc";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -41,8 +43,18 @@ export default function DashboardPage() {
   const [selectedFormForDrawer, setSelectedFormForDrawer] = useState<any | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  
+  // Filters state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [visibilityFilter, setVisibilityFilter] = useState<"all" | "public" | "draft" | "unlisted">("all");
 
-  // Keyboard Shortcuts
+  const filteredForms = formsList?.filter((form) => {
+    const matchesSearch = form.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (form.description?.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesVisibility = visibilityFilter === "all" || form.visibility === visibilityFilter;
+    return matchesSearch && matchesVisibility;
+  });
+
   useGlobalShortcut("new-form", "n", "Create New Form", () => {
     setIsCreateModalOpen(true);
   }, "Global Actions");
@@ -50,6 +62,22 @@ export default function DashboardPage() {
   useGlobalShortcut("ai-form", "g", "Generate AI Form", () => {
     setIsAIModalOpen(true);
   }, "Global Actions");
+
+  useGlobalShortcut("filter-all", "shift+1", "Filter: All", () => {
+    setVisibilityFilter("all");
+  }, "Filters");
+
+  useGlobalShortcut("filter-public", "shift+2", "Filter: Public", () => {
+    setVisibilityFilter("public");
+  }, "Filters");
+
+  useGlobalShortcut("filter-draft", "shift+3", "Filter: Draft", () => {
+    setVisibilityFilter("draft");
+  }, "Filters");
+
+  useGlobalShortcut("filter-unlisted", "shift+4", "Filter: Unlisted", () => {
+    setVisibilityFilter("unlisted");
+  }, "Filters");
 
   // Handle template import from query parameter on load
   useEffect(() => {
@@ -131,7 +159,7 @@ export default function DashboardPage() {
       {/* Main dashboard content (Left side) */}
       <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
         {/* Page Header (Pinned & Harmonized) */}
-        <DashboardHeader title={t("navDashboard")}>
+        <DashboardHeader title={t("navMyForms") || "My Forms"}>
           <Tooltip>
             <TooltipTrigger asChild>
               <motion.div
@@ -173,21 +201,35 @@ export default function DashboardPage() {
         {/* Scrollable Body area */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
           <div className="max-w-6xl mx-auto space-y-8">
-            {/* STATS OVERVIEW CARDS */}
-            <StatsCardGrid stats={stats} isStatsLoading={isStatsLoading} />
-
             {/* FORMS LIST SECTION */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-outfit text-xl font-bold text-foreground">Recent Forms</h2>
-                <Button variant="ghost" className="text-muted-foreground text-sm" onClick={() => router.push('/dashboard/my-forms')}>
-                  View all
-                </Button>
+            <div className="space-y-6">
+              <div className="sticky top-0 z-20 flex flex-col sm:flex-row gap-4 items-center justify-between -mx-4 sm:mx-0 rounded-none sm:rounded-2xl bg-transparent pointer-events-none">
+                <div className="relative w-full sm:w-80 backdrop-blur-sm pointer-events-auto">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search forms..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 h-10 w-full bg-background/50 border-border rounded-xl text-sm transition-colors focus:bg-background"
+                  />
+                </div>
+                <div className="relative h-14 w-full sm:w-[450px]">
+                  <TabBar
+                    items={[
+                      { value: "all", label: "All Forms", icon: Layers, shortcut: "Shift+1" },
+                      { value: "public", label: "Public", icon: Globe, shortcut: "Shift+2" },
+                      { value: "draft", label: "Draft", icon: FileEdit, shortcut: "Shift+3" },
+                      { value: "unlisted", label: "Unlisted", icon: LinkIcon, shortcut: "Shift+4" },
+                    ]}
+                    selectedValue={visibilityFilter}
+                    onChange={(val) => setVisibilityFilter(val as any)}
+                    fullWidth
+                  />
+                </div>
               </div>
 
               <FormCardGrid
-                formsList={formsList?.slice(0, 4)}
-                hideDelete
+                formsList={filteredForms}
                 isFormsLoading={isFormsLoading}
                 setSelectedFormForDrawer={setSelectedFormForDrawer}
                 handleDeleteForm={handleDeleteForm}

@@ -8,6 +8,7 @@ import { LoadingSpinner } from "@sec-form/ui";
 import { useTranslations } from "next-intl";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FormAnalyticsRow } from "@/components/dashboard/FormAnalyticsRow";
 
 export default function AnalyticsDashboardPage() {
   const t = useTranslations("Analytics");
@@ -161,70 +162,3 @@ export default function AnalyticsDashboardPage() {
   );
 }
 
-function FormAnalyticsRow({ form }: { form: any }) {
-  const { data: analytics, isLoading } = trpc.analytics.getFormAnalytics.useQuery({ formId: form.id });
-
-  const getVisibilityColor = (vis: string) => {
-    switch (vis) {
-      case "public":
-        return "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-600/10 dark:ring-emerald-500/20";
-      case "unlisted":
-        return "bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 ring-1 ring-amber-600/10 dark:ring-amber-500/20";
-      default:
-        return "bg-muted text-muted-foreground ring-1 ring-border";
-    }
-  };
-
-  return (
-    <tr className="border-b border-border hover:bg-muted/50 transition-colors">
-      <td className="py-4 px-6">
-        <div className="font-semibold text-foreground truncate max-w-xs">{form.title}</div>
-        {form.description && (
-          <div className="text-xs text-muted-foreground truncate max-w-xs mt-0.5">{form.description}</div>
-        )}
-      </td>
-      <td className="py-4 px-6">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold tracking-wide uppercase ${getVisibilityColor(form.visibility)}`}>
-          {form.visibility}
-        </span>
-      </td>
-      <td className="py-4 px-6 text-sm font-medium text-foreground">
-        {isLoading ? (
-          <Skeleton className="h-4 w-8 inline-block" />
-        ) : (
-          analytics?.totalViews ?? 0
-        )}
-      </td>
-      <td className="py-4 px-6 text-sm font-medium text-foreground">
-        {isLoading ? (
-          <Skeleton className="h-4 w-8 inline-block" />
-        ) : (
-          analytics?.totalResponses ?? 0
-        )}
-      </td>
-      <td className="py-4 px-6 text-sm font-medium text-foreground">
-        {isLoading ? (
-          <Skeleton className="h-4 w-12 inline-block" />
-        ) : (
-          `${analytics?.conversionRate ?? 0}%`
-        )}
-      </td>
-      <td className="py-4 px-6">
-        <div className="flex gap-2">
-          <Link
-            href={`/dashboard/builder/${form.id}?tab=analytics`}
-            className="inline-flex h-8 items-center gap-1 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground px-3 text-xs font-bold text-muted-foreground transition-colors shadow-sm"
-          >
-            <BarChart3 className="w-3.5 h-3.5" /> Stats
-          </Link>
-          <Link
-            href={`/dashboard/builder/${form.id}`}
-            className="inline-flex h-8 items-center gap-1 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground px-3 text-xs font-bold text-muted-foreground transition-colors shadow-sm"
-          >
-            <Pencil className="w-3.5 h-3.5" /> Edit
-          </Link>
-        </div>
-      </td>
-    </tr>
-  );
-}

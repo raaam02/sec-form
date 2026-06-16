@@ -5,23 +5,32 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { trpc } from "../../../utils/trpc";
 import { FORM_TEMPLATES, BUILTIN_THEMES } from "@sec-form/shared";
-import { Copy, Compass, AlertCircle } from "lucide-react";
+import { Copy, Compass, AlertCircle, Search, Filter, Layers } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { Input } from "@/components/ui/input";
+import { TabBar } from "@/components/TabBar";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function DashboardExplorePage() {
   const t = useTranslations("Dashboard");
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [actionTemplateId, setActionTemplateId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
   const categories = ["All", ...Array.from(new Set(FORM_TEMPLATES.map((t) => t.category)))];
 
-  const filteredTemplates = selectedCategory === "All"
-    ? FORM_TEMPLATES
-    : FORM_TEMPLATES.filter((t) => t.category === selectedCategory);
+  const filteredTemplates = FORM_TEMPLATES.filter((t) => {
+    const matchesCategory = selectedCategory === "All" || t.category === selectedCategory;
+    const matchesSearch =
+      searchQuery === "" ||
+      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   // Mutations
   const createFormMutation = trpc.forms.create.useMutation();
@@ -76,32 +85,46 @@ export default function DashboardExplorePage() {
       {/* Scrollable Body area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6 sm:p-8">
         <div className="max-w-6xl mx-auto space-y-8">
-          {/* Category Filters */}
-          <div className="flex flex-wrap gap-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-                  selectedCategory === cat
-                    ? "bg-indigo-600 border-indigo-600 text-white shadow-md shadow-indigo-100 dark:shadow-none"
-                    : "bg-card border-border text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+          
+          <div className="sticky top-0 z-20 flex flex-col sm:flex-row gap-4 items-center justify-between -mx-4 sm:mx-0 rounded-none sm:rounded-2xl bg-transparent pointer-events-none">
+            <div className="relative w-full sm:w-80 backdrop-blur-sm pointer-events-auto">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search templates..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-10 w-full bg-background/50 border-border rounded-xl text-sm transition-colors focus:bg-background"
+              />
+            </div>
+            <div className="relative h-14 w-full sm:w-[450px]">
+              <TabBar
+                items={categories.map((cat) => ({
+                  value: cat,
+                  label: cat,
+                  icon: Layers,
+                }))}
+                selectedValue={selectedCategory}
+                onChange={(val) => setSelectedCategory(val as string)}
+                fullWidth
+              />
+            </div>
           </div>
 
           {/* Templates Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
-            {filteredTemplates.map((template) => {
-              const isCurrentLoading = isActionLoading && actionTemplateId === template.id;
-              return (
-                <div
-                  key={template.id}
-                  className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between text-card-foreground"
-                >
+          <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-6">
+            <AnimatePresence mode="popLayout">
+              {filteredTemplates.map((template) => {
+                const isCurrentLoading = isActionLoading && actionTemplateId === template.id;
+                return (
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ type: "tween", ease: "linear", duration: 0.2 }}
+                    key={template.id}
+                    className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between text-card-foreground"
+                  >
                   <div>
                     <div className="flex items-center justify-between">
                       <span className="rounded-md bg-indigo-500/10 px-2 py-0.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400">
@@ -185,10 +208,11 @@ export default function DashboardExplorePage() {
                       )}
                     </button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { FileText, Eye, BarChart2, Sparkles, Trash2, ArrowRight, Pencil } from "lucide-react";
+import { FileText, Eye, BarChart2, Sparkles, Trash2, ArrowRight, Pencil, Inbox } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/comp
 import { useTranslations } from "next-intl";
 import { ConfirmationPopover } from "@/components/ui/confirmation-popover";
 import { Skeleton } from "@/components/ui/skeleton";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -39,10 +39,13 @@ interface FormCard {
   description?: string | null;
   visibility: string;
   slug: string;
+  totalViews?: number;
+  totalResponses?: number;
 }
 
 interface FormCardGridProps {
   formsList: FormCard[] | undefined;
+  hideDelete?: boolean;
   isFormsLoading: boolean;
   setSelectedFormForDrawer: (form: FormCard) => void;
   handleDeleteForm: (id: string) => void;
@@ -52,6 +55,7 @@ interface FormCardGridProps {
 
 export function FormCardGrid({
   formsList,
+  hideDelete = false,
   isFormsLoading,
   setSelectedFormForDrawer,
   handleDeleteForm,
@@ -133,10 +137,16 @@ export function FormCardGrid({
         animate="visible"
         className={`grid gap-6 ${gridColsClass}`}
       >
-        {formsList.map((form) => (
-          <motion.div
-            key={form.id}
-            variants={cardVariants}
+        <AnimatePresence mode="popLayout">
+          {formsList.map((form) => (
+            <motion.div
+              key={form.id}
+              layout
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "tween", ease: "linear", duration: 0.2 }}
+              variants={cardVariants}
             whileHover={{
               y: -3,
               boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
@@ -152,42 +162,55 @@ export function FormCardGrid({
                   {form.visibility}
                 </span>
                 
-                <ConfirmationPopover
-                  title={t("cardConfirmDelete")}
-                  description="This will permanently delete the form."
-                  confirmText="Delete"
-                  onConfirm={() => handleDeleteForm(form.id)}
-                >
-                  <motion.div
-                    whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
-                    whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                      if (e.nativeEvent && e.nativeEvent.stopPropagation) {
-                        e.nativeEvent.stopPropagation();
-                      }
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (e.nativeEvent && e.nativeEvent.stopPropagation) {
-                        e.nativeEvent.stopPropagation();
-                      }
-                    }}
-                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 flex items-center justify-center"
+                {!hideDelete && (
+                  <ConfirmationPopover
+                    title={t("cardConfirmDelete")}
+                    description="This will permanently delete the form."
+                    confirmText="Delete"
+                    onConfirm={() => handleDeleteForm(form.id)}
                   >
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-full w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-0"
+                    <motion.div
+                      whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                      whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                      onPointerDown={(e) => {
+                        e.stopPropagation();
+                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                          e.nativeEvent.stopPropagation();
+                        }
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                          e.nativeEvent.stopPropagation();
+                        }
+                      }}
+                      className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 flex items-center justify-center"
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                </ConfirmationPopover>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-full w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </motion.div>
+                  </ConfirmationPopover>
+                )}
               </div>
 
               <h3 className="mt-4 font-outfit text-lg font-bold text-foreground truncate">{form.title}</h3>
               <p className="mt-1.5 text-muted-foreground text-sm line-clamp-2 min-h-[40px]">{form.description || "No description."}</p>
+
+              <div className="mt-4 flex items-center gap-4 text-xs font-medium text-muted-foreground">
+                <div className="flex items-center gap-1.5" title="Views">
+                  <Eye className="h-4 w-4 text-emerald-500/70" />
+                  <span>{form.totalViews ?? 0} views</span>
+                </div>
+                <div className="flex items-center gap-1.5" title="Responses">
+                  <Inbox className="h-4 w-4 text-purple-500/70" />
+                  <span>{form.totalResponses ?? 0} responses</span>
+                </div>
+              </div>
             </div>
 
             <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-2">
@@ -221,7 +244,7 @@ export function FormCardGrid({
                         className="h-8 w-8 text-muted-foreground hover:text-foreground"
                         asChild
                       >
-                        <Link href={`/dashboard/builder/${form.id}`}>
+                        <Link href={`/dashboard/my-forms/${form.id}/edit`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
@@ -263,44 +286,11 @@ export function FormCardGrid({
                   </TooltipTrigger>
                   <TooltipContent>{t("cardPublicLink")}</TooltipContent>
                 </Tooltip>
-
-                {/* View Analytics Button with Tooltip */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <motion.div
-                      whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
-                      whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-                      onPointerDown={(e) => {
-                        e.stopPropagation();
-                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
-                          e.nativeEvent.stopPropagation();
-                        }
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
-                          e.nativeEvent.stopPropagation();
-                        }
-                      }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        asChild
-                      >
-                        <Link href={`/dashboard/builder/${form.id}?tab=analytics`}>
-                          <BarChart2 className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </motion.div>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("cardAnalytics")}</TooltipContent>
-                </Tooltip>
               </div>
             </div>
           </motion.div>
-        ))}
+          ))}
+        </AnimatePresence>
       </motion.div>
     </TooltipProvider>
   );

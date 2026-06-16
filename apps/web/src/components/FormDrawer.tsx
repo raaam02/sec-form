@@ -367,7 +367,7 @@ export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerP
                       </div>
                       <button
                         onClick={handleRunAI}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 px-4 text-xs font-bold text-white shadow-sm hover:opacity-95"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-gradient-to-r from-primary to-pink-500 px-4 text-xs font-bold text-white shadow-sm hover:opacity-95"
                       >
                         <Sparkles className="h-3.5 w-3.5" /> Analyze Responses
                       </button>
@@ -390,7 +390,7 @@ export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerP
             <Eye className="h-4 w-4" /> Live Form
           </Link>
           <Link
-            href={`/dashboard/builder/${form.id}`}
+            href={`/dashboard/my-forms/${form.id}/edit`}
             className="flex-1 inline-flex h-11 items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-md shadow-indigo-100 dark:shadow-none transition-colors"
           >
             <span>Go to Editor</span>

@@ -46,7 +46,7 @@ export default function ThemesPage() {
         <div className="mx-auto max-w-6xl w-full rounded-2xl border border-border bg-card/75 backdrop-blur-md shadow-sm transition-colors duration-200">
           <div className="flex h-16 items-center justify-between px-4 sm:px-6">
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-600 shadow-md shadow-indigo-200 dark:shadow-none">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-primary to-rose-400 shadow-md shadow-indigo-200 dark:shadow-none">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="font-outfit text-xl font-bold tracking-tight text-foreground">
@@ -89,7 +89,7 @@ export default function ThemesPage() {
                   <button
                     onClick={handleDemoLogin}
                     disabled={isLoggingIn}
-                    className="inline-flex h-9 items-center justify-center rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 text-sm font-semibold text-white shadow-md shadow-indigo-100 dark:shadow-none hover:opacity-90 transition-opacity disabled:opacity-50"
+                    className="inline-flex h-9 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-pink-600 px-4 text-sm font-semibold text-white shadow-md shadow-indigo-100 dark:shadow-none hover:opacity-90 transition-opacity disabled:opacity-50"
                   >
                     {isLoggingIn ? tLanding("loggingIn") : tLanding("tryDemo")}
                   </button>
