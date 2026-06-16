@@ -22,13 +22,13 @@ export function Providers({ children }: { children: React.ReactNode }) {
             retry: false,
           },
           mutations: {
-            onError: (error) => {
+            onError: (error: any) => {
               toast.error(error.message || "An error occurred");
             },
           },
         },
         queryCache: new QueryCache({
-          onError: (error) => {
+          onError: (error: any) => {
             toast.error(error.message || "An error occurred");
           },
         }),

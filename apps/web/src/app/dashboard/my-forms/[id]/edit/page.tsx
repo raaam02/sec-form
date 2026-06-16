@@ -34,8 +34,19 @@ export default function BuilderPage() {
 
   // Queries
   const { data: form, isLoading: isFormLoading, error: formError } = trpcAny.forms.get.useQuery({ id });
+  const { data: analytics, isLoading: isAnalyticsLoading } = trpcAny.analytics.getFormAnalytics.useQuery(
+    { formId: id },
+    { enabled: middleTab === "analytics" }
+  );
+  const { data: responses, isLoading: isResponsesLoading } = trpcAny.submissions.list.useQuery(
+    { formId: id },
+    { enabled: middleTab === "responses" }
+  );
+
   // Mutations
   const updateFormMutation = trpcAny.forms.update.useMutation();
+  const generateInsightsMutation = trpcAny.ai.generateInsights.useMutation();
+  const exportCSVMutation = trpcAny.submissions.exportCSV.useMutation();
 
   // Local Form state
   const [fields, setFields] = useState<FormField[]>([]);
@@ -46,7 +57,10 @@ export default function BuilderPage() {
   // Theme state
   const [activeTheme, setActiveTheme] = useState<ThemeConfig | null>(null);
 
-
+  // AI Insights state
+  const [aiInsights, setAIInsights] = useState<any>(null);
+  const [isInsightsGenerating, setIsInsightsGenerating] = useState(false);
+  const [insightsError, setInsightsError] = useState("");
 
   // Settings state
   const [slug, setSlug] = useState("");
@@ -326,7 +340,38 @@ export default function BuilderPage() {
     }
   };
 
+  const handleGenerateInsights = async () => {
+    setIsInsightsGenerating(true);
+    setInsightsError("");
+    try {
+      const insights = await generateInsightsMutation.mutateAsync({
+        formId: id,
+      });
+      setAIInsights(insights);
+    } catch (e: any) {
+      setInsightsError(e.message || "Failed to analyze submissions");
+    } finally {
+      setIsInsightsGenerating(false);
+    }
+  };
 
+  const handleExportCSV = async () => {
+    try {
+      const res = await exportCSVMutation.mutateAsync({ formId: id });
+      
+      const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", res.filename);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e: any) {
+      alert("Export failed: " + e.message);
+    }
+  };
 
   if (isFormLoading) {
     return (
@@ -410,6 +455,15 @@ export default function BuilderPage() {
             handleDeleteField={handleDeleteField}
             handleUpdateField={handleUpdateField}
             saveForm={saveForm}
+            responses={responses}
+            isResponsesLoading={isResponsesLoading}
+            handleExportCSV={handleExportCSV}
+            analytics={analytics}
+            isAnalyticsLoading={isAnalyticsLoading}
+            aiInsights={aiInsights}
+            isInsightsGenerating={isInsightsGenerating}
+            insightsError={insightsError}
+            handleGenerateInsights={handleGenerateInsights}
             visibility={visibility}
             setVisibility={setVisibility}
             slug={slug}

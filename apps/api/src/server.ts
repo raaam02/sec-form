@@ -13,9 +13,13 @@ import { cache } from "./redis";
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+  : ["http://localhost:3000", "http://127.0.0.1:3000"];
+
 // Enable CORS
 app.use(cors({
-  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  origin: allowedOrigins,
   credentials: true
 }));
 
