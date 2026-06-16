@@ -74,9 +74,9 @@ const DashboardPreview = () => (
 
 // ─── Floating annotation ─────────────────────────────────────────────────────
 
-const Annotation = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <div className={`absolute flex items-center gap-1.5 bg-card border border-border rounded-xl px-3 py-1.5 shadow-sm text-[11px] font-semibold text-foreground ${className}`}>
-    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+const Annotation = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex items-center gap-1.5 bg-card border border-border rounded-xl px-3 py-1.5 shadow-sm text-[11px] font-semibold text-foreground whitespace-nowrap">
+    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
     {children}
   </div>
 );
@@ -196,22 +196,24 @@ export function LandingHero() {
             {/* Glow */}
             <div className="absolute inset-0 rounded-3xl bg-primary/15 blur-3xl scale-90 pointer-events-none" />
 
-            {/* Floating annotations */}
+            {/* Floating annotations — opacity-only animation prevents positional jumping */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6, duration: 0.4 }}
+              className="absolute -top-4 -right-4 z-10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.4 }}
             >
-              <Annotation className="-top-4 -right-4 z-10">
+              <Annotation>
                 AI generating form…
               </Annotation>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.9, duration: 0.4 }}
+              className="absolute -bottom-4 -left-4 z-10"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.0, duration: 0.4 }}
             >
-              <Annotation className="-bottom-4 -left-4 z-10">
+              <Annotation>
                 76.4% conversion ↑
               </Annotation>
             </motion.div>

@@ -87,65 +87,6 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-between transition-colors duration-200">
-      {/* FLOATING HEADER */}
-      <header className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6">
-        <div className="mx-auto max-w-6xl w-full rounded-2xl border border-border bg-card/75 backdrop-blur-md shadow-sm transition-colors duration-200">
-          <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-primary to-rose-400 shadow-md shadow-indigo-200 dark:shadow-none">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-outfit text-xl font-bold tracking-tight text-foreground">
-                {tLanding("logo")}
-              </span>
-            </Link>
-
-            <nav className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
-              <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                {tLanding("navExplore")}
-              </Link>
-              <Link href="/themes" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                {tLanding("navThemes")}
-              </Link>
-              <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                {tLanding("navPricing")}
-              </Link>
-              <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1">
-                {tLanding("navApiDocs")} <Code className="h-3 w-3" />
-              </a>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              {session ? (
-                <Link
-                  href="/dashboard"
-                  className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
-                >
-                  {tLanding("ctaStart")}
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                  >
-                    {tLanding("login")}
-                  </Link>
-                  <button
-                    onClick={handleDemoLogin}
-                    disabled={isLoggingIn}
-                    className="inline-flex h-9 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-pink-600 px-4 text-sm font-semibold text-white shadow-md shadow-indigo-100 dark:shadow-none hover:opacity-90 transition-opacity disabled:opacity-50"
-                  >
-                    {isLoggingIn ? tLanding("loggingIn") : tLanding("tryDemo")}
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="flex-1 py-16 pt-28 container mx-auto px-4 sm:px-6">
         <div className="text-center max-w-2xl mx-auto">
           <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
@@ -162,12 +103,12 @@ export default function PricingPage() {
               key={tier.name}
               className={`rounded-2xl bg-card border p-8 shadow-sm flex flex-col justify-between relative ${
                 tier.popular 
-                  ? "border-indigo-600 dark:border-indigo-500 ring-2 ring-indigo-600/10 dark:ring-indigo-500/20" 
+                  ? "border-primary ring-2 ring-indigo-600/10 dark:ring-indigo-500/20" 
                   : "border-border"
               }`}
             >
               {tier.popular && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-indigo-600 px-3 py-1 text-xs font-bold text-white uppercase tracking-wider">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground uppercase tracking-wider">
                   {tPricing("mostPopular")}
                 </span>
               )}
@@ -182,7 +123,7 @@ export default function PricingPage() {
                 <ul className="mt-8 space-y-4 text-sm text-muted-foreground">
                   {tier.features.map((feat) => (
                     <li key={feat} className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-primary shrink-0" />
                       <span>{feat}</span>
                     </li>
                   ))}
@@ -194,7 +135,7 @@ export default function PricingPage() {
                   href="/login"
                   className={`block w-full py-3 text-center rounded-xl font-semibold text-sm transition-all ${
                     tier.popular
-                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-indigo-500"
+                      ? "bg-primary text-white shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-primary/80"
                       : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   }`}
                 >
@@ -205,27 +146,6 @@ export default function PricingPage() {
           ))}
         </div>
       </main>
-
-      {/* FOOTER */}
-      <footer className="border-t border-border bg-muted/50 py-10 transition-colors duration-200">
-        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <p>{tLanding("rights")}</p>
-            <LocaleSwitcher />
-          </div>
-          <div className="flex gap-4">
-            <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400">
-              {tLanding("navExplore")}
-            </Link>
-            <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400">
-              {tLanding("navPricing")}
-            </Link>
-            <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400">
-              {tLanding("navApiDocs")}
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

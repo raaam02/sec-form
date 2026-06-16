@@ -56,66 +56,6 @@ export default function ExplorePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-between transition-colors duration-200">
-      
-      {/* FLOATING HEADER */}
-      <header className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6">
-        <div className="mx-auto max-w-6xl w-full rounded-2xl border border-border bg-card/75 backdrop-blur-md shadow-sm transition-colors duration-200">
-          <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-primary to-rose-400 shadow-md shadow-indigo-200 dark:shadow-none">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-outfit text-xl font-bold tracking-tight text-foreground">
-                {tLanding("logo")}
-              </span>
-            </Link>
-
-            <nav className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
-              <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                {tLanding("navExplore")}
-              </Link>
-              <Link href="/themes" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                {tLanding("navThemes")}
-              </Link>
-              <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                {tLanding("navPricing")}
-              </Link>
-              <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors flex items-center gap-1">
-                {tLanding("navApiDocs")} <Code className="h-3 w-3" />
-              </a>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              {session ? (
-                <Link
-                  href="/dashboard"
-                  className="inline-flex h-9 items-center justify-center rounded-lg bg-indigo-600 px-4 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
-                >
-                  {tLanding("ctaStart")}
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="inline-flex h-9 items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                  >
-                    {tLanding("login")}
-                  </Link>
-                  <button
-                    onClick={handleDemoLogin}
-                    disabled={isLoggingIn}
-                    className="inline-flex h-9 items-center justify-center rounded-lg bg-gradient-to-r from-primary to-pink-600 px-4 text-sm font-semibold text-white shadow-md shadow-indigo-100 dark:shadow-none hover:opacity-90 transition-opacity disabled:opacity-50"
-                  >
-                    {isLoggingIn ? tLanding("loggingIn") : tLanding("tryDemo")}
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="flex-1 py-16 pt-28 container mx-auto px-4 sm:px-6 max-w-6xl">
         <div className="text-center max-w-2xl mx-auto">
           <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
@@ -220,7 +160,7 @@ export default function ExplorePage() {
               <div className="mt-6 pt-4 border-t border-border flex gap-2">
                 <button
                   onClick={() => handleUseTemplate(template.id)}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-primary hover:bg-indigo-500 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors"
                 >
                   <Copy className="h-4 w-4" /> {tExplore("useTemplate")}
                 </button>
@@ -229,27 +169,6 @@ export default function ExplorePage() {
           ))}
         </div>
       </main>
-
-      {/* FOOTER */}
-      <footer className="border-t border-border bg-muted py-10 transition-colors duration-200">
-        <div className="container mx-auto px-4 text-center text-muted-foreground text-sm flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <p>{tLanding("rights")}</p>
-            <LocaleSwitcher />
-          </div>
-          <div className="flex gap-4">
-            <Link href="/explore" className="hover:text-indigo-600 dark:hover:text-indigo-400">
-              {tLanding("navExplore")}
-            </Link>
-            <Link href="/pricing" className="hover:text-indigo-600 dark:hover:text-indigo-400">
-              {tLanding("navPricing")}
-            </Link>
-            <a href="http://localhost:4000/docs" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400">
-              {tLanding("navApiDocs")}
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

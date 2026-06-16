@@ -186,7 +186,7 @@ export default function DashboardPage() {
               </div>
 
               <FormCardGrid
-                formsList={formsList?.slice(0, 4)}
+                formsList={formsList?.slice(0, 6)}
                 hideDelete
                 isFormsLoading={isFormsLoading}
                 setSelectedFormForDrawer={setSelectedFormForDrawer}

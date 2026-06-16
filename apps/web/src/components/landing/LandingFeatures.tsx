@@ -14,7 +14,7 @@ interface FeatureCard {
   id: string;
   bg: string;
   border: string;
-  accent: string;
+  accentColor: string;
   heading: string;
   body: string;
   illustration: React.ReactNode;
@@ -28,87 +28,87 @@ interface FeatureCard {
 const FEATURE_CARDS: FeatureCard[] = [
   {
     id: "ai",
-    bg: "bg-[#fdf4ff]",
-    border: "border-[#e9b8f5]/50",
-    accent: "#c084fc",
+    bg: "bg-purple-50 dark:bg-purple-950/25",
+    border: "border-purple-200/60 dark:border-purple-800/40",
+    accentColor: "rgb(192,132,252)",
     heading: "AI-Powered Generation",
     body: "Describe your form in plain English. Our AI builds it instantly — fields, validation, logic, all included.",
     illustration: <IllustrationAI />,
     tag: "AI",
-    tagBg: "bg-[#f3e8ff] border-[#e9d5ff]",
-    tagText: "text-[#9333ea]",
+    tagBg: "bg-purple-100 dark:bg-purple-900/50 border-purple-200 dark:border-purple-700",
+    tagText: "text-purple-700 dark:text-purple-300",
     highlight: "AI builds it",
-    highlightColor: "text-[#9333ea]",
+    highlightColor: "text-purple-600 dark:text-purple-400",
   },
   {
     id: "theme",
-    bg: "bg-[#f0fdf9]",
-    border: "border-[#99f6e4]/50",
-    accent: "#14b8a6",
+    bg: "bg-teal-50 dark:bg-teal-950/25",
+    border: "border-teal-200/60 dark:border-teal-800/40",
+    accentColor: "rgb(20,184,166)",
     heading: "Beautiful Themes",
     body: "Choose from dozens of carefully crafted themes. Every detail — typography, spacing, color — is perfectly balanced.",
     illustration: <IllustrationTheme />,
     tag: "Design",
-    tagBg: "bg-[#ccfbf1] border-[#99f6e4]",
-    tagText: "text-[#0d9488]",
+    tagBg: "bg-teal-100 dark:bg-teal-900/50 border-teal-200 dark:border-teal-700",
+    tagText: "text-teal-700 dark:text-teal-300",
     highlight: "perfectly balanced",
-    highlightColor: "text-[#0d9488]",
+    highlightColor: "text-teal-600 dark:text-teal-400",
   },
   {
     id: "analytics",
-    bg: "bg-[#eff6ff]",
-    border: "border-[#bfdbfe]/50",
-    accent: "#3b82f6",
+    bg: "bg-blue-50 dark:bg-blue-950/25",
+    border: "border-blue-200/60 dark:border-blue-800/40",
+    accentColor: "rgb(59,130,246)",
     heading: "Deep Analytics",
     body: "Track submissions, measure conversion, identify drop-offs. Every insight you need, visualized clearly.",
     illustration: <IllustrationAnalytics />,
     tag: "Insights",
-    tagBg: "bg-[#dbeafe] border-[#bfdbfe]",
-    tagText: "text-[#2563eb]",
+    tagBg: "bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-700",
+    tagText: "text-blue-700 dark:text-blue-300",
     highlight: "Every insight",
-    highlightColor: "text-[#2563eb]",
+    highlightColor: "text-blue-600 dark:text-blue-400",
   },
   {
     id: "security",
-    bg: "bg-[#f0fdf4]",
-    border: "border-[#bbf7d0]/50",
-    accent: "#22c55e",
+    bg: "bg-emerald-50 dark:bg-emerald-950/25",
+    border: "border-emerald-200/60 dark:border-emerald-800/40",
+    accentColor: "rgb(34,197,94)",
     heading: "Enterprise Security",
     body: "Role-based access, encrypted submissions, GDPR compliance built-in. Security you can trust at any scale.",
     illustration: <IllustrationSecurity />,
     tag: "Secure",
-    tagBg: "bg-[#dcfce7] border-[#bbf7d0]",
-    tagText: "text-[#16a34a]",
+    tagBg: "bg-emerald-100 dark:bg-emerald-900/50 border-emerald-200 dark:border-emerald-700",
+    tagText: "text-emerald-700 dark:text-emerald-300",
     highlight: "trust at any scale",
-    highlightColor: "text-[#16a34a]",
+    highlightColor: "text-emerald-600 dark:text-emerald-400",
   },
   {
     id: "builder",
-    bg: "bg-[#fefce8]",
-    border: "border-[#fde68a]/50",
-    accent: "#eab308",
+    bg: "bg-yellow-50 dark:bg-yellow-950/25",
+    border: "border-yellow-200/60 dark:border-yellow-800/40",
+    accentColor: "rgb(234,179,8)",
     heading: "Visual Builder",
     body: "Drag, drop, reorder. Build complex multi-step forms visually with our intuitive canvas — no code needed.",
     illustration: <IllustrationDragDrop />,
     tag: "Builder",
-    tagBg: "bg-[#fef9c3] border-[#fde68a]",
-    tagText: "text-[#ca8a04]",
+    tagBg: "bg-yellow-100 dark:bg-yellow-900/50 border-yellow-200 dark:border-yellow-700",
+    tagText: "text-yellow-700 dark:text-yellow-300",
     highlight: "no code needed",
-    highlightColor: "text-[#ca8a04]",
+    highlightColor: "text-yellow-600 dark:text-yellow-400",
   },
   {
     id: "publish",
-    bg: "bg-[#fff7ed]",
-    border: "border-[#fed7aa]/50",
-    accent: "#f97316",
+    bg: "bg-orange-50 dark:bg-orange-950/25",
+    border: "border-orange-200/60 dark:border-orange-800/40",
+    accentColor: "rgb(249,115,22)",
     heading: "One-Click Publish",
     body: "Share via link, embed on any site, or integrate with your stack via our REST API and webhooks.",
     illustration: <IllustrationPublish />,
     tag: "Publish",
-    tagBg: "bg-[#ffedd5] border-[#fed7aa]",
-    tagText: "text-[#ea580c]",
+    tagBg: "bg-orange-100 dark:bg-orange-900/50 border-orange-200 dark:border-orange-700",
+    tagText: "text-orange-700 dark:text-orange-300",
     highlight: "any site",
-    highlightColor: "text-[#ea580c]",
+    highlightColor: "text-orange-600 dark:text-orange-400",
   },
 ];
 
@@ -120,10 +120,10 @@ function FeatureCardItem({ card }: { card: FeatureCard }) {
       whileHover={{ y: -5, transition: { duration: 0.2, ease: "easeOut" } }}
       className={`relative group rounded-3xl border ${card.border} ${card.bg} p-7 flex flex-col gap-5 overflow-hidden shadow-sm hover:shadow-md transition-shadow`}
     >
-      {/* Subtle organic shape */}
+      {/* Corner organic circle */}
       <div
-        className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-15 pointer-events-none"
-        style={{ background: card.accent }}
+        className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-10 dark:opacity-5 pointer-events-none"
+        style={{ background: card.accentColor }}
       />
 
       {/* Tag + illustration */}
@@ -136,12 +136,12 @@ function FeatureCardItem({ card }: { card: FeatureCard }) {
         </div>
       </div>
 
-      {/* Content */}
+      {/* Text */}
       <div>
         <h3 className="font-outfit text-[19px] font-bold text-foreground mb-2 leading-snug">
           {card.heading}
         </h3>
-        <p className={`text-[14px] text-muted-foreground leading-relaxed`}>
+        <p className="text-[14px] text-muted-foreground leading-relaxed">
           {parts.map((part, i, arr) =>
             i < arr.length - 1 ? (
               <React.Fragment key={i}>

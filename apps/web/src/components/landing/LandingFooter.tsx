@@ -10,7 +10,7 @@ const NAV_COLUMNS = [
   {
     title: "Product",
     links: [
-      { label: "Explore Templates", href: "/dashboard/explore" },
+      { label: "Templates", href: "/dashboard/explore" },
       { label: "Theme Gallery", href: "/themes" },
       { label: "Pricing", href: "/pricing" },
       { label: "Changelog", href: "/changelog" },
@@ -44,9 +44,9 @@ export function LandingFooter() {
       {/* Giant brand watermark */}
       <div
         aria-hidden
-        className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
+        className="absolute top-28 inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
       >
-        <span className="font-outfit font-black text-[18vw] leading-none tracking-tighter text-primary/[0.035] whitespace-nowrap translate-y-2">
+        <span className="font-outfit font-black text-[18vw] leading-none tracking-tighter text-foreground/[0.035] dark:text-foreground/[0.04] whitespace-nowrap translate-y-2">
           Formu.AI
         </span>
       </div>
@@ -83,7 +83,7 @@ export function LandingFooter() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}
-                  className="h-8 w-8 rounded-lg border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  className="h-8 w-8 rounded-lg border border-border backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
                 >
                   <Icon className="h-3.5 w-3.5" />
                 </a>
@@ -131,7 +131,7 @@ export function LandingFooter() {
       </div>
 
       {/* Bottom strip */}
-      <div className="border-t border-border/50">
+      <div className="border-t border-border/50 mt-36">
         <div className="container mx-auto px-4 sm:px-6 max-w-6xl py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-muted-foreground relative z-10">
           <span>{t("rights")}</span>
           <div className="flex items-center gap-4">

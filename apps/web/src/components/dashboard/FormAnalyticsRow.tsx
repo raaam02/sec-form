@@ -87,7 +87,9 @@ export function FormAnalyticsRow({ form }: { form: any }) {
         <td className="py-4 px-6">
           <div className="font-semibold text-foreground truncate max-w-xs">{form.title}</div>
           {form.description && (
-            <div className="text-xs text-muted-foreground truncate max-w-xs mt-0.5">{form.description}</div>
+            <div className={`text-xs text-muted-foreground mt-0.5 max-w-xs transition-all ${isExpanded ? "whitespace-normal" : "truncate"}`}>
+              {form.description}
+            </div>
           )}
         </td>
         <td className="py-4 px-6">

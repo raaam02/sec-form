@@ -48,7 +48,7 @@ export function LandingNav() {
 
           {/* Nav */}
           <nav className="hidden md:flex gap-6 text-[13px] font-medium text-muted-foreground">
-            <Link href="/dashboard/explore" className="hover:text-foreground transition-colors">{t("navExplore")}</Link>
+            <Link href="/explore" className="hover:text-foreground transition-colors">{t("navExplore")}</Link>
             <Link href="/themes" className="hover:text-foreground transition-colors">{t("navThemes")}</Link>
             <Link href="/pricing" className="hover:text-foreground transition-colors">{t("navPricing")}</Link>
             <a

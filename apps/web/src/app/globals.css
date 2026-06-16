@@ -59,7 +59,7 @@
 
   .dark {
     /* Page background: very deep slate / navy */
-    --background: 326, 78%, 3%;
+    --background: 333 25% 7%;
     --foreground: 210 20% 96%;
 
     /* Cards: a touch lighter than bg — slightly elevated dark surface */
@@ -69,7 +69,7 @@
     --popover: 222 47% 10%;
     --popover-foreground: 210 20% 96%;
 
-    --primary: 333, 71%, 51%; /* Soft Purple */
+    --primary: 333 71% 65%; /* Pink accent in dark mode */
     --primary-foreground: 210 20% 98%;
 
     --secondary: 220 20% 16%;

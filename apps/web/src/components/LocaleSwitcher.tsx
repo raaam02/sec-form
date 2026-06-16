@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useLocale } from "next-intl";
 import { setLocaleAction } from "../app/actions/locale";
-import { Globe, Check } from "lucide-react";
+import { Globe, Check, ChevronDown } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 
@@ -30,13 +30,13 @@ export function LocaleSwitcher() {
       <PopoverTrigger asChild>
         <Button
           variant="outline"
-          className="h-9 w-[130px] bg-card/50 border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-all rounded-lg text-xs font-semibold gap-1.5 shrink-0 justify-between px-3"
+          className="h-9 w-[130px] backdrop-blur-sm bg-secondary/20 border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-all rounded-lg text-xs font-semibold gap-1.5 shrink-0 justify-between px-3"
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <Globe className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <span className="truncate">{getLocaleLabel(locale)}</span>
           </div>
-          <span className="text-[10px] text-muted-foreground shrink-0 select-none">▼</span>
+          <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[150px] bg-popover border-border rounded-xl text-popover-foreground p-1 shadow-lg z-50">
