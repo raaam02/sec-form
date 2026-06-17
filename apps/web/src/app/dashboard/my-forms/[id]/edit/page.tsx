@@ -6,7 +6,7 @@ import Link from "next/link";
 import { trpc } from "@/utils/trpc";
 import { ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
-import { AlertCircle, Plus, Palette, FileText, BarChart3, Settings, Inbox } from "lucide-react";
+import { AlertCircle, Plus, Palette, FileText, BarChart3, Settings, Inbox, Smartphone, Code } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 
 import { BuilderHeader } from "@/components/builder/BuilderHeader";
@@ -16,6 +16,10 @@ import { BuilderSidebarRight } from "@/components/builder/BuilderSidebarRight";
 import { ShareModal } from "@/components/builder/ShareModal";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { LimitModal } from "@/components/builder/LimitModal";
+import { ContactAdminModal } from "@/components/builder/ContactAdminModal";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // Cast trpc to bypass Next.js 15 type collision checks
 const trpcAny = trpc as any;
@@ -66,6 +70,31 @@ export default function BuilderPage() {
   const [slug, setSlug] = useState("");
   const [visibility, setVisibility] = useState<"draft" | "public" | "unlisted">("draft");
   const [layoutMode, setLayoutMode] = useState<"standard" | "single_field" | "custom_steps">("single_field");
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showContactAdminModal, setShowContactAdminModal] = useState(false);
+  const [activeMobileTab, setActiveMobileTab] = useState<"build" | "theme" | "preview" | "embed" | "settings">("build");
+
+  useEffect(() => {
+    if (activeMobileTab === "preview" || activeMobileTab === "embed") {
+      setActiveMobileTab(rightTab as any);
+    }
+  }, [rightTab]);
+
+  useEffect(() => {
+    if (activeMobileTab === "build" || activeMobileTab === "theme") {
+      setActiveMobileTab(leftTab === "themes" ? "theme" : "build");
+    }
+  }, [leftTab]);
+
+  useEffect(() => {
+    if (middleTab === "settings") {
+      setActiveMobileTab("settings");
+    } else if (middleTab === "form" && activeMobileTab === "settings") {
+      setActiveMobileTab("build");
+    }
+  }, [middleTab]);
+
+  const { data: formsList } = trpcAny.forms.list.useQuery();
   
   // Share state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -206,6 +235,14 @@ export default function BuilderPage() {
   // Auto-Save Form Logic
   const saveForm = async (updatedFields: FormField[], updatedTheme?: ThemeConfig | null, updatedLayoutMode?: "standard" | "single_field" | "custom_steps") => {
     setSaveStatus("saving");
+    
+    let nextVisibility = visibility;
+    if (visibility === "public" || visibility === "unlisted") {
+      nextVisibility = "draft";
+      setVisibility("draft");
+      toast.info("Form reverted to draft due to live edits. Please publish again to make changes public.");
+    }
+    
     try {
       await updateFormMutation.mutateAsync({
         id,
@@ -216,7 +253,9 @@ export default function BuilderPage() {
           layout: { mode: updatedLayoutMode || layoutMode }
         },
         themeJson: updatedTheme || activeTheme || undefined,
+        visibility: nextVisibility,
       });
+      utils.forms.get.invalidate({ id });
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2500);
     } catch (e: any) {
@@ -293,6 +332,16 @@ export default function BuilderPage() {
 
 
   const handleUpdateVisibility = async (newVisibility: "draft" | "public" | "unlisted") => {
+    console.log("[EditPage] handleUpdateVisibility called with:", newVisibility);
+    if (newVisibility === "public") {
+      const otherPublicForms = formsList?.filter((f: any) => f.visibility === "public" && f.id !== id) || [];
+      console.log("[EditPage] otherPublicForms count:", otherPublicForms.length, "formsList:", formsList);
+      if (otherPublicForms.length >= 3) {
+        console.log("[EditPage] Limit reached! Showing limit modal.");
+        setShowLimitModal(true);
+        return;
+      }
+    }
     setVisibility(newVisibility);
     setSaveStatus("saving");
     try {
@@ -304,6 +353,7 @@ export default function BuilderPage() {
         visibility: newVisibility,
       });
       utils.forms.get.invalidate({ id });
+      utils.forms.list.invalidate();
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2500);
 
@@ -311,6 +361,11 @@ export default function BuilderPage() {
         setIsShareModalOpen(true);
       }
     } catch (e: any) {
+      if (e.message?.includes("LIMIT_REACHED")) {
+        setShowLimitModal(true);
+        setSaveStatus("idle");
+        return;
+      }
       setSaveStatus("error");
       setSaveErrorMessage(e.message || "Failed to update visibility");
     }
@@ -318,6 +373,16 @@ export default function BuilderPage() {
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("[EditPage] handleSaveSettings called. visibility:", visibility);
+    if (visibility === "public") {
+      const otherPublicForms = formsList?.filter((f: any) => f.visibility === "public" && f.id !== id) || [];
+      console.log("[EditPage] otherPublicForms count:", otherPublicForms.length, "formsList:", formsList);
+      if (otherPublicForms.length >= 3) {
+        console.log("[EditPage] Limit reached! Showing limit modal.");
+        setShowLimitModal(true);
+        return;
+      }
+    }
     setSaveStatus("saving");
     try {
       await updateFormMutation.mutateAsync({
@@ -328,6 +393,7 @@ export default function BuilderPage() {
         visibility,
       });
       utils.forms.get.invalidate({ id });
+      utils.forms.list.invalidate();
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2500);
       
@@ -335,6 +401,11 @@ export default function BuilderPage() {
         setIsShareModalOpen(true);
       }
     } catch (e: any) {
+      if (e.message?.includes("LIMIT_REACHED")) {
+        setShowLimitModal(true);
+        setSaveStatus("idle");
+        return;
+      }
       setSaveStatus("error");
       setSaveErrorMessage(e.message || "Failed to save settings");
     }
@@ -397,12 +468,6 @@ export default function BuilderPage() {
   const focusedField = fields.find((f) => f.id === selectedFieldId);
   const hostOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
   const publicFormUrl = `${hostOrigin}/f/${slug || form.slug}`;
-
-  const activeMobileTab = 
-    middleTab === "responses" ? "responses" :
-    middleTab === "analytics" ? "analytics" :
-    middleTab === "settings" ? "settings" :
-    leftTab === "themes" ? "theme" : "build";
 
   return (
     <div className="h-full flex flex-col overflow-hidden text-foreground bg-transparent">
@@ -509,8 +574,8 @@ export default function BuilderPage() {
       <div className="flex md:hidden flex-col flex-1 overflow-hidden min-h-0 bg-muted/20 relative pb-16">
         {/* Mobile Viewport based on computed active tab */}
         <div className="flex-1 flex overflow-hidden min-h-0 relative">
-          {(activeMobileTab === "build" || activeMobileTab === "theme") && (
-            <div className={`shrink-0 ${activeMobileTab === "theme" ? "w-full" : "w-14"}`}>
+          {activeMobileTab === "build" && (
+            <div className="shrink-0 w-14">
               <BuilderSidebarLeft
                 leftTab={leftTab}
                 setLeftTab={setLeftTab}
@@ -526,7 +591,41 @@ export default function BuilderPage() {
             </div>
           )}
 
-          {activeMobileTab !== "theme" && (
+          {activeMobileTab === "theme" && (
+            <div className="w-full h-full">
+              <BuilderSidebarLeft
+                leftTab={leftTab}
+                setLeftTab={setLeftTab}
+                focusedField={focusedField || null}
+                handleUpdateField={handleUpdateField}
+                handleAddField={handleAddField}
+                activeTheme={activeTheme}
+                setActiveTheme={setActiveTheme}
+                saveForm={saveForm}
+                pushToHistory={pushToHistory}
+                fields={fields}
+              />
+            </div>
+          )}
+
+          {(activeMobileTab === "preview" || activeMobileTab === "embed") && (
+            <div className="w-full h-full">
+              <BuilderSidebarRight
+                rightTab={rightTab}
+                setRightTab={setRightTab}
+                title={title}
+                description={description}
+                fields={fields}
+                activeTheme={activeTheme}
+                layoutMode={layoutMode}
+                publicFormUrl={publicFormUrl}
+                id={id}
+                hostOrigin={hostOrigin}
+              />
+            </div>
+          )}
+
+          {(activeMobileTab === "build" || activeMobileTab === "settings") && (
             <div className="flex-1 flex flex-col min-w-0">
               <BuilderCanvas
                 middleTab={middleTab}
@@ -576,6 +675,7 @@ export default function BuilderPage() {
           <button
             type="button"
             onClick={() => {
+              setActiveMobileTab("build");
               setMiddleTab("form");
               setLeftTab("builder");
             }}
@@ -590,6 +690,7 @@ export default function BuilderPage() {
           <button
             type="button"
             onClick={() => {
+              setActiveMobileTab("theme");
               setMiddleTab("form");
               setLeftTab("themes");
             }}
@@ -603,29 +704,38 @@ export default function BuilderPage() {
 
           <button
             type="button"
-            onClick={() => setMiddleTab("responses")}
+            onClick={() => {
+              setActiveMobileTab("preview");
+              setRightTab("preview");
+            }}
             className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
-              activeMobileTab === "responses" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              activeMobileTab === "preview" ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Inbox className="h-5 w-5" />
-            <span>Responses</span>
+            <Smartphone className="h-5 w-5" />
+            <span>Preview</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setMiddleTab("analytics")}
+            onClick={() => {
+              setActiveMobileTab("embed");
+              setRightTab("embed");
+            }}
             className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
-              activeMobileTab === "analytics" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              activeMobileTab === "embed" ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            <BarChart3 className="h-5 w-5" />
-            <span>Analytics</span>
+            <Code className="h-5 w-5" />
+            <span>Embed</span>
           </button>
 
           <button
             type="button"
-            onClick={() => setMiddleTab("settings")}
+            onClick={() => {
+              setActiveMobileTab("settings");
+              setMiddleTab("settings");
+            }}
             className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
               activeMobileTab === "settings" ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
@@ -641,6 +751,20 @@ export default function BuilderPage() {
         isOpen={isShareModalOpen}
         setIsOpen={setIsShareModalOpen}
         publicFormUrl={publicFormUrl}
+      />
+
+      {/* LIMIT MODAL */}
+      <LimitModal
+        isOpen={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        onContactAdmin={() => setShowContactAdminModal(true)}
+      />
+
+      {/* CONTACT ADMIN MODAL */}
+      <ContactAdminModal
+        isOpen={showContactAdminModal}
+        onOpenChange={setShowContactAdminModal}
+        defaultPlan="pro"
       />
 
     </div>

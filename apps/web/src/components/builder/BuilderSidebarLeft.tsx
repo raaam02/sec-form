@@ -93,7 +93,7 @@ export function BuilderSidebarLeft({
   return (
     <aside className={`@container relative w-full h-full border-r border-border bg-sidebar overflow-hidden flex flex-col transition-all duration-300 ${isExpanded ? "w-64 z-30 absolute inset-y-0 left-0 md:relative md:w-full" : "w-14 md:w-full"}`}>
       {/* Mobile-only Toggle Button */}
-      <div className="absolute top-2.5 right-2.5 md:hidden z-40 pointer-events-auto">
+      {/* <div className="absolute top-2.5 right-2.5 md:hidden z-40 pointer-events-auto">
         <Button
           variant="outline"
           size="icon"
@@ -102,24 +102,26 @@ export function BuilderSidebarLeft({
         >
           {isExpanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </Button>
-      </div>
+      </div> */}
 
       {/* Tabs header */}
-      <TabBar
-        items={LEFT_TABS}
-        selectedValue={leftTab}
-        onChange={setLeftTab}
-        fullWidth
-      />
+      <div className="hidden md:block">
+        <TabBar
+          items={LEFT_TABS}
+          selectedValue={leftTab}
+          onChange={setLeftTab}
+          fullWidth
+        />
+      </div>
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 @[150px]:p-5 pt-16 space-y-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 @[150px]:p-5 pt-3 md:pt-16 space-y-6">
         {leftTab === "builder" && (
           <>
             {/* Field adder */}
-            <div className="space-y-3">
-              <h3 className="font-outfit font-extrabold text-foreground text-sm hidden @[150px]:block">{t("sidebarAddFields")}</h3>
-              <div className="grid grid-cols-1 @[150px]:grid-cols-2 @[200px]:grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2 text-[11px] font-bold text-muted-foreground">
+            <div className="space-y-3 sm:pt-12">
+              {/* <h3 className="font-outfit font-extrabold text-foreground text-sm hidden @[150px]:block">{t("sidebarAddFields")}</h3> */}
+              <div className="grid grid-cols-1 @[260px]:grid-cols-2 gap-2 text-[11px] font-bold text-muted-foreground">
                 {FIELD_TYPES.map((field) => {
                   const Icon = field.icon;
                   return (
@@ -130,12 +132,12 @@ export function BuilderSidebarLeft({
                           whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
                           whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                           onClick={() => handleAddField(field.type)}
-                          className={`flex items-center justify-center @[150px]:justify-start gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors min-w-0 ${
-                            field.colSpan2 ? "col-span-full @[150px]:justify-center" : ""
+                          className={`flex items-center justify-center @[120px]:justify-start gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors min-w-0 ${
+                            field.colSpan2 ? "col-span-full @[120px]:justify-center" : ""
                           }`}
                         >
                           <Icon className={`h-4 w-4 ${field.iconColor} shrink-0`} />
-                          <span className="truncate min-w-0 hidden @[150px]:inline">{field.label}</span>
+                          <span className="truncate min-w-0 hidden @[120px]:inline">{field.label}</span>
                         </motion.button>
                       </TooltipTrigger>
                       <TooltipContent side="right" sideOffset={14}>

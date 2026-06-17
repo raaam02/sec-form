@@ -8,11 +8,14 @@ import { CheckCircle, Sparkles, Code } from "lucide-react";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import { LocaleSwitcher } from "../../components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
+import { ContactAdminModal } from "../../components/builder/ContactAdminModal";
 
 export default function PricingPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [showContactAdminModal, setShowContactAdminModal] = useState(false);
+  const [contactPlan, setContactPlan] = useState<"general" | "pro" | "enterprise">("pro");
   
   const tLanding = useTranslations("Landing");
   const tPricing = useTranslations("Pricing");
@@ -136,6 +139,14 @@ export default function PricingPage() {
               <div className="mt-8">
                 <Link
                   href={tier.href}
+                  onClick={(e) => {
+                    if (session && tier.href.startsWith("/contact")) {
+                      e.preventDefault();
+                      const plan = tier.href.includes("plan=enterprise") ? "enterprise" : "pro";
+                      setContactPlan(plan);
+                      setShowContactAdminModal(true);
+                    }
+                  }}
                   className={`block w-full py-3 text-center rounded-xl font-semibold text-sm transition-all ${
                     tier.popular
                       ? "bg-primary text-white shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-primary/80"
@@ -149,6 +160,12 @@ export default function PricingPage() {
           ))}
         </div>
       </main>
+
+      <ContactAdminModal
+        isOpen={showContactAdminModal}
+        onOpenChange={setShowContactAdminModal}
+        defaultPlan={contactPlan}
+      />
     </div>
   );
 }

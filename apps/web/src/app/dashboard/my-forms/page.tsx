@@ -102,7 +102,7 @@ export default function DashboardPage() {
         id: newForm.id,
         schemaJson: { fields: template.fields as any },
         themeJson: theme as any,
-        visibility: "public",
+        visibility: "draft",
       });
 
       router.push(`/dashboard/my-forms/${newForm.id}/edit`);

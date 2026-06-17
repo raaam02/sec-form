@@ -153,6 +153,28 @@ export const formsRouter = router({
         });
       }
 
+      // Check active public forms limit
+      if (updates.visibility === "public") {
+        const publicFormsCount = await ctx.db
+          .select({ count: count() })
+          .from(forms)
+          .where(
+            and(
+              eq(forms.userId, ctx.user.id),
+              eq(forms.visibility, "public"),
+              ne(forms.id, id)
+            )
+          );
+        
+        const countVal = Number(publicFormsCount[0]?.count || 0);
+        if (countVal >= 3) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "LIMIT_REACHED: You have reached the limit of 3 active public forms.",
+          });
+        }
+      }
+
       // Sync published flag if visibility is changing
       let isPublished = form.isPublished;
       if (updates.visibility) {

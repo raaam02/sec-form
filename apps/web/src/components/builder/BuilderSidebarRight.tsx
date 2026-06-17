@@ -246,7 +246,7 @@ export function BuilderSidebarRight({
                   <div className="pt-2 flex gap-2">
                     {currentStepIndex > 0 && (
                       <Button 
-                        disabled
+                        onClick={() => setCurrentStepIndex((p) => Math.max(0, p - 1))}
                         variant="outline"
                         className="flex-1 h-8 text-[10px] uppercase font-bold rounded-xl transition-all shadow-sm"
                         style={{

@@ -470,90 +470,92 @@ export function BuilderCanvas({
         }}
       />
       {/* Tabs header with integrated left/right actions */}
-      <TabBar
-        items={MIDDLE_TABS}
-        selectedValue={middleTab}
-        onChange={setMiddleTab}
-        leftElement={
-          middleTab === "form" && setLayoutMode ? (
-            <div className="w-32 @[600px]:w-44 ml-3 animate-in fade-in zoom-in duration-200 hidden sm:block">
-              <Select value={layoutMode} onValueChange={(val: any) => {
-                setLayoutMode(val);
-                saveForm(fields, null, val);
-              }}>
-                <SelectTrigger className="h-8 text-xs bg-secondary/50 border-0 shadow-sm hover:bg-muted/40 transition-colors focus:ring-1 focus:ring-ring focus:ring-offset-0 backdrop-blur-sm w-full">
-                  <SelectValue placeholder="Display Layout">
-                    {layoutMode === "standard" && (
-                      <>
-                        <span className="hidden @[600px]:inline">Standard (All Fields)</span>
-                        <span className="inline @[600px]:hidden">Standard</span>
-                      </>
-                    )}
-                    {layoutMode === "single_field" && (
-                      <>
-                        <span className="hidden @[600px]:inline">One Field per Step</span>
-                        <span className="inline @[600px]:hidden">1 Field/Step</span>
-                      </>
-                    )}
-                    {layoutMode === "custom_steps" && (
-                      <>
-                        <span className="hidden @[600px]:inline">Grouped by Steps</span>
-                        <span className="inline @[600px]:hidden">Grouped</span>
-                      </>
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="bg-secondary/50 backdrop-blur-sm">
-                  <SelectItem value="standard" className="text-xs">
-                    <div className="flex flex-col">
-                      <span className="font-semibold">Standard (All Fields)</span>
-                      <span className="text-[10px] text-muted-foreground">All fields shown on one page</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="single_field" className="text-xs">
-                    <div className="flex flex-col">
-                      <span className="font-semibold">One Field per Step</span>
-                      <span className="text-[10px] text-muted-foreground">Show one question at a time</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="custom_steps" className="text-xs">
-                    <div className="flex flex-col">
-                      <span className="font-semibold">Grouped by Steps</span>
-                      <span className="text-[10px] text-muted-foreground">Use page break elements to group</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          ) : undefined
-        }
-        rightElement={
-          middleTab === "form" ? (
-            <div className="flex items-center gap-1 bg-secondary/50 shadow-sm rounded-full p-0.5 mr-3 backdrop-blur-sm animate-in fade-in zoom-in duration-200 hidden sm:flex">
-               <Tooltip delayDuration={0}>
-                 <TooltipTrigger asChild>
-                   <Button variant="ghost" size="icon" onClick={handleUndo} disabled={!canUndo} className="h-6 w-7 rounded-full">
-                     <Undo2 className="h-3.5 w-3.5" />
-                   </Button>
-                 </TooltipTrigger>
-                 <TooltipContent side="bottom">Undo [Ctrl+Z]</TooltipContent>
-               </Tooltip>
-               <div className="w-[1px] h-3 bg-border" />
-               <Tooltip delayDuration={0}>
-                 <TooltipTrigger asChild>
-                   <Button variant="ghost" size="icon" onClick={handleRedo} disabled={!canRedo} className="h-6 w-7 rounded-full">
-                     <Redo2 className="h-3.5 w-3.5" />
-                   </Button>
-                 </TooltipTrigger>
-                 <TooltipContent side="bottom">Redo [Ctrl+Y]</TooltipContent>
-               </Tooltip>
-            </div>
-          ) : undefined
-        }
-      />
+      <div className="hidden md:block">
+        <TabBar
+          items={MIDDLE_TABS}
+          selectedValue={middleTab}
+          onChange={setMiddleTab}
+          leftElement={
+            middleTab === "form" && setLayoutMode ? (
+              <div className="w-32 @[600px]:w-44 ml-3 animate-in fade-in zoom-in duration-200 hidden sm:block">
+                <Select value={layoutMode} onValueChange={(val: any) => {
+                  setLayoutMode(val);
+                  saveForm(fields, null, val);
+                }}>
+                  <SelectTrigger className="h-8 text-xs bg-secondary/50 border-0 shadow-sm hover:bg-muted/40 transition-colors focus:ring-1 focus:ring-ring focus:ring-offset-0 backdrop-blur-sm w-full">
+                    <SelectValue placeholder="Display Layout">
+                      {layoutMode === "standard" && (
+                        <>
+                          <span className="hidden @[600px]:inline">Standard (All Fields)</span>
+                          <span className="inline @[600px]:hidden">Standard</span>
+                        </>
+                      )}
+                      {layoutMode === "single_field" && (
+                        <>
+                          <span className="hidden @[600px]:inline">One Field per Step</span>
+                          <span className="inline @[600px]:hidden">1 Field/Step</span>
+                        </>
+                      )}
+                      {layoutMode === "custom_steps" && (
+                        <>
+                          <span className="hidden @[600px]:inline">Grouped by Steps</span>
+                          <span className="inline @[600px]:hidden">Grouped</span>
+                        </>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-secondary/50 backdrop-blur-sm">
+                    <SelectItem value="standard" className="text-xs">
+                      <div className="flex flex-col">
+                        <span className="font-semibold">Standard (All Fields)</span>
+                        <span className="text-[10px] text-muted-foreground">All fields shown on one page</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="single_field" className="text-xs">
+                      <div className="flex flex-col">
+                        <span className="font-semibold">One Field per Step</span>
+                        <span className="text-[10px] text-muted-foreground">Show one question at a time</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="custom_steps" className="text-xs">
+                      <div className="flex flex-col">
+                        <span className="font-semibold">Grouped by Steps</span>
+                        <span className="text-[10px] text-muted-foreground">Use page break elements to group</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : undefined
+          }
+          rightElement={
+            middleTab === "form" ? (
+              <div className="flex items-center gap-1 bg-secondary/50 shadow-sm rounded-full p-0.5 mr-3 backdrop-blur-sm animate-in fade-in zoom-in duration-200 hidden sm:flex">
+                 <Tooltip delayDuration={0}>
+                   <TooltipTrigger asChild>
+                     <Button variant="ghost" size="icon" onClick={handleUndo} disabled={!canUndo} className="h-6 w-7 rounded-full">
+                       <Undo2 className="h-3.5 w-3.5" />
+                     </Button>
+                   </TooltipTrigger>
+                   <TooltipContent side="bottom">Undo [Ctrl+Z]</TooltipContent>
+                 </Tooltip>
+                 <div className="w-[1px] h-3 bg-border" />
+                 <Tooltip delayDuration={0}>
+                   <TooltipTrigger asChild>
+                     <Button variant="ghost" size="icon" onClick={handleRedo} disabled={!canRedo} className="h-6 w-7 rounded-full">
+                       <Redo2 className="h-3.5 w-3.5" />
+                     </Button>
+                   </TooltipTrigger>
+                   <TooltipContent side="bottom">Redo [Ctrl+Y]</TooltipContent>
+                 </Tooltip>
+              </div>
+            ) : undefined
+          }
+        />
+      </div>
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-14 pt-20 min-w-0 relative z-10">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-14 pt-4 md:pt-20 min-w-0 relative z-10">
         {middleTab === "form" && (
           <div className="max-w-2xl mx-auto space-y-6 relative pb-10">
             {/* Mobile-only Canvas Controls to prevent TabBar clustering */}
@@ -586,6 +588,16 @@ export function BuilderCanvas({
                 </Button>
               </div>
             </div>
+
+            {visibility === "public" && (
+              <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-800 dark:text-amber-400">
+                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
+                <div className="space-y-0.5 text-left">
+                  <p className="font-bold">You are editing a live public form</p>
+                  <p className="opacity-90">Any changes you make here will automatically revert the form to <strong>Draft</strong> mode to prevent displaying a half-edited form publicly.</p>
+                </div>
+              </div>
+            )}
 
             <Card className="border-border bg-card/20 backdrop-blur-[1px] p-6 shadow-sm flex flex-col gap-5 relative">
               <div className="">

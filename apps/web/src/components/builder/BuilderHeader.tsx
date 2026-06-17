@@ -72,6 +72,12 @@ export function BuilderHeader({
 
       {/* Share actions & Save indicators */}
       <div className="flex items-center gap-3 shrink-0">
+        {visibility === "public" && (
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/20 text-amber-700 dark:text-amber-500 rounded-lg text-[10px] font-bold uppercase tracking-wider animate-pulse select-none">
+            <span className="h-1.5 w-1.5 bg-amber-500 rounded-full shrink-0" />
+            Editing Live Public Form
+          </div>
+        )}
         {/* Continuous saving indicator */}
         <div className="text-xs font-semibold select-none mr-2 hidden sm:block">
           {saveStatus === "saving" ? (
