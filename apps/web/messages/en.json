@@ -65,8 +65,8 @@
     "or": "or",
     "googleBtn": "Sign in with Google",
     "dontHaveAccount": "Don't have an account? Sign up",
-    "demoTitle": "Hackathon Demo Credentials:",
-    "demoCredentials": "Email: demo@demo.com | Password: demo123",
+    "demoTitle": "Demo Credentials",
+    "demoCredentials": "demo@demo.com | demo123",
     "errorGeneric": "An unexpected error occurred. Please try again.",
     "errorInvalid": "Invalid email or password. Please use: demo@demo.com / demo123"
   },

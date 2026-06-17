@@ -3,6 +3,7 @@ import * as trpcExpress from "@trpc/server/adapters/express";
 import { db, users } from "@sec-form/db";
 import { eq } from "@sec-form/db";
 import superjson from "superjson";
+import crypto from "crypto";
 
 export interface Context {
   db: typeof db;
@@ -21,11 +22,37 @@ export async function createContext({ req, res }: trpcExpress.CreateExpressConte
 
   // Support reading developer bypass header during local work/seeding
   const userIdHeader = req.headers["x-user-id"];
-  if (userIdHeader && typeof userIdHeader === "string") {
+  if (userIdHeader && typeof userIdHeader === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userIdHeader)) {
     try {
-      const dbUser = await db.query.users.findFirst({
+      let dbUser = await db.query.users.findFirst({
         where: eq(users.id, userIdHeader),
       });
+
+      // Special fallback for the demo user if using the hardcoded credentials fallback ID
+      if (!dbUser && userIdHeader === "00000000-0000-0000-0000-000000000000") {
+        dbUser = await db.query.users.findFirst({
+          where: eq(users.email, "demo@demo.com"),
+        });
+
+        // If the database has not been seeded at all, auto-create the demo user with this ID
+        if (!dbUser) {
+          const passwordHash = crypto.createHash("sha256").update("demo123").digest("hex");
+          const [newDemoUser] = await db
+            .insert(users)
+            .values({
+              id: "00000000-0000-0000-0000-000000000000",
+              name: "Demo User",
+              email: "demo@demo.com",
+              passwordHash,
+              image: "https://api.dicebear.com/7.x/adventurer/svg?seed=DemoUser",
+              role: "user",
+            })
+            .returning();
+          dbUser = newDemoUser;
+          console.log("Auto-created fallback demo user in database.");
+        }
+      }
+
       if (dbUser) {
         user = {
           id: dbUser.id,

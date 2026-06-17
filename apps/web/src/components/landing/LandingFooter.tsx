@@ -44,9 +44,9 @@ export function LandingFooter() {
       {/* Giant brand watermark */}
       <div
         aria-hidden
-        className="absolute top-28 inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden"
+        className="absolute top-28 inset-0 flex items-end pb-[88px] sm:pb-[60px] md:pb-[41px] justify-center pointer-events-none select-none overflow-hidden"
       >
-        <span className="font-outfit font-black text-[18vw] leading-none tracking-tighter text-foreground/[0.035] dark:text-foreground/[0.04] whitespace-nowrap translate-y-2">
+        <span className="font-outfit font-black text-[22vw] sm:text-[18vw] leading-none tracking-tighter text-foreground/[0.035] dark:text-foreground/[0.04] whitespace-nowrap translate-y-2">
           Formu.AI
         </span>
       </div>

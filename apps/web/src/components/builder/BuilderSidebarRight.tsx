@@ -100,7 +100,6 @@ export function BuilderSidebarRight({
             <div 
               className="w-full rounded-2xl border border-border shadow-md overflow-hidden flex flex-col transition-all duration-300 bg-background"
               style={{
-                fontFamily: activeTheme?.fontFamily || "inherit",
                 backgroundColor: activeTheme?.backgroundColor || "#ffffff",
                 color: activeTheme?.textColor || "#0f172a",
               }}

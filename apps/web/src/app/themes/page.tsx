@@ -63,50 +63,78 @@ export default function ThemesPage() {
                   <h3 className="font-outfit text-lg font-bold text-foreground">{theme.name}</h3>
                 </div>
                 
-                {/* Visual Palette Preview */}
-                 <div className="mt-6 rounded-xl border border-border p-4 bg-muted/50 space-y-4">
-                   <div className="flex justify-between items-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    <span>Colors</span>
-                    <span>Values</span>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                       <span className="text-muted-foreground">Primary Accent</span>
+                {/* Visual Form Preview with the Theme Applied */}
+                <div 
+                  className="mt-6 border border-border p-4 relative overflow-hidden flex flex-col justify-between"
+                  style={{ 
+                    backgroundColor: theme.backgroundColor, 
+                    borderRadius: theme.borderRadius,
+                    minHeight: "220px"
+                  }}
+                >
+                  {/* Mini Form Card inside the container */}
+                  <div 
+                    className="p-4 border border-border/20 shadow-sm space-y-3.5 flex-1 flex flex-col justify-between"
+                    style={{ 
+                      backgroundColor: theme.cardColor,
+                      borderRadius: `calc(${theme.borderRadius} - 4px)`
+                    }}
+                  >
+                    {/* Header */}
+                    <div className="space-y-1">
+                      <div 
+                        className="h-3.5 w-2/3 font-semibold text-xs tracking-tight truncate"
+                        style={{ color: theme.primaryColor }}
+                      >
+                        Sample Survey Form
+                      </div>
+                      <div className="h-2 w-1/2 bg-muted-foreground/20 rounded-sm" />
+                    </div>
+
+                    {/* Form Fields Mock */}
+                    <div className="space-y-2.5">
+                      {/* Text Input field */}
+                      <div className="space-y-1">
+                        <div className="h-1.5 w-1/4 bg-muted-foreground/30 rounded-sm" />
+                        <div 
+                          className="h-7 w-full rounded border border-border/30 bg-background/50 px-2 text-[9px] flex items-center text-muted-foreground select-none pointer-events-none"
+                          style={{ borderRadius: `calc(${theme.borderRadius} - 6px)` }}
+                        >
+                          Placeholder text...
+                        </div>
+                      </div>
+
+                      {/* Choice items */}
                       <div className="flex items-center gap-2">
-                         <span className="font-mono text-xs text-muted-foreground">{theme.primaryColor}</span>
-                         <div className="h-4 w-4 rounded border border-border" style={{ backgroundColor: theme.primaryColor }} />
+                        <div 
+                          className="h-3 w-3 rounded border border-border/30 bg-background/50 flex items-center justify-center shrink-0"
+                          style={{ borderRadius: `calc(${theme.borderRadius} - 8px)` }}
+                        >
+                          <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: theme.primaryColor }} />
+                        </div>
+                        <div className="h-1.5 w-1/3 bg-muted-foreground/20 rounded-sm" />
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm">
-                       <span className="text-muted-foreground">Background</span>
-                      <div className="flex items-center gap-2">
-                         <span className="font-mono text-xs text-muted-foreground">{theme.backgroundColor}</span>
-                         <div className="h-4 w-4 rounded border border-border" style={{ backgroundColor: theme.backgroundColor }} />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm">
-                       <span className="text-muted-foreground">Card Base</span>
-                      <div className="flex items-center gap-2">
-                         <span className="font-mono text-xs text-muted-foreground">{theme.cardColor}</span>
-                         <div className="h-4 w-4 rounded border border-border" style={{ backgroundColor: theme.cardColor }} />
-                      </div>
+                    {/* Submit Button */}
+                    <div 
+                      className="h-8 w-full text-[10px] font-bold flex items-center justify-center text-white shadow-sm select-none pointer-events-none"
+                      style={{ 
+                        backgroundColor: theme.primaryColor,
+                        borderRadius: `calc(${theme.borderRadius} - 6px)`
+                      }}
+                    >
+                      Submit Response
                     </div>
                   </div>
                 </div>
 
-                 <div className="mt-6 space-y-2 text-sm border-t border-border pt-4 text-muted-foreground">
-                  <div className="flex justify-between">
-                    <span>Font Family:</span>
-                     <span className="font-semibold text-foreground">{theme.fontFamily.split(",")[0]}</span>
-                   </div>
-                   <div className="flex justify-between">
-                     <span>Border Radius:</span>
-                     <span className="font-semibold text-foreground">{theme.borderRadius}</span>
+                  <div className="mt-6 space-y-2 text-sm border-t border-border pt-4 text-muted-foreground">
+                    <div className="flex justify-between">
+                      <span>Border Radius:</span>
+                      <span className="font-semibold text-foreground">{theme.borderRadius}</span>
+                    </div>
                   </div>
-                </div>
               </div>
 
               <div className="mt-6 pt-4">

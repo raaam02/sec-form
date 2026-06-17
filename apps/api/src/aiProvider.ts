@@ -140,7 +140,6 @@ export async function generateAITheme(prompt: string): Promise<any> {
           "backgroundColor": string (hex color code for body background, e.g. "#f3f4f6"),
           "textColor": string (hex color code for dark headings, e.g. "#1f2937"),
           "cardColor": string (hex color code for form card container, e.g. "#ffffff"),
-          "fontFamily": "Inter" | "Outfit" | "Roboto" | "Plus Jakarta Sans",
           "borderRadius": "0rem" | "0.25rem" | "0.5rem" | "0.75rem" | "1rem"
         }
         Return ONLY the raw JSON object. Do not wrap in backticks or include markdown.
@@ -178,7 +177,6 @@ function generateMockTheme(prompt: string): any {
       backgroundColor: "#030712", // gray-950
       textColor: "#34d399", // emerald-400
       cardColor: "#111827", // gray-900
-      fontFamily: "Plus Jakarta Sans",
       borderRadius: "0.25rem"
     };
   }
@@ -190,7 +188,6 @@ function generateMockTheme(prompt: string): any {
       backgroundColor: "#fffbeb", // amber-50
       textColor: "#7c2d12", // orange-900
       cardColor: "#ffffff",
-      fontFamily: "Outfit",
       borderRadius: "1rem"
     };
   }
@@ -202,7 +199,6 @@ function generateMockTheme(prompt: string): any {
       backgroundColor: "#f0fdf4", // green-50
       textColor: "#14532d", // green-950
       cardColor: "#ffffff",
-      fontFamily: "Inter",
       borderRadius: "0.75rem"
     };
   }
@@ -214,7 +210,6 @@ function generateMockTheme(prompt: string): any {
     backgroundColor: "#faf5ff", // purple-50
     textColor: "#4c1d95", // purple-900
     cardColor: "#ffffff",
-    fontFamily: "Outfit",
     borderRadius: "0.5rem"
   };
 }

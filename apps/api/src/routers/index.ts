@@ -5,6 +5,7 @@ import { submissionsRouter } from "./submissions";
 import { analyticsRouter } from "./analytics";
 import { aiRouter } from "./ai";
 import { adminRouter } from "./admin";
+import { supportRouter } from "./support";
 
 export const appRouter = router({
   auth: authRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   analytics: analyticsRouter,
   ai: aiRouter,
   admin: adminRouter,
+  support: supportRouter,
 });
 
 export type AppRouter = typeof appRouter;

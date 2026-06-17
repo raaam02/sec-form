@@ -222,13 +222,12 @@ export default function PublicFormPage() {
     "--background-color": theme.backgroundColor || "#f3f4f6",
     "--text-color": theme.textColor || "#1f2937",
     "--card-color": theme.cardColor || "#ffffff",
-    "--border-radius": theme.borderRadius || "0.5rem",
-    "--font-family": theme.fontFamily || "Inter, sans-serif"
+    "--border-radius": theme.borderRadius || "0.5rem"
   } as React.CSSProperties;
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-between p-4 md:p-10 font-[family-name:var(--font-family)] transition-colors"
+      className="min-h-screen flex flex-col items-center justify-between p-4 md:p-10 font-sans transition-colors"
       style={{
         ...customStyles,
         backgroundColor: "var(--background-color)",

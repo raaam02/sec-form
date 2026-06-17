@@ -50,6 +50,7 @@ export default function PricingPage() {
         "Basic theme selection",
       ],
       cta: tPricing("getStarted"),
+      href: "/signup",
       popular: false
     },
     {
@@ -65,7 +66,8 @@ export default function PricingPage() {
         "Custom URLs & Custom slugs",
         "CSV submissions exports",
       ],
-      cta: tPricing("getStarted"),
+      cta: "Contact Admin",
+      href: "/contact?plan=pro",
       popular: true
     },
     {
@@ -80,7 +82,8 @@ export default function PricingPage() {
         "Custom SAML/SSO authentication",
         "Advanced Redis rate limits",
       ],
-      cta: tPricing("getStarted"),
+      cta: "Contact Admin",
+      href: "/contact?plan=enterprise",
       popular: false
     }
   ];
@@ -132,7 +135,7 @@ export default function PricingPage() {
 
               <div className="mt-8">
                 <Link
-                  href="/login"
+                  href={tier.href}
                   className={`block w-full py-3 text-center rounded-xl font-semibold text-sm transition-all ${
                     tier.popular
                       ? "bg-primary text-white shadow-lg shadow-indigo-100 dark:shadow-none hover:bg-primary/80"

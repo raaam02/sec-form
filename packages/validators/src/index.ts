@@ -53,7 +53,6 @@ export const ThemeSchema = z.object({
   backgroundColor: z.string(),    // e.g. "#f3f4f6"
   textColor: z.string(),          // e.g. "#1f2937"
   cardColor: z.string().default("#ffffff"),
-  fontFamily: z.string().default("Inter"),
   borderRadius: z.string().default("0.5rem")
 });
 

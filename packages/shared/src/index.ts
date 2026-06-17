@@ -6,7 +6,6 @@ export interface ThemeConfig {
   backgroundColor: string;
   textColor: string;
   cardColor: string;
-  fontFamily: string;
   borderRadius: string;
 }
 
@@ -18,7 +17,6 @@ export const BUILTIN_THEMES: ThemeConfig[] = [
     backgroundColor: "#ffffff",
     textColor: "#0f172a",
     cardColor: "#f8fafc",
-    fontFamily: "Inter, sans-serif",
     borderRadius: "0.25rem"
   },
   {
@@ -28,7 +26,6 @@ export const BUILTIN_THEMES: ThemeConfig[] = [
     backgroundColor: "#fafafa",
     textColor: "#18181b",
     cardColor: "#ffffff",
-    fontFamily: "Outfit, sans-serif",
     borderRadius: "0.75rem"
   },
   {
@@ -38,7 +35,6 @@ export const BUILTIN_THEMES: ThemeConfig[] = [
     backgroundColor: "#09090b", // zinc-950
     textColor: "#fafafa",
     cardColor: "#18181b", // zinc-900
-    fontFamily: "Inter, sans-serif",
     borderRadius: "0.5rem"
   },
   {
@@ -48,7 +44,6 @@ export const BUILTIN_THEMES: ThemeConfig[] = [
     backgroundColor: "#f0f4f8",
     textColor: "#1e293b",
     cardColor: "#ffffff",
-    fontFamily: "Roboto, sans-serif",
     borderRadius: "0rem"
   },
   {
@@ -58,8 +53,115 @@ export const BUILTIN_THEMES: ThemeConfig[] = [
     backgroundColor: "#f5f3ff", // violet-50
     textColor: "#1e1b4b",
     cardColor: "#ffffff",
-    fontFamily: "Plus Jakarta Sans, sans-serif",
     borderRadius: "1rem"
+  },
+  {
+    id: "forest",
+    name: "Forest Green",
+    primaryColor: "#15803d", // green-700
+    backgroundColor: "#f0fdf4", // green-50
+    textColor: "#14532d",
+    cardColor: "#ffffff",
+    borderRadius: "0.5rem"
+  },
+  {
+    id: "cyberpunk",
+    name: "Cyberpunk",
+    primaryColor: "#f43f5e", // rose-500
+    backgroundColor: "#0c0a09", // stone-950
+    textColor: "#f5f5f4",
+    cardColor: "#1c1917", // stone-900
+    borderRadius: "0.125rem"
+  },
+  {
+    id: "sunset",
+    name: "Sunset Glow",
+    primaryColor: "#f97316", // orange-500
+    backgroundColor: "#fff7ed", // orange-50
+    textColor: "#431407",
+    cardColor: "#ffffff",
+    borderRadius: "0.75rem"
+  },
+  {
+    id: "ocean",
+    name: "Ocean Breeze",
+    primaryColor: "#0ea5e9", // sky-500
+    backgroundColor: "#f0f9ff", // sky-50
+    textColor: "#0c4a6e",
+    cardColor: "#ffffff",
+    borderRadius: "0.375rem"
+  },
+  {
+    id: "nordic",
+    name: "Nordic Slate",
+    primaryColor: "#475569", // slate-600
+    backgroundColor: "#f1f5f9", // slate-100
+    textColor: "#0f172a",
+    cardColor: "#ffffff",
+    borderRadius: "0.5rem"
+  },
+  {
+    id: "lavender",
+    name: "Sweet Lavender",
+    primaryColor: "#8b5cf6", // violet-500
+    backgroundColor: "#faf5ff", // purple-50
+    textColor: "#3b0764",
+    cardColor: "#ffffff",
+    borderRadius: "1.25rem"
+  },
+  {
+    id: "cherry-blossom",
+    name: "Cherry Blossom",
+    primaryColor: "#db2777", // pink-600
+    backgroundColor: "#fff1f2", // rose-50
+    textColor: "#4c0519", // rose-950
+    cardColor: "#ffffff",
+    borderRadius: "0.75rem"
+  },
+  {
+    id: "midnight-neon",
+    name: "Midnight Neon",
+    primaryColor: "#a855f7", // purple-500
+    backgroundColor: "#030712", // gray-950
+    textColor: "#f3f4f6", // gray-100
+    cardColor: "#111827", // gray-900
+    borderRadius: "0.5rem"
+  },
+  {
+    id: "coffee-cozy",
+    name: "Coffee Cozy",
+    primaryColor: "#7c2d12", // orange-900
+    backgroundColor: "#fdf8f6",
+    textColor: "#451a03", // amber-950
+    cardColor: "#fafaf9", // stone-50
+    borderRadius: "0.375rem"
+  },
+  {
+    id: "sand-dune",
+    name: "Sand Dune",
+    primaryColor: "#c2410c", // orange-700
+    backgroundColor: "#fefcfb",
+    textColor: "#431407",
+    cardColor: "#f7f5f0",
+    borderRadius: "1rem"
+  },
+  {
+    id: "emerald-mint",
+    name: "Emerald Mint",
+    primaryColor: "#0d9488", // teal-600
+    backgroundColor: "#f0fdfa", // teal-50
+    textColor: "#042f2e", // teal-950
+    cardColor: "#ffffff",
+    borderRadius: "0.5rem"
+  },
+  {
+    id: "crimson-velvet",
+    name: "Crimson Velvet",
+    primaryColor: "#dc2626", // red-600
+    backgroundColor: "#fef2f2", // red-50
+    textColor: "#450a0a", // red-950
+    cardColor: "#ffffff",
+    borderRadius: "0.25rem"
   }
 ];
 
