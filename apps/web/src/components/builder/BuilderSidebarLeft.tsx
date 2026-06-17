@@ -12,7 +12,9 @@ import {
   Star, 
   Calendar,
   Clock,
-  Phone
+  Phone,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { BUILTIN_THEMES, ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
@@ -23,6 +25,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 interface BuilderSidebarLeftProps {
   leftTab: "builder" | "themes";
@@ -85,8 +88,22 @@ export function BuilderSidebarLeft({
   useGlobalShortcut("add-field-time", "i", "Add Time Field", () => handleAddField("time"), "Builder Fields");
   useGlobalShortcut("add-field-stepbreak", "b", "Add Step Break", () => handleAddField("step_break"), "Builder Fields");
 
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
   return (
-    <aside className="@container relative w-full h-full border-r border-border bg-sidebar overflow-hidden flex flex-col">
+    <aside className={`@container relative w-full h-full border-r border-border bg-sidebar overflow-hidden flex flex-col transition-all duration-300 ${isExpanded ? "w-64 z-30 absolute inset-y-0 left-0 md:relative md:w-full" : "w-14 md:w-full"}`}>
+      {/* Mobile-only Toggle Button */}
+      <div className="absolute top-2.5 right-2.5 md:hidden z-40 pointer-events-auto">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="h-8 w-8 rounded-lg bg-card shadow-sm border border-border"
+        >
+          {isExpanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+        </Button>
+      </div>
+
       {/* Tabs header */}
       <TabBar
         items={LEFT_TABS}
@@ -96,13 +113,13 @@ export function BuilderSidebarLeft({
       />
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-5 pt-16 space-y-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 @[150px]:p-5 pt-16 space-y-6">
         {leftTab === "builder" && (
           <>
             {/* Field adder */}
             <div className="space-y-3">
-              <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("sidebarAddFields")}</h3>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2 text-[11px] font-bold text-muted-foreground">
+              <h3 className="font-outfit font-extrabold text-foreground text-sm hidden @[150px]:block">{t("sidebarAddFields")}</h3>
+              <div className="grid grid-cols-1 @[150px]:grid-cols-2 @[200px]:grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-2 text-[11px] font-bold text-muted-foreground">
                 {FIELD_TYPES.map((field) => {
                   const Icon = field.icon;
                   return (
@@ -113,15 +130,15 @@ export function BuilderSidebarLeft({
                           whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
                           whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                           onClick={() => handleAddField(field.type)}
-                          className={`flex items-center gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors min-w-0 ${
-                            field.colSpan2 ? "col-span-full justify-center" : ""
+                          className={`flex items-center justify-center @[150px]:justify-start gap-2 p-2 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors min-w-0 ${
+                            field.colSpan2 ? "col-span-full @[150px]:justify-center" : ""
                           }`}
                         >
                           <Icon className={`h-4 w-4 ${field.iconColor} shrink-0`} />
-                          <span className="truncate min-w-0">{field.label}</span>
+                          <span className="truncate min-w-0 hidden @[150px]:inline">{field.label}</span>
                         </motion.button>
                       </TooltipTrigger>
-                      <TooltipContent side="top" sideOffset={14}>
+                      <TooltipContent side="right" sideOffset={14}>
                         Add {field.label} [{field.shortcut.toUpperCase()}]
                       </TooltipContent>
                     </Tooltip>
@@ -129,8 +146,6 @@ export function BuilderSidebarLeft({
                 })}
               </div>
             </div>
-
-            {/* Properties editor removed, moved to canvas */}
           </>
         )}
 
@@ -138,8 +153,8 @@ export function BuilderSidebarLeft({
           <>
             {/* Built-in Preset Themes */}
             <div className="space-y-4">
-              <h3 className="font-outfit font-extrabold text-foreground text-sm">{t("themePresets")}</h3>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-3">
+              <h3 className="font-outfit font-extrabold text-foreground text-sm hidden @[150px]:block">{t("themePresets")}</h3>
+              <div className="grid grid-cols-1 @[150px]:grid-cols-[repeat(auto-fill,minmax(110px,1fr))] gap-3">
                 {BUILTIN_THEMES.map((theme) => (
                   <motion.div
                     key={theme.id}
@@ -161,7 +176,7 @@ export function BuilderSidebarLeft({
             </div>
 
             {/* Custom Theme Editor */}
-            <div className="space-y-4 pt-6 border-t border-border mt-6 pb-6">
+            <div className="space-y-4 pt-6 border-t border-border mt-6 pb-6 hidden @[150px]:block">
               <h3 className="font-outfit font-extrabold text-foreground text-sm">Custom Styling</h3>
               
               <div className="space-y-4">

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { trpc } from "@/utils/trpc";
 import { ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Plus, Palette, FileText, BarChart3, Settings, Inbox } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 
 import { BuilderHeader } from "@/components/builder/BuilderHeader";
@@ -406,6 +406,12 @@ export default function BuilderPage() {
   const hostOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
   const publicFormUrl = `${hostOrigin}/f/${slug || form.slug}`;
 
+  const activeMobileTab = 
+    middleTab === "responses" ? "responses" :
+    middleTab === "analytics" ? "analytics" :
+    middleTab === "settings" ? "settings" :
+    leftTab === "themes" ? "theme" : "build";
+
   return (
     <div className="h-full flex flex-col overflow-hidden text-foreground bg-transparent">
       
@@ -420,89 +426,223 @@ export default function BuilderPage() {
         publicFormUrl={publicFormUrl}
       />
 
-      {/* WORKSPACE 3-PANE CONTAINER */}
-      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden min-h-0 bg-muted/20">
-        
-        {/* PANEL A: LEFT SIDEBAR (Builder / Themes) */}
-        <ResizablePanel defaultSize="10" minSize="12" maxSize="20" className="flex flex-col">
-          <BuilderSidebarLeft
-            leftTab={leftTab}
-            setLeftTab={setLeftTab}
-            focusedField={focusedField || null}
-            handleUpdateField={handleUpdateField}
-            handleAddField={handleAddField}
-            activeTheme={activeTheme}
-            setActiveTheme={setActiveTheme}
-            saveForm={saveForm}
-            pushToHistory={pushToHistory}
-            fields={fields}
-          />
-        </ResizablePanel>
+      {/* WORKSPACE AREA */}
+      {/* Desktop View (md and up) */}
+      <div className="hidden md:flex flex-1 overflow-hidden min-h-0 bg-muted/20">
+        <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
+          
+          {/* PANEL A: LEFT SIDEBAR (Builder / Themes) */}
+          <ResizablePanel defaultSize="10" minSize="12" maxSize="20" className="flex flex-col">
+            <BuilderSidebarLeft
+              leftTab={leftTab}
+              setLeftTab={setLeftTab}
+              focusedField={focusedField || null}
+              handleUpdateField={handleUpdateField}
+              handleAddField={handleAddField}
+              activeTheme={activeTheme}
+              setActiveTheme={setActiveTheme}
+              saveForm={saveForm}
+              pushToHistory={pushToHistory}
+              fields={fields}
+            />
+          </ResizablePanel>
 
-        <ResizableHandle />
+          <ResizableHandle />
 
-        {/* PANEL B: MIDDLE CANVAS (Form Editor / Responses / Analytics / Settings) */}
-        <ResizablePanel defaultSize="65" minSize="40" className="flex flex-col">
-          <BuilderCanvas
-            middleTab={middleTab}
-            setMiddleTab={setMiddleTab}
-            title={title}
-            setTitle={setTitle}
-            description={description}
-            setDescription={setDescription}
-            fields={fields}
-            selectedFieldId={selectedFieldId}
-            setSelectedFieldId={setSelectedFieldId}
-            layoutMode={layoutMode}
-            setLayoutMode={(mode: "standard" | "single_field" | "custom_steps") => {
-              setLayoutMode(mode);
-              saveForm(fields, activeTheme, mode);
+          {/* PANEL B: MIDDLE CANVAS (Form Editor / Responses / Analytics / Settings) */}
+          <ResizablePanel defaultSize="65" minSize="40" className="flex flex-col">
+            <BuilderCanvas
+              middleTab={middleTab}
+              setMiddleTab={setMiddleTab}
+              title={title}
+              setTitle={setTitle}
+              description={description}
+              setDescription={setDescription}
+              fields={fields}
+              selectedFieldId={selectedFieldId}
+              setSelectedFieldId={setSelectedFieldId}
+              layoutMode={layoutMode}
+              setLayoutMode={(mode: "standard" | "single_field" | "custom_steps") => {
+                setLayoutMode(mode);
+                saveForm(fields, activeTheme, mode);
+              }}
+              handleReorder={handleReorder}
+              handleDragReorder={handleDragReorder}
+              handleDeleteField={handleDeleteField}
+              handleUpdateField={handleUpdateField}
+              saveForm={saveForm}
+              responses={responses}
+              isResponsesLoading={isResponsesLoading}
+              handleExportCSV={handleExportCSV}
+              analytics={analytics}
+              isAnalyticsLoading={isAnalyticsLoading}
+              aiInsights={aiInsights}
+              isInsightsGenerating={isInsightsGenerating}
+              insightsError={insightsError}
+              handleGenerateInsights={handleGenerateInsights}
+              visibility={visibility}
+              setVisibility={setVisibility}
+              slug={slug}
+              setSlug={setSlug}
+              handleSaveSettings={handleSaveSettings}
+              handleUndo={handleUndo}
+              handleRedo={handleRedo}
+              canUndo={formHistory.index > 0}
+              canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
+            />
+          </ResizablePanel>
+
+          <ResizableHandle />
+
+          {/* PANEL C: RIGHT SIDEBAR (Preview / Embed) */}
+          <ResizablePanel defaultSize="25" minSize="25" maxSize="30" className="flex flex-col">
+            <BuilderSidebarRight
+              rightTab={rightTab}
+              setRightTab={setRightTab}
+              title={title}
+              description={description}
+              fields={fields}
+              activeTheme={activeTheme}
+              layoutMode={layoutMode}
+              publicFormUrl={publicFormUrl}
+              id={id}
+              hostOrigin={hostOrigin}
+            />
+          </ResizablePanel>
+
+        </ResizablePanelGroup>
+      </div>
+
+      {/* Mobile View (under md breakpoint) */}
+      <div className="flex md:hidden flex-col flex-1 overflow-hidden min-h-0 bg-muted/20 relative pb-16">
+        {/* Mobile Viewport based on computed active tab */}
+        <div className="flex-1 flex overflow-hidden min-h-0 relative">
+          {(activeMobileTab === "build" || activeMobileTab === "theme") && (
+            <div className={`shrink-0 ${activeMobileTab === "theme" ? "w-full" : "w-14"}`}>
+              <BuilderSidebarLeft
+                leftTab={leftTab}
+                setLeftTab={setLeftTab}
+                focusedField={focusedField || null}
+                handleUpdateField={handleUpdateField}
+                handleAddField={handleAddField}
+                activeTheme={activeTheme}
+                setActiveTheme={setActiveTheme}
+                saveForm={saveForm}
+                pushToHistory={pushToHistory}
+                fields={fields}
+              />
+            </div>
+          )}
+
+          {activeMobileTab !== "theme" && (
+            <div className="flex-1 flex flex-col min-w-0">
+              <BuilderCanvas
+                middleTab={middleTab}
+                setMiddleTab={setMiddleTab}
+                title={title}
+                setTitle={setTitle}
+                description={description}
+                setDescription={setDescription}
+                fields={fields}
+                selectedFieldId={selectedFieldId}
+                setSelectedFieldId={setSelectedFieldId}
+                layoutMode={layoutMode}
+                setLayoutMode={(mode: "standard" | "single_field" | "custom_steps") => {
+                  setLayoutMode(mode);
+                  saveForm(fields, activeTheme, mode);
+                }}
+                handleReorder={handleReorder}
+                handleDragReorder={handleDragReorder}
+                handleDeleteField={handleDeleteField}
+                handleUpdateField={handleUpdateField}
+                saveForm={saveForm}
+                responses={responses}
+                isResponsesLoading={isResponsesLoading}
+                handleExportCSV={handleExportCSV}
+                analytics={analytics}
+                isAnalyticsLoading={isAnalyticsLoading}
+                aiInsights={aiInsights}
+                isInsightsGenerating={isInsightsGenerating}
+                insightsError={insightsError}
+                handleGenerateInsights={handleGenerateInsights}
+                visibility={visibility}
+                setVisibility={setVisibility}
+                slug={slug}
+                setSlug={setSlug}
+                handleSaveSettings={handleSaveSettings}
+                handleUndo={handleUndo}
+                handleRedo={handleRedo}
+                canUndo={formHistory.index > 0}
+                canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Tab Bar Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border flex items-center justify-around z-30 px-2 pointer-events-auto shadow-lg">
+          <button
+            type="button"
+            onClick={() => {
+              setMiddleTab("form");
+              setLeftTab("builder");
             }}
-            handleReorder={handleReorder}
-            handleDragReorder={handleDragReorder}
-            handleDeleteField={handleDeleteField}
-            handleUpdateField={handleUpdateField}
-            saveForm={saveForm}
-            responses={responses}
-            isResponsesLoading={isResponsesLoading}
-            handleExportCSV={handleExportCSV}
-            analytics={analytics}
-            isAnalyticsLoading={isAnalyticsLoading}
-            aiInsights={aiInsights}
-            isInsightsGenerating={isInsightsGenerating}
-            insightsError={insightsError}
-            handleGenerateInsights={handleGenerateInsights}
-            visibility={visibility}
-            setVisibility={setVisibility}
-            slug={slug}
-            setSlug={setSlug}
-            handleSaveSettings={handleSaveSettings}
-            handleUndo={handleUndo}
-            handleRedo={handleRedo}
-            canUndo={formHistory.index > 0}
-            canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
-          />
-        </ResizablePanel>
+            className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
+              activeMobileTab === "build" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Plus className="h-5 w-5" />
+            <span>Build</span>
+          </button>
 
-        <ResizableHandle />
+          <button
+            type="button"
+            onClick={() => {
+              setMiddleTab("form");
+              setLeftTab("themes");
+            }}
+            className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
+              activeMobileTab === "theme" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Palette className="h-5 w-5" />
+            <span>Theme</span>
+          </button>
 
-        {/* PANEL C: RIGHT SIDEBAR (Preview / Embed) */}
-        <ResizablePanel defaultSize="25" minSize="25" maxSize="30" className="flex flex-col">
-          <BuilderSidebarRight
-            rightTab={rightTab}
-            setRightTab={setRightTab}
-            title={title}
-            description={description}
-            fields={fields}
-            activeTheme={activeTheme}
-            layoutMode={layoutMode}
-            publicFormUrl={publicFormUrl}
-            id={id}
-            hostOrigin={hostOrigin}
-          />
-        </ResizablePanel>
+          <button
+            type="button"
+            onClick={() => setMiddleTab("responses")}
+            className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
+              activeMobileTab === "responses" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Inbox className="h-5 w-5" />
+            <span>Responses</span>
+          </button>
 
-      </ResizablePanelGroup>
+          <button
+            type="button"
+            onClick={() => setMiddleTab("analytics")}
+            className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
+              activeMobileTab === "analytics" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <BarChart3 className="h-5 w-5" />
+            <span>Analytics</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setMiddleTab("settings")}
+            className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
+              activeMobileTab === "settings" ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Settings className="h-5 w-5" />
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
 
       {/* SHARE MODAL */}
       <ShareModal

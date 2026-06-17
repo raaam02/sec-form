@@ -141,9 +141,10 @@ export default function DashboardPage() {
               >
                 <Button
                   onClick={() => setIsAIModalOpen(true)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-pink-500 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-pink-500 px-3 sm:px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
                 >
-                  <Sparkles className="h-4 w-4" /> {t("generateAi")}
+                  <Sparkles className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t("generateAi")}</span>
                 </Button>
               </motion.div>
             </TooltipTrigger>
@@ -160,9 +161,10 @@ export default function DashboardPage() {
                 <Button
                   onClick={() => setIsCreateModalOpen(true)}
                   variant="outline"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-3 sm:px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
                 >
-                  <Plus className="h-4 w-4" /> {t("newForm")}
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t("newForm")}</span>
                 </Button>
               </motion.div>
             </TooltipTrigger>

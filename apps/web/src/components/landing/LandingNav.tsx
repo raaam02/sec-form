@@ -18,11 +18,13 @@ export function LandingNav() {
   const handleDemoLogin = async () => {
     setIsLoggingIn(true);
     try {
-      const res = await signIn("credentials", { email: "demo@demo.com", password: "demo123", redirect: false });
-      if (res?.ok) router.push("/dashboard");
+      await signIn("credentials", { 
+        email: "demo@demo.com", 
+        password: "demo123", 
+        callbackUrl: "/dashboard" 
+      });
     } catch (e) {
       console.error(e);
-    } finally {
       setIsLoggingIn(false);
     }
   };
@@ -45,7 +47,6 @@ export function LandingNav() {
               Formu<span className="text-primary">.AI</span>
             </span>
           </Link>
-
           {/* Nav */}
           <nav className="hidden md:flex gap-6 text-[13px] font-medium text-muted-foreground">
             <Link href="/explore" className="hover:text-foreground transition-colors">{t("navExplore")}</Link>
@@ -60,7 +61,6 @@ export function LandingNav() {
               {t("navApiDocs")} <Code className="h-3 w-3" />
             </a>
           </nav>
-
           {/* Actions */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
@@ -84,7 +84,7 @@ export function LandingNav() {
                   whileTap={{ scale: 0.97 }}
                   onClick={handleDemoLogin}
                   disabled={isLoggingIn}
-                  className="inline-flex h-8 items-center rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-60"
+                  className="hidden sm:inline-flex h-8 items-center rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-60"
                 >
                   {isLoggingIn ? t("loggingIn") : t("tryDemo")}
                 </motion.button>

@@ -18,11 +18,13 @@ export function LandingCTA() {
   const handleDemoLogin = async () => {
     setIsLoggingIn(true);
     try {
-      const res = await signIn("credentials", { email: "demo@demo.com", password: "demo123", redirect: false });
-      if (res?.ok) router.push("/dashboard");
+      await signIn("credentials", { 
+        email: "demo@demo.com", 
+        password: "demo123", 
+        callbackUrl: "/dashboard" 
+      });
     } catch (e) {
       console.error(e);
-    } finally {
       setIsLoggingIn(false);
     }
   };

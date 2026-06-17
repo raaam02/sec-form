@@ -92,16 +92,13 @@ export function LandingHero() {
   const handleDemoLogin = async () => {
     setIsLoggingIn(true);
     try {
-      const res = await signIn("credentials", {
+      await signIn("credentials", {
         email: "demo@demo.com",
         password: "demo123",
-        redirect: false,
+        callbackUrl: "/dashboard",
       });
-      if (res?.ok) router.push("/dashboard");
-      else alert("Failed to login. Please try manually.");
     } catch (e) {
       console.error(e);
-    } finally {
       setIsLoggingIn(false);
     }
   };

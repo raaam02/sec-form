@@ -476,7 +476,7 @@ export function BuilderCanvas({
         onChange={setMiddleTab}
         leftElement={
           middleTab === "form" && setLayoutMode ? (
-            <div className="w-32 @[600px]:w-44 ml-3 animate-in fade-in zoom-in duration-200">
+            <div className="w-32 @[600px]:w-44 ml-3 animate-in fade-in zoom-in duration-200 hidden sm:block">
               <Select value={layoutMode} onValueChange={(val: any) => {
                 setLayoutMode(val);
                 saveForm(fields, null, val);
@@ -529,7 +529,7 @@ export function BuilderCanvas({
         }
         rightElement={
           middleTab === "form" ? (
-            <div className="flex items-center gap-1 bg-secondary/50 shadow-sm rounded-full p-0.5 mr-3 backdrop-blur-sm animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-1 bg-secondary/50 shadow-sm rounded-full p-0.5 mr-3 backdrop-blur-sm animate-in fade-in zoom-in duration-200 hidden sm:flex">
                <Tooltip delayDuration={0}>
                  <TooltipTrigger asChild>
                    <Button variant="ghost" size="icon" onClick={handleUndo} disabled={!canUndo} className="h-6 w-7 rounded-full">
@@ -553,9 +553,40 @@ export function BuilderCanvas({
       />
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-14 pt-20 min-w-0 relative z-10">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-14 pt-20 min-w-0 relative z-10">
         {middleTab === "form" && (
           <div className="max-w-2xl mx-auto space-y-6 relative pb-10">
+            {/* Mobile-only Canvas Controls to prevent TabBar clustering */}
+            <div className="flex sm:hidden justify-between items-center gap-2 bg-secondary/30 backdrop-blur-sm rounded-xl p-2 mb-2 pointer-events-auto">
+              {/* Layout Mode Select */}
+              {setLayoutMode && (
+                <div className="w-32">
+                  <Select value={layoutMode} onValueChange={(val: any) => {
+                    setLayoutMode(val);
+                    saveForm(fields, null, val);
+                  }}>
+                    <SelectTrigger className="h-8 text-xs bg-background/80 border border-border shadow-sm">
+                      <SelectValue placeholder="Display Layout" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="standard">Standard</SelectItem>
+                      <SelectItem value="single_field">1 Field/Step</SelectItem>
+                      <SelectItem value="custom_steps">Grouped</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {/* Undo / Redo */}
+              <div className="flex items-center gap-1 bg-background/80 border border-border rounded-lg p-0.5">
+                <Button variant="ghost" size="icon" onClick={handleUndo} disabled={!canUndo} className="h-7 w-7 rounded-md">
+                  <Undo2 className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleRedo} disabled={!canRedo} className="h-7 w-7 rounded-md">
+                  <Redo2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
             <Card className="border-border bg-card/20 backdrop-blur-[1px] p-6 shadow-sm flex flex-col gap-5 relative">
               <div className="">
                 <input

@@ -98,7 +98,7 @@ export function BuilderHeader({
             className="h-9 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-bold text-muted-foreground transition-colors"
           >
             {getVisibilityIcon(visibility)}
-            <span className="capitalize">{visibility}</span>
+            <span className="capitalize hidden sm:inline">{visibility}</span>
             <ChevronDown className="h-3 w-3 text-muted-foreground" />
           </Button>
 
@@ -158,7 +158,7 @@ export function BuilderHeader({
               asChild
             >
               <a href={publicFormUrl} target="_blank" rel="noopener noreferrer">
-                <span>{t("preview")}</span>
+                <span className="hidden sm:inline">{t("preview")}</span>
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </Button>
