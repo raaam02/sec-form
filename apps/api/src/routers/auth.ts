@@ -7,6 +7,8 @@ import { cache } from "../redis";
 import { sendOtpMail } from "../mailer";
 import { TRPCError } from "@trpc/server";
 
+import * as userService from "../services/userService";
+
 function hashPassword(password: string) {
   return crypto.createHash("sha256").update(password).digest("hex");
 }
@@ -15,6 +17,79 @@ export const authRouter = router({
   me: protectedProcedure.query(({ ctx }) => {
     return ctx.user;
   }),
+
+  signUp: publicProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        email: z.string().email(),
+        password: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { name, email, password } = input;
+      const existing = await userService.findUserByEmail(email);
+      if (existing) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A user with this email already exists",
+        });
+      }
+      const hashedPassword = userService.hashPassword(password);
+      await userService.createUser(name, email, hashedPassword);
+      return { success: true };
+    }),
+
+  authorize: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+        password: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { email, password } = input;
+      const verifiedUser = await userService.verifyCredentials(email, password);
+      if (!verifiedUser) {
+        return null;
+      }
+      return verifiedUser;
+    }),
+
+  oauthSync: publicProcedure
+    .input(
+      z.object({
+        name: z.string().nullable().optional(),
+        email: z.string().email(),
+        image: z.string().nullable().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { name, email, image } = input;
+      const synced = await userService.syncOAuthUser(name || "", email, image || "");
+      return {
+        id: synced.id,
+        name: synced.name,
+        email: synced.email,
+        image: synced.image,
+        role: synced.role,
+      };
+    }),
+
+  userRole: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+      })
+    )
+    .query(async ({ input }) => {
+      const user = await userService.findUserByEmail(input.email);
+      if (!user) return null;
+      return {
+        id: user.id,
+        role: user.role,
+      };
+    }),
   
   loginDemo: publicProcedure
     .input(

@@ -1,9 +1,8 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import { db, users } from "@sec-form/db";
-import { eq } from "@sec-form/db";
 import crypto from "crypto";
+import { trpcClient } from "./trpc-client";
 
 export function hashPassword(password: string) {
   return crypto.createHash("sha256").update(password).digest("hex");
@@ -28,30 +27,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const passStr = credentials.password as string;
 
         try {
-          // Verify user in the PostgreSQL database
-          const user = await db.query.users.findFirst({
-            where: eq(users.email, emailStr)
+          // Verify user by calling backend API router
+          const user = await trpcClient.auth.authorize.mutate({
+            email: emailStr,
+            password: passStr,
           });
 
           if (user) {
-            const passwordHash = hashPassword(passStr);
-            if (user.passwordHash === passwordHash) {
-              return {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                image: user.image
-              };
-            }
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image,
+            };
           }
         } catch (e) {
-          console.warn("Database lookup failed during authorization, checking default credentials fallback:", e);
+          console.warn("API authorize lookup failed, checking default credentials fallback:", e);
         }
 
         // Hackathon-ready fallback in case database is not populated yet
         if (emailStr === "demo@demo.com" && passStr === "demo123") {
           return {
-            id: "00000000-0000-0000-0000-000000000000", // Will be overridden or synced later
+            id: "00000000-0000-0000-0000-000000000000",
             name: "Demo User",
             email: "demo@demo.com",
             image: "https://api.dicebear.com/7.x/adventurer/svg?seed=DemoUser"
@@ -66,20 +63,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       if (account?.provider === "google" && user.email) {
         try {
-          const dbUser = await db.query.users.findFirst({
-            where: eq(users.email, user.email),
+          await trpcClient.auth.oauthSync.mutate({
+            email: user.email,
+            name: user.name || "Google User",
+            image: user.image || "",
           });
-          if (!dbUser) {
-            await db.insert(users).values({
-              id: user.id || crypto.randomUUID(),
-              email: user.email,
-              name: user.name || "Google User",
-              image: user.image || "",
-              passwordHash: "oauth-user",
-            });
-          }
         } catch (e) {
-          console.error("Failed to sync Google user to database:", e);
+          console.error("Failed to sync Google user via API:", e);
         }
       }
       return true;
@@ -94,8 +84,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user && user.email) {
         try {
-          const dbUser = await db.query.users.findFirst({
-            where: eq(users.email, user.email),
+          const dbUser = await trpcClient.auth.userRole.query({
+            email: user.email,
           });
           if (dbUser) {
             token.sub = dbUser.id;
