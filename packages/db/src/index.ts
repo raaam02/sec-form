@@ -4,6 +4,12 @@ import * as schema from "./schema";
 
 const connectionString = process.env.DATABASE_URL || "postgres://postgres:postgres@localhost:5432/secform";
 
+console.log("DATABASE_URL EXISTS:", !!process.env.DATABASE_URL);
+console.log(
+  "DATABASE_URL PREFIX:",
+  process.env.DATABASE_URL?.substring(0, 10)
+);
+
 // For serverless/script executions, postgres client is preferred
 const client = postgres(connectionString, {
   max: process.env.DB_MAX_CONNECTIONS ? parseInt(process.env.DB_MAX_CONNECTIONS) : 10,
