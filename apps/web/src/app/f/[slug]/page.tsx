@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 import { getLocalForms, saveLocalForm, saveLocalSubmission } from "../../../utils/localForms";
 
@@ -131,6 +132,15 @@ export default function PublicFormPage() {
         }
       });
       setValidationErrors(errorsMap);
+
+      toast.error(t("errorValidation"));
+      setTimeout(() => {
+        const firstErrorEl = document.querySelector(".text-destructive");
+        if (firstErrorEl) {
+          firstErrorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 50);
+
       return false;
     }
     setValidationErrors({});
@@ -170,6 +180,15 @@ export default function PublicFormPage() {
         }
       });
       setValidationErrors(errorsMap);
+
+      toast.error(t("errorValidation"));
+      setTimeout(() => {
+        const firstErrorEl = document.querySelector(".text-destructive");
+        if (firstErrorEl) {
+          firstErrorEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 50);
+
       return;
     }
 
@@ -436,7 +455,7 @@ export default function PublicFormPage() {
                                   id={`${field.id}-${opt}`}
                                   checked={isChecked}
                                   onCheckedChange={(checked) => handleMultiSelectChange(field.id, opt, !!checked)}
-                                  className="border-slate-300 data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
+                                  className="border-slate-300 data-[state=checked]:bg-[var(--primary)] data-[state=checked]:border-[var(--primary)] data-[state=checked]:text-white transition-all group-hover:border-[var(--primary)]/50 focus-visible:ring-[var(--primary)]"
                                 />
                                 <span className="font-medium select-none text-sm text-foreground">{opt}</span>
                               </label>
@@ -452,7 +471,7 @@ export default function PublicFormPage() {
                             id={field.id}
                             checked={answers[field.id] || false}
                             onCheckedChange={(checked) => handleCheckboxChange(field.id, !!checked)}
-                            className="border-slate-300 data-[state=checked]:border-primary transition-all group-hover:border-primary/50"
+                            className="border-slate-300 data-[state=checked]:bg-[var(--primary)] data-[state=checked]:border-[var(--primary)] data-[state=checked]:text-white transition-all group-hover:border-[var(--primary)]/50 focus-visible:ring-[var(--primary)]"
                           />
                           <span className="font-medium select-none text-sm text-foreground">I confirm this detail</span>
                         </label>
@@ -529,7 +548,7 @@ export default function PublicFormPage() {
                     variant="outline"
                     onClick={handlePrevStep}
                     disabled={submitMutation.isLoading}
-                    className="flex-1 h-11 font-semibold text-sm rounded-xl transition-all shadow-sm flex items-center justify-center"
+                    className="flex-1 h-11 font-semibold text-sm rounded-xl transition-all shadow-sm flex items-center justify-center focus-visible:ring-[var(--primary)]"
                     style={{
                       borderRadius: "var(--border-radius)",
                     }}
@@ -542,11 +561,10 @@ export default function PublicFormPage() {
                   <Button
                     type="submit"
                     disabled={submitMutation.isLoading}
-                    className="flex-1 h-11 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
+                    className="flex-1 h-11 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50 focus-visible:ring-[var(--primary)]"
                     style={{
                       backgroundColor: "var(--primary)",
                       borderRadius: "var(--border-radius)",
-                      boxShadow: "0 10px 15px -3px rgba(var(--primary), 0.15)"
                     }}
                   >
                     {submitMutation.isLoading ? <LoadingSpinner className="w-5 h-5" color="text-white" /> : t("submitBtn")}
@@ -555,11 +573,10 @@ export default function PublicFormPage() {
                   <Button
                     type="button"
                     onClick={handleNextStep}
-                    className="flex-1 h-11 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center"
+                    className="flex-1 h-11 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center focus-visible:ring-[var(--primary)]"
                     style={{
                       backgroundColor: "var(--primary)",
                       borderRadius: "var(--border-radius)",
-                      boxShadow: "0 10px 15px -3px rgba(var(--primary), 0.15)"
                     }}
                   >
                     Next
