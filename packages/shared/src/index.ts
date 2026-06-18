@@ -197,7 +197,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Customer Feedback Form",
     description: "Gather feedback from your users to improve your product or service.",
     category: "Feedback & Surveys",
-    themeId: "modern-saas",
+    themeId: "emerald-mint",
     fields: [
       {
         id: "cf_name",
@@ -254,7 +254,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Restaurant Feedback Form",
     description: "Help us serve you better! Tell us about your dining experience.",
     category: "Feedback & Surveys",
-    themeId: "modern-saas",
+    themeId: "emerald-mint",
     fields: [
       {
         id: "rs_date",
@@ -302,7 +302,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Product Satisfaction Survey",
     description: "Gather deep usage metrics, Net Promoter Score (NPS), and feature suggestions for your SaaS application.",
     category: "Feedback & Surveys",
-    themeId: "modern-saas",
+    themeId: "sunset",
     fields: [
       {
         id: "ps_nps",
@@ -339,7 +339,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Course & Instructor Evaluation",
     description: "Collect student feedback regarding course content clarity, material utility, and instructor performance.",
     category: "Feedback & Surveys",
-    themeId: "minimal",
+    themeId: "cherry-blossom",
     fields: [
       {
         id: "ce_instructor_rating",
@@ -378,7 +378,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Newsletter Signup",
     description: "Grow your audience with a simple email collection newsletter form.",
     category: "Marketing & Sales",
-    themeId: "minimal",
+    themeId: "modern-saas",
     fields: [
       {
         id: "ns_email",
@@ -407,7 +407,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Contact & Lead Capture",
     description: "A clean, high-converting minimal form to capture contact details and user inquiries.",
     category: "Marketing & Sales",
-    themeId: "gradient",
+    themeId: "modern-saas",
     fields: [
       {
         id: "cl_name",
@@ -444,7 +444,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Sales Lead Qualification",
     description: "Qualify B2B sales leads based on company size, budget ranges, and project urgency.",
     category: "Marketing & Sales",
-    themeId: "corporate",
+    themeId: "sunset",
     fields: [
       {
         id: "sq_company",
@@ -488,7 +488,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "B2B Product Demo Request",
     description: "Request a custom product walkthrough and consult with a sales engineer.",
     category: "Marketing & Sales",
-    themeId: "modern-saas",
+    themeId: "ocean",
     fields: [
       {
         id: "dr_company",
@@ -534,7 +534,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Event Registration",
     description: "Register attendees for your upcoming conference, webinar, or meetup.",
     category: "Operations & HR",
-    themeId: "gradient",
+    themeId: "lavender",
     fields: [
       {
         id: "er_name",
@@ -582,7 +582,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Job Application",
     description: "Accept candidate applications for open roles in your team.",
     category: "Operations & HR",
-    themeId: "corporate",
+    themeId: "lavender",
     fields: [
       {
         id: "ja_name",
@@ -637,7 +637,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "Bug & Issue Report Form",
     description: "Log platform bugs, defects, and browser compatibility issues.",
     category: "Operations & HR",
-    themeId: "corporate",
+    themeId: "cherry-blossom",
     fields: [
       {
         id: "br_title",
@@ -674,7 +674,7 @@ export const FORM_TEMPLATES: FormTemplate[] = [
     title: "IT Support Request",
     description: "Submit hardware, network, or application access assistance requests.",
     category: "Operations & HR",
-    themeId: "minimal",
+    themeId: "ocean",
     fields: [
       {
         id: "is_category",

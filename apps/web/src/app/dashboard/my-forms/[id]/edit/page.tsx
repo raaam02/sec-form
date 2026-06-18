@@ -75,6 +75,7 @@ export default function BuilderPage() {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showContactAdminModal, setShowContactAdminModal] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState<"build" | "theme" | "preview" | "embed" | "settings">("build");
+  const [isLeftSidebarExpanded, setIsLeftSidebarExpanded] = useState(false);
 
   useEffect(() => {
     if (activeMobileTab === "preview" || activeMobileTab === "embed") {
@@ -578,7 +579,7 @@ export default function BuilderPage() {
         {/* Mobile Viewport based on computed active tab */}
         <div className="flex-1 flex overflow-hidden min-h-0 relative">
           {activeMobileTab === "build" && (
-            <div className="shrink-0 w-14">
+            <div className={`shrink-0 transition-all duration-300 ${isLeftSidebarExpanded ? "w-40" : "w-14"}`}>
               <BuilderSidebarLeft
                 leftTab={leftTab}
                 setLeftTab={setLeftTab}
@@ -590,6 +591,8 @@ export default function BuilderPage() {
                 saveForm={saveForm}
                 pushToHistory={pushToHistory}
                 fields={fields}
+                isExpanded={isLeftSidebarExpanded}
+                setIsExpanded={setIsLeftSidebarExpanded}
               />
             </div>
           )}

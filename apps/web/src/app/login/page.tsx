@@ -215,7 +215,7 @@ function LoginForm() {
         </div>
 
         {/* Mobile mascot (smaller) */}
-        <div className="w-full max-w-md sm:hidden">
+        <div className="w-full max-w-md lg:hidden">
           <LoginMascot
             focusedField={focusedField}
             emailLength={email.length}

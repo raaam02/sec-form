@@ -200,7 +200,7 @@ export default function ExplorePage() {
 
   const handleUseTemplate = async (templateId: string) => {
     if (!session) {
-      router.push("/login?redirect=/dashboard");
+      router.push(`/login?redirect=${encodeURIComponent(`/dashboard?createTemplate=${templateId}`)}`);
       return;
     }
     router.push(`/dashboard?createTemplate=${templateId}`);

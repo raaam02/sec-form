@@ -38,6 +38,8 @@ interface BuilderSidebarLeftProps {
   saveForm: (fields: FormField[], theme?: ThemeConfig | null) => void;
   pushToHistory?: (fields: FormField[], theme: ThemeConfig | null) => void;
   fields: FormField[];
+  isExpanded?: boolean;
+  setIsExpanded?: (open: boolean) => void;
 }
 
 export function BuilderSidebarLeft({
@@ -51,6 +53,8 @@ export function BuilderSidebarLeft({
   saveForm,
   pushToHistory,
   fields,
+  isExpanded,
+  setIsExpanded,
 }: BuilderSidebarLeftProps) {
   const t = useTranslations("Builder");
 
@@ -88,21 +92,23 @@ export function BuilderSidebarLeft({
   useGlobalShortcut("add-field-time", "i", "Add Time Field", () => handleAddField("time"), "Builder Fields");
   useGlobalShortcut("add-field-stepbreak", "b", "Add Step Break", () => handleAddField("step_break"), "Builder Fields");
 
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [localExpanded, setLocalExpanded] = React.useState(false);
+  const activeExpanded = isExpanded !== undefined ? isExpanded : localExpanded;
+  const activeSetExpanded = setIsExpanded !== undefined ? setIsExpanded : setLocalExpanded;
 
   return (
-    <aside className={`@container relative w-full h-full border-r border-border bg-sidebar overflow-hidden flex flex-col transition-all duration-300 ${isExpanded ? "w-64 z-30 absolute inset-y-0 left-0 md:relative md:w-full" : "w-14 md:w-full"}`}>
+    <aside className={`@container relative w-full h-full border-r border-border bg-sidebar overflow-hidden flex flex-col transition-all duration-300 ${activeExpanded ? "w-40 z-30 absolute inset-y-0 left-0 md:relative md:w-full" : "w-14 md:w-full"}`}>
       {/* Mobile-only Toggle Button */}
-      {/* <div className="absolute top-2.5 right-2.5 md:hidden z-40 pointer-events-auto">
+      <div className="flex md:hidden p-2 border-b border-border justify-center items-center">
         <Button
-          variant="outline"
+          variant="ghost"
           size="icon"
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="h-8 w-8 rounded-lg bg-card shadow-sm border border-border"
+          onClick={() => activeSetExpanded(!activeExpanded)}
+          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
         >
-          {isExpanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          {activeExpanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </Button>
-      </div> */}
+      </div>
 
       {/* Tabs header */}
       <div className="hidden md:block">

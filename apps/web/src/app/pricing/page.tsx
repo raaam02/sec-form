@@ -46,7 +46,8 @@ export default function PricingPage() {
       price: tPricing("plans.free.price"),
       description: tPricing("plans.free.desc"),
       features: [
-        "Up to 3 active forms",
+        "Up to 5 active forms",
+        "2 Ai form generation",
         "100 submissions per month",
         "Standard templates library",
         "Rate limiting validation",
@@ -63,7 +64,7 @@ export default function PricingPage() {
       features: [
         "Unlimited active forms",
         "Unlimited submissions",
-        "AI Form Generator (Gemini)",
+        "20 Ai form generation",
         "AI Insights report engine",
         "Recharts Analytics dashboard",
         "Custom URLs & Custom slugs",
