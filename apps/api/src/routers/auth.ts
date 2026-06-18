@@ -28,15 +28,115 @@ export const authRouter = router({
     )
     .mutation(async ({ input }) => {
       const { name, email, password } = input;
-      const existing = await userService.findUserByEmail(email);
+      const normalizedEmail = email.toLowerCase().trim();
+      const existing = await userService.findUserByEmail(normalizedEmail);
       if (existing) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "A user with this email already exists",
         });
       }
+
       const hashedPassword = userService.hashPassword(password);
-      await userService.createUser(name, email, hashedPassword);
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Cache the pending signup details
+      const pendingKey = `signup:pending:${normalizedEmail}`;
+      await cache.set(pendingKey, JSON.stringify({ name, email: normalizedEmail, hashedPassword }), 600);
+
+      // Cache the OTP for 10 minutes
+      const otpKey = `otp:signup:${normalizedEmail}`;
+      await cache.set(otpKey, otp, 600);
+
+      // Send the email
+      await sendOtpMail(normalizedEmail, otp, name);
+
+      return { success: true, needsOtp: true, email: normalizedEmail };
+    }),
+
+  verifySignup: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+        otp: z.string().length(6),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { email, otp } = input;
+      const normalizedEmail = email.toLowerCase().trim();
+      const otpKey = `otp:signup:${normalizedEmail}`;
+      const cachedOtp = await cache.get(otpKey);
+
+      if (!cachedOtp) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Verification code has expired or is invalid. Please request a new one.",
+        });
+      }
+
+      if (cachedOtp !== otp) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid verification code.",
+        });
+      }
+
+      const pendingKey = `signup:pending:${normalizedEmail}`;
+      const pendingDataStr = await cache.get(pendingKey);
+      if (!pendingDataStr) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Signup session expired. Please start the signup process again.",
+        });
+      }
+
+      const { name, hashedPassword } = JSON.parse(pendingDataStr);
+
+      const existing = await userService.findUserByEmail(normalizedEmail);
+      if (existing) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "A user with this email already exists",
+        });
+      }
+
+      await userService.createUser(name, normalizedEmail, hashedPassword);
+
+      // Clean up cache
+      await cache.del(otpKey);
+      await cache.del(pendingKey);
+
+      return { success: true };
+    }),
+
+  resendSignupOtp: publicProcedure
+    .input(
+      z.object({
+        email: z.string().email(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const { email } = input;
+      const normalizedEmail = email.toLowerCase().trim();
+      const pendingKey = `signup:pending:${normalizedEmail}`;
+      const pendingDataStr = await cache.get(pendingKey);
+      if (!pendingDataStr) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Signup session expired. Please start the signup process again.",
+        });
+      }
+
+      const { name } = JSON.parse(pendingDataStr);
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Cache the OTP for 10 minutes
+      const otpKey = `otp:signup:${normalizedEmail}`;
+      await cache.set(otpKey, otp, 600);
+
+      // Send the email
+      await sendOtpMail(normalizedEmail, otp, name);
+
       return { success: true };
     }),
 

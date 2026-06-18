@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AlertCircle, Lock, Mail, User, CheckCircle2 } from "lucide-react";
+import { AlertCircle, Lock, Mail, User, CheckCircle2, ArrowLeft } from "lucide-react";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { Card } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LocaleSwitcher } from "../../components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
-import { signUpAction } from "../actions/auth";
+import { signUpAction, verifySignupAction, resendSignupOtpAction } from "../actions/auth";
 import { Logo } from "@/components/Logo";
 
 function SignupForm() {
@@ -25,6 +25,11 @@ function SignupForm() {
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const [needsOtp, setNeedsOtp] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -34,8 +39,10 @@ function SignupForm() {
     try {
       const res = await signUpAction({ name, email, password });
 
-      if (res.error) {
+      if ("error" in res && res.error) {
         setError(res.error);
+      } else if ("needsOtp" in res && res.needsOtp) {
+        setNeedsOtp(true);
       } else {
         setSuccess(t("successMessage"));
         setTimeout(() => {
@@ -46,6 +53,53 @@ function SignupForm() {
       setError(t("errorGeneric"));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otp.length !== 6) {
+      setError("Please enter a valid 6-digit verification code.");
+      return;
+    }
+
+    setIsVerifying(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const res = await verifySignupAction({ email, otp });
+      if (res.error) {
+        setError(res.error);
+      } else {
+        setSuccess("Account verified successfully! Redirecting to login...");
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setIsResending(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const res = await resendSignupOtpAction({ email });
+      if (res.error) {
+        setError(res.error);
+      } else {
+        setSuccess("Verification code resent successfully!");
+      }
+    } catch (err) {
+      setError("Failed to resend verification code. Please try again.");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -83,63 +137,122 @@ function SignupForm() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                {t("nameLabel")}
-              </label>
-              <div className="relative">
-                <Input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full h-10 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm"
-                  required
-                />
-                <User className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+          {needsOtp ? (
+            <form onSubmit={handleVerifyOtp} className="space-y-4">
+              <div className="text-center pb-2">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  We've sent a 6-digit verification code to <span className="font-semibold text-foreground">{email}</span>. Please enter it below to confirm your email.
+                </p>
               </div>
-            </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                {t("emailLabel")}
-              </label>
-              <div className="relative">
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-10 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm"
-                  required
-                />
-                <Mail className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                  Verification Code
+                </label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    pattern="\d*"
+                    maxLength={6}
+                    placeholder="123456"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    className="w-full h-11 px-3 text-center tracking-[0.3em] font-mono text-lg rounded-xl border border-border bg-background text-foreground"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
-                {t("passwordLabel")}
-              </label>
-              <div className="relative">
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-10 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm"
-                  required
-                />
-                <Lock className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+              <Button
+                type="submit"
+                disabled={isVerifying || otp.length !== 6 || !!success}
+                className="w-full h-11 bg-primary text-primary-foreground font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
+              >
+                {isVerifying ? "Verifying..." : "Verify Code"}
+              </Button>
+
+              <div className="flex flex-col gap-2 pt-2 text-center text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={isResending || !!success}
+                  className="text-primary hover:underline disabled:opacity-50"
+                >
+                  {isResending ? "Resending..." : "Resend Verification Code"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNeedsOtp(false);
+                    setOtp("");
+                    setError("");
+                    setSuccess("");
+                  }}
+                  className="text-muted-foreground hover:text-foreground flex items-center justify-center gap-1 mt-1 font-semibold"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back to Sign Up
+                </button>
               </div>
-            </div>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                  {t("nameLabel")}
+                </label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full h-10 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm"
+                    required
+                  />
+                  <User className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading || !!success}
-              className="w-full h-11 bg-primary text-primary-foreground font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
-            >
-              {isLoading ? t("signingUp") : t("signUpBtn")}
-            </Button>
-          </form>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                  {t("emailLabel")}
+                </label>
+                <div className="relative">
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full h-10 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm"
+                    required
+                  />
+                  <Mail className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-1">
+                  {t("passwordLabel")}
+                </label>
+                <div className="relative">
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full h-10 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm"
+                    required
+                  />
+                  <Lock className="absolute left-3.5 top-3 h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isLoading || !!success}
+                className="w-full h-11 bg-primary text-primary-foreground font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center disabled:opacity-50"
+              >
+                {isLoading ? t("signingUp") : t("signUpBtn")}
+              </Button>
+            </form>
+          )}
 
           <div className="mt-6 pt-4 border-t border-border text-center">
             <Link
