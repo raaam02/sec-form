@@ -1,5 +1,4 @@
-import { db } from "d:/Projects/sec-form/packages/db/src/index";
-import { forms, users } from "d:/Projects/sec-form/packages/db/src/schema";
+import { db, forms, users } from "@sec-form/db";
 
 async function main() {
   const allUsers = await db.select().from(users);

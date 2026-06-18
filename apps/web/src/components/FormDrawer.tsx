@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { trpc } from "../utils/trpc";
+import { useSession } from "next-auth/react";
+import { getLocalForm, getLocalSubmissions } from "../utils/localForms";
 import { X, Eye, ArrowUpRight, FileText, BarChart3, Sparkles, BrainCircuit, Check, Calendar, HelpCircle } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
@@ -27,6 +29,11 @@ export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerP
   const [activeTab, setActiveTab] = useState<TabType>("overview");
   const [aiInsights, setAiInsights] = useState<string | null>(null);
 
+  const { data: session } = useSession();
+  const isDemo = session?.user?.email === "demo@demo.com";
+  const localFormFound = isDemo ? getLocalForm(form.id) : null;
+  const isLocal = isDemo && !!localFormFound;
+
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -38,14 +45,26 @@ export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerP
   }, [onClose]);
 
   // Queries
-  const { data: analytics, isLoading: isAnalyticsLoading } = trpc.analytics.getFormAnalytics.useQuery(
+  const { data: analyticsFromQuery, isLoading: isAnalyticsLoading } = trpc.analytics.getFormAnalytics.useQuery(
     { formId: form.id },
-    { keepPreviousData: true }
+    { keepPreviousData: true, enabled: !isLocal }
   );
 
-  const { data: submissionsList, isLoading: isSubmissionsLoading } = trpc.submissions.list.useQuery(
-    { formId: form.id }
+  const { data: submissionsListFromQuery, isLoading: isSubmissionsLoading } = trpc.submissions.list.useQuery(
+    { formId: form.id },
+    { enabled: !isLocal }
   );
+
+  const localSubmissions = isLocal ? getLocalSubmissions(form.id) : [];
+
+  const analytics = isLocal ? {
+    totalViews: localFormFound?.totalViews || 0,
+    totalResponses: localSubmissions.length,
+    conversionRate: localFormFound?.totalViews ? Math.round(localSubmissions.length / localFormFound.totalViews * 100) : 0,
+    timeline: []
+  } : analyticsFromQuery;
+
+  const submissionsList = isLocal ? localSubmissions : submissionsListFromQuery;
 
   // Mutations
   const generateInsightsMutation = trpc.ai.generateInsights.useMutation();

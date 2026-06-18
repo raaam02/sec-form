@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { trpc } from "../../../utils/trpc";
+import { useSession } from "next-auth/react";
+import { getLocalForms, saveLocalForm, LocalForm } from "../../../utils/localForms";
 import { FORM_TEMPLATES, BUILTIN_THEMES } from "@sec-form/shared";
 import { 
   Copy, Compass, AlertCircle, Search, Filter, Layers,
@@ -159,6 +161,8 @@ function interleaveByCategory(templates: typeof FORM_TEMPLATES) {
 export default function DashboardExplorePage() {
   const t = useTranslations("Dashboard");
   const router = useRouter();
+  const { data: session } = useSession();
+  const isDemo = session?.user?.email === "demo@demo.com";
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -191,14 +195,31 @@ export default function DashboardExplorePage() {
     setErrorMessage("");
 
     try {
+      const theme = BUILTIN_THEMES.find((theme) => theme.id === template.themeId) || BUILTIN_THEMES[0];
+      if (isDemo) {
+        const id = crypto.randomUUID();
+        const localForm: LocalForm = {
+          id,
+          title: template.title,
+          description: template.description,
+          slug: `form-${Math.random().toString(36).substring(2, 8)}`,
+          visibility: "draft",
+          schemaJson: { fields: template.fields as any },
+          themeJson: theme as any,
+          userId: "demo-user-id",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        saveLocalForm(localForm);
+        router.push(`/dashboard/builder/${id}`);
+        return;
+      }
+
       // 1. Create a blank form
       const newForm = await createFormMutation.mutateAsync({
         title: template.title,
         description: template.description,
       });
-
-      // 2. Load matched theme or Minimal
-      const theme = BUILTIN_THEMES.find((theme) => theme.id === template.themeId) || BUILTIN_THEMES[0];
 
       // 3. Update the form with the template schema and theme
       await updateFormMutation.mutateAsync({

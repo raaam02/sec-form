@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { trpc } from "../../utils/trpc";
+import { saveLocalForm } from "../../utils/localForms";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardMobileHeader } from "@/components/dashboard/DashboardMobileHeader";
 import { CreateFormModal } from "@/components/dashboard/CreateFormModal";
@@ -20,6 +21,34 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const createFormMutation = trpc.forms.create.useMutation();
 
   const handleCreateForm = async (title: string, description: string) => {
+    const isDemo = session?.user?.email === "demo@demo.com";
+    if (isDemo) {
+      const id = crypto.randomUUID();
+      const localForm = {
+        id,
+        title,
+        description,
+        slug: `form-${Math.random().toString(36).substring(2, 8)}`,
+        visibility: "draft" as const,
+        schemaJson: {
+          fields: [
+            {
+              id: crypto.randomUUID(),
+              type: "text" as const,
+              label: "Untitled Question",
+              required: false,
+              placeholder: "",
+            },
+          ],
+        },
+        userId: "demo-user-id",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      saveLocalForm(localForm);
+      router.push(`/dashboard/my-forms/${id}/edit`);
+      return;
+    }
     const form = await createFormMutation.mutateAsync({
       title,
       description,

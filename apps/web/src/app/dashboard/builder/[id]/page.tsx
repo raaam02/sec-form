@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/utils/trpc";
+import { useSession } from "next-auth/react";
+import { getLocalForm, saveLocalForm, LocalForm, getLocalSubmissions, getLocalForms } from "@/utils/localForms";
 import { ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
 import { AlertCircle, Plus, Palette, FileText, BarChart3, Settings, Inbox, Smartphone, Code } from "lucide-react";
@@ -33,21 +35,52 @@ export default function BuilderPage() {
   
   const utils = trpcAny.useUtils();
 
+  const { data: session } = useSession();
+  const isDemo = session?.user?.email === "demo@demo.com";
+
   // Sub-tabs states for the three panels
   const [leftTab, setLeftTab] = useState<"builder" | "themes">("builder");
   const [middleTab, setMiddleTab] = useState<"form" | "responses" | "analytics" | "settings">("form");
   const [rightTab, setRightTab] = useState<"preview" | "embed">("preview");
 
+  const [localForm, setLocalForm] = useState<LocalForm | null>(null);
+  const [hasLoadedLocal, setHasLoadedLocal] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const found = getLocalForm(id);
+      if (found) {
+        setLocalForm(found);
+      }
+      setHasLoadedLocal(true);
+    }
+  }, [id]);
+
   // Queries
-  const { data: form, isLoading: isFormLoading, error: formError } = trpcAny.forms.get.useQuery({ id });
+  const { data: form, isLoading: isFormLoading, error: formError } = trpcAny.forms.get.useQuery(
+    { id },
+    { enabled: !isDemo || (!hasLoadedLocal ? false : !localForm) }
+  );
+
+  const activeForm = isDemo && localForm ? localForm : form;
+
   const { data: analytics, isLoading: isAnalyticsLoading } = trpcAny.analytics.getFormAnalytics.useQuery(
     { formId: id },
-    { enabled: middleTab === "analytics" }
+    { enabled: middleTab === "analytics" && (!isDemo || !localForm) }
   );
   const { data: responses, isLoading: isResponsesLoading } = trpcAny.submissions.list.useQuery(
     { formId: id },
-    { enabled: middleTab === "responses" }
+    { enabled: middleTab === "responses" && (!isDemo || !localForm) }
   );
+
+  const activeResponses = isDemo && localForm ? getLocalSubmissions(id) : responses;
+  const activeAnalytics = isDemo && localForm ? {
+    totalViews: localForm.totalViews || 0,
+    totalResponses: activeResponses?.length || 0,
+    conversionRate: localForm.totalViews ? Math.round((activeResponses?.length || 0) / localForm.totalViews * 100) : 0,
+    timeline: [],
+  } : analytics;
+  const activeIsFormLoading = isDemo ? !hasLoadedLocal || (activeForm ? false : isFormLoading) : isFormLoading;
 
   // Mutations
   const updateFormMutation = trpcAny.forms.update.useMutation();
@@ -200,17 +233,17 @@ export default function BuilderPage() {
 
   // Sync state from query load
   useEffect(() => {
-    if (form) {
-      setTitle(form.title);
-      setDescription(form.description || "");
+    if (activeForm) {
+      setTitle(activeForm.title);
+      setDescription(activeForm.description || "");
       
-      const loadedFields = (form.schemaJson as any).fields || [];
-      const loadedTheme = form.themeJson as any;
+      const loadedFields = (activeForm.schemaJson as any).fields || [];
+      const loadedTheme = activeForm.themeJson as any;
       setFields(loadedFields);
       setActiveTheme(loadedTheme);
-      setSlug(form.slug);
-      setVisibility(form.visibility as any);
-      setLayoutMode((form.schemaJson as any).layout?.mode || "single_field");
+      setSlug(activeForm.slug);
+      setVisibility(activeForm.visibility as any);
+      setLayoutMode((activeForm.schemaJson as any).layout?.mode || "single_field");
 
       setFormHistory((prev) => {
         if (prev.states.length === 0) {
@@ -222,7 +255,7 @@ export default function BuilderPage() {
         return prev;
       });
     }
-  }, [form]);
+  }, [activeForm]);
 
   // Track tab parameter changes from deep links
   useEffect(() => {
@@ -256,6 +289,36 @@ export default function BuilderPage() {
       toast.info("Form reverted to draft due to live edits. Please publish again to make changes public.");
     }
     
+    if (isDemo) {
+      try {
+        const updatedLocal: LocalForm = {
+          id,
+          title,
+          description,
+          slug,
+          visibility: nextVisibility,
+          schemaJson: { 
+            fields: updatedFields,
+            layout: { mode: updatedLayoutMode || layoutMode }
+          },
+          themeJson: updatedTheme !== undefined ? updatedTheme : (activeTheme || null),
+          userId: "demo-user-id",
+          createdAt: activeForm?.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          totalViews: activeForm?.totalViews || 0,
+          totalResponses: activeForm?.totalResponses || 0,
+        };
+        saveLocalForm(updatedLocal);
+        setLocalForm(updatedLocal);
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2500);
+      } catch (err: any) {
+        setSaveStatus("error");
+        setSaveErrorMessage(err.message || "Auto-save failed");
+      }
+      return;
+    }
+
     try {
       await updateFormMutation.mutateAsync({
         id,
@@ -376,6 +439,65 @@ export default function BuilderPage() {
     }
     setVisibility(newVisibility);
     setSaveStatus("saving");
+
+    if (isDemo) {
+      try {
+        const localForms = getLocalForms();
+        const conflictLocal = localForms.some(f => f.slug === slug && f.id !== id);
+        if (conflictLocal) {
+          setSaveStatus("error");
+          toast.error("This custom slug is already taken. Please choose another.");
+          return;
+        }
+
+        try {
+          const dbForm = await utils.forms.getBySlug.fetch({ slug });
+          if (dbForm && dbForm.id !== id) {
+            setSaveStatus("error");
+            toast.error("This custom slug is already taken. Please choose another.");
+            return;
+          }
+        } catch (err: any) {
+          const isNotFound = err.message?.toLowerCase().includes("not found");
+          if (!isNotFound) {
+            setSaveStatus("error");
+            toast.error("This custom slug is already taken. Please choose another.");
+            return;
+          }
+        }
+
+        const updatedLocal: LocalForm = {
+          id,
+          title,
+          description,
+          slug,
+          visibility: newVisibility,
+          schemaJson: {
+            fields,
+            layout: { mode: layoutMode }
+          },
+          themeJson: activeTheme || null,
+          userId: "demo-user-id",
+          createdAt: activeForm?.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          totalViews: activeForm?.totalViews || 0,
+          totalResponses: activeForm?.totalResponses || 0,
+        };
+        saveLocalForm(updatedLocal);
+        setLocalForm(updatedLocal);
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2500);
+
+        if (newVisibility === "public") {
+          setIsShareModalOpen(true);
+        }
+      } catch (err: any) {
+        setSaveStatus("error");
+        setSaveErrorMessage(err.message || "Failed to update visibility");
+      }
+      return;
+    }
+
     try {
       await updateFormMutation.mutateAsync({
         id,
@@ -410,6 +532,65 @@ export default function BuilderPage() {
       return;
     }
     setSaveStatus("saving");
+
+    if (isDemo) {
+      try {
+        const localForms = getLocalForms();
+        const conflictLocal = localForms.some(f => f.slug === slug && f.id !== id);
+        if (conflictLocal) {
+          setSaveStatus("error");
+          toast.error("This custom slug is already taken. Please choose another.");
+          return;
+        }
+
+        try {
+          const dbForm = await utils.forms.getBySlug.fetch({ slug });
+          if (dbForm && dbForm.id !== id) {
+            setSaveStatus("error");
+            toast.error("This custom slug is already taken. Please choose another.");
+            return;
+          }
+        } catch (err: any) {
+          const isNotFound = err.message?.toLowerCase().includes("not found");
+          if (!isNotFound) {
+            setSaveStatus("error");
+            toast.error("This custom slug is already taken. Please choose another.");
+            return;
+          }
+        }
+
+        const updatedLocal: LocalForm = {
+          id,
+          title,
+          description,
+          slug,
+          visibility,
+          schemaJson: {
+            fields,
+            layout: { mode: layoutMode }
+          },
+          themeJson: activeTheme || null,
+          userId: "demo-user-id",
+          createdAt: activeForm?.createdAt || new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          totalViews: activeForm?.totalViews || 0,
+          totalResponses: activeForm?.totalResponses || 0,
+        };
+        saveLocalForm(updatedLocal);
+        setLocalForm(updatedLocal);
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2500);
+
+        if (visibility === "public") {
+          setIsShareModalOpen(true);
+        }
+      } catch (err: any) {
+        setSaveStatus("error");
+        setSaveErrorMessage(err.message || "Failed to save settings");
+      }
+      return;
+    }
+
     try {
       await updateFormMutation.mutateAsync({
         id,
@@ -438,6 +619,40 @@ export default function BuilderPage() {
   };
 
   const handleExportCSV = async () => {
+    if (isDemo && localForm) {
+      try {
+        const localSubs = getLocalSubmissions(id);
+        const headers = ["Submission ID", "Created At", ...fields.map(f => f.label)];
+        const rows = localSubs.map(sub => {
+          const answers = sub.answersJson || {};
+          return [
+            sub.id,
+            sub.createdAt,
+            ...fields.map(f => {
+              const ans = answers[f.id];
+              if (ans === undefined || ans === null) return "-";
+              if (Array.isArray(ans)) return ans.join(", ");
+              return String(ans);
+            })
+          ];
+        });
+        const csvContent = [headers.join(","), ...rows.map(r => r.map(val => `"${val.replace(/"/g, '""')}"`).join(","))].join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `submissions-${slug || activeForm?.slug || id}.csv`);
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("CSV exported successfully");
+      } catch (err: any) {
+        toast.error("Export failed: " + err.message);
+      }
+      return;
+    }
+
     try {
       const res = await exportCSVMutation.mutateAsync({ formId: id });
       
@@ -455,7 +670,7 @@ export default function BuilderPage() {
     }
   };
 
-  if (isFormLoading) {
+  if (activeIsFormLoading) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-background">
         <LoadingSpinner className="w-10 h-10" color="text-primary" />
@@ -463,7 +678,7 @@ export default function BuilderPage() {
     );
   }
 
-  if (formError || !form) {
+  if ((formError && !localForm) || (!activeIsFormLoading && !activeForm)) {
     return (
       <div className="h-full w-full p-10 flex flex-col items-center justify-center bg-background gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
@@ -478,7 +693,7 @@ export default function BuilderPage() {
 
   const focusedField = fields.find((f) => f.id === selectedFieldId);
   const hostOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
-  const publicFormUrl = `${hostOrigin}/f/${slug || form.slug}`;
+  const publicFormUrl = `${hostOrigin}/f/${slug || activeForm?.slug}`;
 
   return (
     <div className="h-full flex flex-col overflow-hidden text-foreground bg-transparent">
@@ -539,11 +754,11 @@ export default function BuilderPage() {
               handleDeleteField={handleDeleteField}
               handleUpdateField={handleUpdateField}
               saveForm={saveForm}
-              responses={responses}
-              isResponsesLoading={isResponsesLoading}
+              responses={activeResponses}
+              isResponsesLoading={isResponsesLoading && !localForm}
               handleExportCSV={handleExportCSV}
-              analytics={analytics}
-              isAnalyticsLoading={isAnalyticsLoading}
+              analytics={activeAnalytics}
+              isAnalyticsLoading={isAnalyticsLoading && !localForm}
               aiInsights={aiInsights}
               isInsightsGenerating={isInsightsGenerating}
               insightsError={insightsError}
@@ -660,11 +875,11 @@ export default function BuilderPage() {
                 handleDeleteField={handleDeleteField}
                 handleUpdateField={handleUpdateField}
                 saveForm={saveForm}
-                responses={responses}
-                isResponsesLoading={isResponsesLoading}
+                responses={activeResponses}
+                isResponsesLoading={isResponsesLoading && !localForm}
                 handleExportCSV={handleExportCSV}
-                analytics={analytics}
-                isAnalyticsLoading={isAnalyticsLoading}
+                analytics={activeAnalytics}
+                isAnalyticsLoading={isAnalyticsLoading && !localForm}
                 aiInsights={aiInsights}
                 isInsightsGenerating={isInsightsGenerating}
                 insightsError={insightsError}

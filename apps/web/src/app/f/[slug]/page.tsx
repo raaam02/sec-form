@@ -16,13 +16,36 @@ import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 
+import { getLocalForms, saveLocalForm, saveLocalSubmission } from "../../../utils/localForms";
+
 export default function PublicFormPage() {
   const params = useParams();
   const slug = params.slug as string;
   const t = useTranslations("PublicForm");
 
+  const localFormFound = typeof window !== "undefined"
+    ? getLocalForms().find((f) => f.slug === slug)
+    : null;
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined" && localFormFound) {
+      const updated = {
+        ...localFormFound,
+        totalViews: (localFormFound.totalViews || 0) + 1,
+      };
+      saveLocalForm(updated);
+    }
+  }, [slug]);
+
   // Query form metadata
-  const { data: form, isLoading, error } = trpc.forms.getBySlug.useQuery({ slug });
+  const { data: formFromQuery, isLoading: isQueryLoading, error: queryError } = trpc.forms.getBySlug.useQuery(
+    { slug },
+    { enabled: !localFormFound }
+  );
+
+  const form = localFormFound || formFromQuery;
+  const isLoading = localFormFound ? false : isQueryLoading;
+  const error = localFormFound ? null : queryError;
 
   // Mutation
   const submitMutation = trpc.submissions.submit.useMutation();
@@ -151,6 +174,27 @@ export default function PublicFormPage() {
     }
 
     // Process submission...
+    if (localFormFound) {
+      try {
+        const mockSubmission = {
+          id: `sub-${Math.random().toString(36).substring(2, 10)}`,
+          formId: localFormFound.id,
+          answersJson: result.data,
+          createdAt: new Date().toISOString(),
+        };
+        saveLocalSubmission(mockSubmission);
+        setIsSubmitted(true);
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      } catch (err: any) {
+        setSubmitError(err.message || "Failed to submit form");
+      }
+      return;
+    }
+
     try {
       await submitMutation.mutateAsync({
         formId: form.id,

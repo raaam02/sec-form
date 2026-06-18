@@ -143,14 +143,16 @@ export function DashboardMobileHeader({
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
                 <span>{t("navFeedback")}</span>
               </Link>
-              <Button
-                variant="ghost"
-                onClick={() => setIsChangePasswordModalOpen(true)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-accent hover:text-accent-foreground transition-colors text-left justify-start h-auto text-foreground"
-              >
-                <Lock className="h-4 w-4 text-muted-foreground" />
-                <span>Change Password</span>
-              </Button>
+              {user.email !== "demo@demo.com" && (
+                <Button
+                  variant="ghost"
+                  onClick={() => setIsChangePasswordModalOpen(true)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-accent hover:text-accent-foreground transition-colors text-left justify-start h-auto text-foreground"
+                >
+                  <Lock className="h-4 w-4 text-muted-foreground" />
+                  <span>Change Password</span>
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 onClick={onSignOut}
