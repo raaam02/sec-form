@@ -199,7 +199,7 @@ function LoginForm() {
 
       <div className="flex-1 flex flex-col justify-center bg-primary/5 dark:bg-secondary/5 items-center px-4 sm:px-8 py-10 lg:py-0">
         {/* Mobile-only top bar */}
-        <div className="lg:hidden w-full max-w-md mb-8 flex items-center justify-between">
+        <div className="lg:hidden w-full max-w-md mb-0 flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/20">
               <Sparkles className="h-4 w-4 text-primary-foreground" />
@@ -215,22 +215,18 @@ function LoginForm() {
         </div>
 
         {/* Mobile mascot (smaller) */}
-        <div className="lg:hidden mb-4">
-          <div className="w-28 h-28 mx-auto">
-            <LoginMascot
-              focusedField={focusedField}
-              emailLength={email.length}
-              showPassword={showPassword}
-            />
-          </div>
-        </div>
+        <LoginMascot
+          focusedField={focusedField}
+          emailLength={email.length}
+          showPassword={showPassword}
+        />
 
         {/* Mobile title */}
-        <div className="lg:hidden text-center mb-6">
+        <div className="lg:hidden text-center mb-6 -mt-4">
           <h1 className="font-outfit text-2xl font-extrabold tracking-tight text-foreground">
             {t("title")}
           </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
+          <p className="mt-0 text-sm text-muted-foreground">
             {t("subtitle")}
           </p>
         </div>

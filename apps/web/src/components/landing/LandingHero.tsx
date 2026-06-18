@@ -166,10 +166,10 @@ export function LandingHero() {
               </motion.button>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
                 <Link
-                  href="/dashboard/explore"
+                  href="/explore"
                   className="inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-card px-6 text-[14px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors shadow-sm"
                 >
-                  Browse templates
+                  Templates
                 </Link>
               </motion.div>
             </motion.div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { createPortal } from "react-dom";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,8 +14,8 @@ import {
 } from "@/components/ui/select";
 import { trpc } from "@/utils/trpc";
 import { toast } from "sonner";
-import { useSession } from "next-auth/react";
-import { Mail, MessageSquare, Send, User } from "lucide-react";
+
+import { Mail, MessageSquare, Send, User, X } from "lucide-react";
 
 interface ContactAdminFormProps {
   onClose: () => void;
@@ -22,20 +23,12 @@ interface ContactAdminFormProps {
 }
 
 export function ContactAdminForm({ onClose, defaultPlan = "pro" }: ContactAdminFormProps) {
-  const { data: session } = useSession();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [plan, setPlan] = useState("pro");
   const [message, setMessage] = useState("");
 
   const sendInquiry = trpc.support.sendContactInquiry.useMutation();
-
-  useEffect(() => {
-    if (session?.user) {
-      setName(session.user.name || "");
-      setEmail(session.user.email || "");
-    }
-  }, [session]);
 
   useEffect(() => {
     setPlan(defaultPlan);
@@ -76,13 +69,10 @@ export function ContactAdminForm({ onClose, defaultPlan = "pro" }: ContactAdminF
   return (
     <>
       <div className="space-y-2 mb-4">
-        <DialogTitle className="font-outfit text-xl font-extrabold text-foreground flex items-center gap-2">
+        <h2 className="font-outfit text-xl font-extrabold text-foreground flex items-center gap-2">
           <MessageSquare className="h-5 w-5 text-primary" />
           Contact Administrator
-        </DialogTitle>
-        <DialogDescription className="text-muted-foreground text-xs">
-          Send an inquiry directly to the system administrator to upgrade your plan or request custom limits.
-        </DialogDescription>
+        </h2>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -181,11 +171,63 @@ interface ContactAdminModalProps {
 }
 
 export function ContactAdminModal({ isOpen, onOpenChange, defaultPlan = "pro" }: ContactAdminModalProps) {
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md border border-border/80 shadow-2xl bg-card rounded-2xl p-6 relative overflow-hidden">
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  if (!mounted || !isOpen) return null;
+
+  return createPortal(
+    <div
+      style={{ position: "fixed", inset: 0, zIndex: 9999 }}
+      aria-modal="true"
+      role="dialog"
+    >
+      {/* Overlay */}
+      <div
+        style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.7)" }}
+        onClick={() => onOpenChange(false)}
+      />
+
+      {/* Modal Content */}
+      <div
+        style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "100%",
+          maxWidth: "28rem",
+          zIndex: 10000,
+        }}
+        className="bg-background border border-border/80 shadow-2xl rounded-2xl p-6 relative"
+      >
+        {/* Close button */}
+        <button
+          onClick={() => onOpenChange(false)}
+          className="absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 text-foreground transition-opacity"
+          aria-label="Close"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
         <ContactAdminForm onClose={() => onOpenChange(false)} defaultPlan={defaultPlan} />
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>,
+    document.body
   );
 }

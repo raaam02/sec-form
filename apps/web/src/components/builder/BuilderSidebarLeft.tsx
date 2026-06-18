@@ -119,7 +119,7 @@ export function BuilderSidebarLeft({
         {leftTab === "builder" && (
           <>
             {/* Field adder */}
-            <div className="space-y-3 sm:pt-12">
+            <div className="space-y-3">
               {/* <h3 className="font-outfit font-extrabold text-foreground text-sm hidden @[150px]:block">{t("sidebarAddFields")}</h3> */}
               <div className="grid grid-cols-1 @[260px]:grid-cols-2 gap-2 text-[11px] font-bold text-muted-foreground">
                 {FIELD_TYPES.map((field) => {

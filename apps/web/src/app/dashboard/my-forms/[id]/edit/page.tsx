@@ -331,16 +331,23 @@ export default function BuilderPage() {
 
 
 
-  const handleUpdateVisibility = async (newVisibility: "draft" | "public" | "unlisted") => {
-    console.log("[EditPage] handleUpdateVisibility called with:", newVisibility);
-    if (newVisibility === "public") {
+  const checkPublicLimit = (targetVisibility: "draft" | "public" | "unlisted") => {
+    if (targetVisibility === "public") {
       const otherPublicForms = formsList?.filter((f: any) => f.visibility === "public" && f.id !== id) || [];
       console.log("[EditPage] otherPublicForms count:", otherPublicForms.length, "formsList:", formsList);
       if (otherPublicForms.length >= 3) {
         console.log("[EditPage] Limit reached! Showing limit modal.");
         setShowLimitModal(true);
-        return;
+        return true;
       }
+    }
+    return false;
+  };
+
+  const handleUpdateVisibility = async (newVisibility: "draft" | "public" | "unlisted") => {
+    console.log("[EditPage] handleUpdateVisibility called with:", newVisibility);
+    if (checkPublicLimit(newVisibility)) {
+      return;
     }
     setVisibility(newVisibility);
     setSaveStatus("saving");
@@ -374,14 +381,8 @@ export default function BuilderPage() {
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("[EditPage] handleSaveSettings called. visibility:", visibility);
-    if (visibility === "public") {
-      const otherPublicForms = formsList?.filter((f: any) => f.visibility === "public" && f.id !== id) || [];
-      console.log("[EditPage] otherPublicForms count:", otherPublicForms.length, "formsList:", formsList);
-      if (otherPublicForms.length >= 3) {
-        console.log("[EditPage] Limit reached! Showing limit modal.");
-        setShowLimitModal(true);
-        return;
-      }
+    if (checkPublicLimit(visibility)) {
+      return;
     }
     setSaveStatus("saving");
     try {
