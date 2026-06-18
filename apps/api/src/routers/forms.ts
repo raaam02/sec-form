@@ -7,6 +7,8 @@ import crypto from "crypto";
 import { BUILTIN_THEMES } from "@sec-form/shared";
 import { TRPCError } from "@trpc/server";
 
+const PUBLIC_FORM_LIMIT = 5;
+
 export const formsRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
     const userForms = await ctx.db.query.forms.findMany({
@@ -167,10 +169,10 @@ export const formsRouter = router({
           );
         
         const countVal = Number(publicFormsCount[0]?.count || 0);
-        if (countVal >= 3) {
+        if (countVal >= PUBLIC_FORM_LIMIT) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: "LIMIT_REACHED: You have reached the limit of 3 active public forms.",
+            message: `LIMIT_REACHED: You have reached the limit of ${PUBLIC_FORM_LIMIT} active public forms.`,
           });
         }
       }

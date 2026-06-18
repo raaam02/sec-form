@@ -10,6 +10,8 @@ interface LimitModalProps {
   onContactAdmin?: () => void;
 }
 
+const PUBLIC_FORM_LIMIT = 5;
+
 export function LimitModal({ isOpen, onOpenChange, onContactAdmin }: LimitModalProps) {
   const [view, setView] = useState<"limit" | "contact">("limit");
   const [mounted, setMounted] = useState(false);
@@ -62,7 +64,7 @@ export function LimitModal({ isOpen, onOpenChange, onContactAdmin }: LimitModalP
           maxWidth: "28rem",
           zIndex: 10000,
         }}
-        className="bg-background border border-border/80 shadow-2xl rounded-2xl p-6 relative"
+        className="bg-background border border-border/80 shadow-2xl rounded-2xl p-6 relative animate-in fade-in zoom-in-95 duration-200"
       >
         {/* Close button */}
         <button
@@ -93,7 +95,7 @@ export function LimitModal({ isOpen, onOpenChange, onContactAdmin }: LimitModalP
                 <ul className="space-y-2 bg-muted/40 p-4 rounded-xl border border-border/50 text-xs">
                   <li className="flex items-start gap-2 text-foreground/80">
                     <span className="h-1.5 w-1.5 bg-amber-500 rounded-full mt-1.5 shrink-0" />
-                    <span><strong>Starter/Free Plan Limit:</strong> Maximum of 3 public forms active at a time.</span>
+                    <span><strong>Starter/Free Plan Limit:</strong> Maximum of {PUBLIC_FORM_LIMIT} public forms active at a time.</span>
                   </li>
                   <li className="flex items-start gap-2 text-foreground/80">
                     <span className="h-1.5 w-1.5 bg-amber-500 rounded-full mt-1.5 shrink-0" />

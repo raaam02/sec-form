@@ -51,6 +51,8 @@ interface FormCardGridProps {
   handleDeleteForm: (id: string) => void;
   setIsAIModalOpen: (open: boolean) => void;
   isSidebarOpen?: boolean;
+  isDemo?: boolean;
+  aiCredits?: number;
 }
 
 export function FormCardGrid({
@@ -61,6 +63,8 @@ export function FormCardGrid({
   handleDeleteForm,
   setIsAIModalOpen,
   isSidebarOpen = false,
+  isDemo = false,
+  aiCredits = 2,
 }: FormCardGridProps) {
   const t = useTranslations("Dashboard");
 
@@ -123,7 +127,7 @@ export function FormCardGrid({
           onClick={() => setIsAIModalOpen(true)}
           className="mt-6 inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary text-primary-foreground shadow-sm"
         >
-          <Sparkles className="h-4 w-4" /> {t("generateAi")}
+          <Sparkles className="h-4 w-4" /> {isDemo ? t("generateAi") : `${t("generateAi")} (${aiCredits}/2)`}
         </Button>
       </Card>
     );

@@ -71,7 +71,7 @@ export function BuilderSidebarLeft({
     { type: "rating", label: "Rating", icon: Star, iconColor: "text-yellow-500", colSpan2: false, shortcut: "r" },
     { type: "date", label: "Date", icon: Calendar, iconColor: "text-pink-500", colSpan2: false, shortcut: "d" },
     { type: "time", label: "Time", icon: Clock, iconColor: "text-rose-500", colSpan2: false, shortcut: "i" },
-    { type: "step_break", label: "Step Break", icon: AlignLeft, iconColor: "text-slate-500", colSpan2: true, shortcut: "b" }
+    { type: "step_break", label: "Page Break", icon: AlignLeft, iconColor: "text-slate-500", colSpan2: true, shortcut: "b" }
   ] as const;
 
   // Register shortcuts

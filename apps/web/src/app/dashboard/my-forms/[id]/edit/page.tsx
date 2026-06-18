@@ -24,6 +24,8 @@ import { toast } from "sonner";
 // Cast trpc to bypass Next.js 15 type collision checks
 const trpcAny = trpc as any;
 
+const PUBLIC_FORM_LIMIT = 5;
+
 export default function BuilderPage() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -335,7 +337,7 @@ export default function BuilderPage() {
     if (targetVisibility === "public") {
       const otherPublicForms = formsList?.filter((f: any) => f.visibility === "public" && f.id !== id) || [];
       console.log("[EditPage] otherPublicForms count:", otherPublicForms.length, "formsList:", formsList);
-      if (otherPublicForms.length >= 3) {
+      if (otherPublicForms.length >= PUBLIC_FORM_LIMIT) {
         console.log("[EditPage] Limit reached! Showing limit modal.");
         setShowLimitModal(true);
         return true;

@@ -48,6 +48,7 @@ export const VisibilitySchema = z.enum(["draft", "public", "unlisted"]);
 export type Visibility = z.infer<typeof VisibilitySchema>;
 
 export const ThemeSchema = z.object({
+  id: z.string().optional(),
   name: z.string(),
   primaryColor: z.string(),       // e.g. "#3b82f6"
   backgroundColor: z.string(),    // e.g. "#f3f4f6"
