@@ -3,11 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { motion } from "motion/react";
-import { Sparkles, Code } from "lucide-react";
+import { Code } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTranslations } from "next-intl";
+import { Logo } from "@/components/Logo";
 
 export function LandingNav() {
   const { data: session } = useSession();
@@ -40,12 +41,7 @@ export function LandingNav() {
         <div className="flex h-14 items-center justify-between px-4 sm:px-5">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/20">
-              <Sparkles className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-outfit text-[17px] font-bold tracking-tight">
-              Formu<span className="text-primary">.AI</span>
-            </span>
+            <Logo size="sm" />
           </Link>
           {/* Nav */}
           <nav className="hidden md:flex gap-6 text-[13px] font-medium text-muted-foreground">
@@ -53,7 +49,7 @@ export function LandingNav() {
             <Link href="/themes" className="hover:text-foreground transition-colors">{t("navThemes")}</Link>
             <Link href="/pricing" className="hover:text-foreground transition-colors">{t("navPricing")}</Link>
             <a
-              href="http://localhost:4000/docs"
+              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-foreground transition-colors flex items-center gap-1"
@@ -65,12 +61,20 @@ export function LandingNav() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             {session ? (
-              <Link
-                href="/dashboard"
-                className="inline-flex h-8 items-center rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                {t("ctaStart")}
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex h-8 items-center rounded-lg px-3 text-[13px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="inline-flex h-8 items-center rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  Log Out
+                </button>
+              </div>
             ) : (
               <>
                 <Link

@@ -1,11 +1,12 @@
 import React from "react";
 import Link from "next/link";
-import { LayoutDashboard, Compass, BarChart3, PlusCircle, Code, LogOut, Shield, Lock } from "lucide-react";
+import { LayoutDashboard, Compass, BarChart3, PlusCircle, Code, LogOut, Shield, Lock, MessageSquare } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
 import { LocaleSwitcher } from "../LocaleSwitcher";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { Logo } from "@/components/Logo";
 
 interface DashboardMobileHeaderProps {
   pathname: string;
@@ -31,7 +32,7 @@ export function DashboardMobileHeader({
 
   return (
     <header className="h-16 border-b border-border bg-card md:hidden flex items-center justify-between px-6 shrink-0 transition-colors duration-200 relative">
-      <span className="font-outfit font-bold tracking-tight text-foreground">Formu.AI</span>
+      <Logo size="sm" />
       
       <div className="flex items-center gap-4">
         {/* Quick Navigation Icons on Mobile */}
@@ -89,7 +90,7 @@ export function DashboardMobileHeader({
             className="h-8.5 w-8.5 p-0 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             title={t("newForm")}
           >
-            <PlusCircle className="h-4.5 w-4.5" />
+            <PlusCircle className="h-[20px] w-[20px]" />
           </Button>
         </div>
 
@@ -127,7 +128,7 @@ export function DashboardMobileHeader({
                 <LocaleSwitcher />
               </div>
               <a
-                href="http://localhost:4000/docs"
+                href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -135,6 +136,13 @@ export function DashboardMobileHeader({
                 <Code className="h-4 w-4 text-muted-foreground" />
                 <span>{t("navDocs")}</span>
               </a>
+              <Link
+                href="/dashboard/feedback"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <span>{t("navFeedback")}</span>
+              </Link>
               <Button
                 variant="ghost"
                 onClick={() => setIsChangePasswordModalOpen(true)}

@@ -168,6 +168,10 @@ app.get("/api/v1/forms/:formId/submissions/csv", async (req, res) => {
 
 // OpenAPI 3.0 specification endpoint
 app.get("/openapi.json", (req, res) => {
+  const protocol = req.headers["x-forwarded-proto"] === "https" || req.secure ? "https" : "http";
+  const host = req.headers.host || `localhost:${PORT}`;
+  const serverUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || `${protocol}://${host}`;
+
   res.json({
     openapi: "3.0.0",
     info: {
@@ -177,8 +181,8 @@ app.get("/openapi.json", (req, res) => {
     },
     servers: [
       {
-        url: "http://localhost:4000",
-        description: "Local Express Server"
+        url: serverUrl,
+        description: "API Server"
       }
     ],
     paths: {

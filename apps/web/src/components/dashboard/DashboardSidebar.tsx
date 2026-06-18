@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle, Shield, Lock, FileText } from "lucide-react";
+import { Sparkles, LayoutDashboard, Compass, LogOut, Code, BarChart3, PlusCircle, Shield, Lock, FileText, MessageSquare } from "lucide-react";
 import { motion } from "motion/react";
 import { ThemeToggle } from "../ThemeToggle";
 import { LocaleSwitcher } from "../LocaleSwitcher";
@@ -11,6 +11,7 @@ import { useTranslations } from "next-intl";
 import { useGlobalShortcutHelp, useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { Keyboard } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Logo } from "@/components/Logo";
 
 interface DashboardSidebarProps {
   pathname: string;
@@ -47,6 +48,7 @@ export function DashboardSidebar({
       router.push("/dashboard/admin");
     }
   }, "Navigation");
+  useGlobalShortcut("nav-feedback", "alt+6", "Go to Feedback", () => router.push("/dashboard/feedback"), "Navigation");
   
   useGlobalShortcut("user-settings", "alt+u", "User Settings", () => setIsUserPopoverOpen(prev => !prev), "Settings");
 
@@ -75,6 +77,12 @@ export function DashboardSidebar({
       icon: BarChart3,
       active: pathname === "/dashboard/analytics",
     },
+    {
+      href: "/dashboard/feedback",
+      label: `${t("navFeedback")} [Alt+6]`,
+      icon: MessageSquare,
+      active: pathname === "/dashboard/feedback",
+    },
   ];
 
   if (user.role === "admin") {
@@ -92,9 +100,7 @@ export function DashboardSidebar({
         <div>
           {/* Brand header - same height as fixed headers (h-16) */}
           <div className="h-16 border-b border-border flex items-center justify-center shrink-0 bg-sidebar">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-primary to-rose-400 shrink-0 shadow-sm">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
+            <Logo showText={false} size="sm" />
           </div>
 
           {/* Nav Links */}
@@ -142,7 +148,7 @@ export function DashboardSidebar({
                     onClick={() => setIsCreateModalOpen(true)}
                     className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-muted-foreground hover:bg-accent hover:text-accent-foreground p-0"
                   >
-                    <PlusCircle className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
+                    <PlusCircle className="h-[22px] w-[22px] shrink-0 transition-colors duration-200 group-hover:text-primary" />
                   </Button>
                 </motion.div>
               </TooltipTrigger>
@@ -181,7 +187,7 @@ export function DashboardSidebar({
                 whileTap={{ scale: 0.95, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
               >
                 <a
-                  href="http://localhost:4000/docs"
+                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all"

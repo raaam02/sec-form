@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Sparkles, AlertCircle, Lock, Mail, User, CheckCircle2 } from "lucide-react";
+import { AlertCircle, Lock, Mail, User, CheckCircle2 } from "lucide-react";
 import { Suspense } from "react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { LocaleSwitcher } from "../../components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { signUpAction } from "../actions/auth";
+import { Logo } from "@/components/Logo";
 
 function SignupForm() {
   const router = useRouter();
@@ -57,12 +58,7 @@ function SignupForm() {
       <div className="max-w-md w-full relative z-10 my-auto">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 justify-center mb-4">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-tr from-primary/20 to-primary shadow-md">
-              <Sparkles className="h-4.5 w-4.5 text-white" />
-            </div>
-            <span className="font-outfit text-xl font-bold tracking-tight text-foreground">
-              Formu.AI
-            </span>
+            <Logo size="md" />
           </Link>
           <h2 className="font-outfit text-3xl font-extrabold tracking-tight text-foreground">
             {t("title")}

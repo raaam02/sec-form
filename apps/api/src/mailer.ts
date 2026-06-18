@@ -179,3 +179,76 @@ export async function sendContactMail(
     throw new Error("Failed to send contact inquiry. Please try again later.");
   }
 }
+
+export async function sendFeedbackMail(
+  message: string,
+  name?: string | null,
+  email?: string | null
+): Promise<void> {
+  const mailer = await getTransporter();
+  const from = process.env.SMTP_FROM || '"Formu.AI" <no-reply@formu.ai>';
+  const to = process.env.ADMIN_EMAIL || "prajapatiram983@gmail.com";
+
+  const displayName = name || "Anonymous";
+  const displayEmail = email || "Not provided";
+  const mailSubject = `New Feedback Submission - from ${displayName}`;
+  
+  const text = `New Feedback Submission:\n\nName: ${displayName}\nEmail: ${displayEmail}\n\nFeedback Message:\n${message}`;
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+      <div style="text-align: center; margin-bottom: 24px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
+        <span style="font-size: 24px; font-weight: 800; color: #4f46e5;">Formu.AI Admin Panel</span>
+        <h2 style="font-size: 18px; font-weight: 700; color: #0f172a; margin-top: 8px; margin-bottom: 0;">New User Feedback Received</h2>
+      </div>
+      
+      <div style="margin-bottom: 24px; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 6px 0; font-size: 14px; font-weight: 600; color: #475569; width: 120px; vertical-align: top;">Submitted By:</td>
+            <td style="padding: 6px 0; font-size: 14px; color: #0f172a; vertical-align: top;">${displayName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; font-size: 14px; font-weight: 600; color: #475569; vertical-align: top;">Email Address:</td>
+            <td style="padding: 6px 0; font-size: 14px; color: #0f172a; vertical-align: top;">
+              ${email ? `<a href="mailto:${email}" style="color: #4f46e5; text-decoration: none;">${email}</a>` : `<em>Not provided</em>`}
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        <h3 style="font-size: 14px; font-weight: 700; color: #334155; margin-top: 0; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">Feedback Message:</h3>
+        <div style="background-color: #f1f5f9; border-radius: 8px; padding: 16px; font-size: 14px; color: #334155; line-height: 1.6; white-space: pre-wrap;">${message}</div>
+      </div>
+
+      <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; text-align: center;">
+        <span style="font-size: 11px; color: #94a3b8;">This is an automated administrative notification from Formu.AI</span>
+      </div>
+    </div>
+  `;
+
+  try {
+    const info = await mailer.sendMail({
+      from,
+      to,
+      subject: mailSubject,
+      text,
+      html,
+      replyTo: email || undefined,
+    });
+
+    console.log(`Feedback mail sent to admin ${to} (Message ID: ${info.messageId})`);
+
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    if (previewUrl) {
+      console.log(`\n======================================================`);
+      console.log(`📧 ETHEREAL TEST EMAIL SENT!`);
+      console.log(`Preview URL: ${previewUrl}`);
+      console.log(`======================================================\n`);
+    }
+  } catch (error) {
+    console.error(`Failed to send feedback email:`, error);
+    throw new Error("Failed to send feedback. Please try again later.");
+  }
+}

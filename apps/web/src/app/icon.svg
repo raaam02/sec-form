@@ -1,0 +1,63 @@
+<svg
+  viewBox="0 0 32 32"
+  width="32"
+  height="32"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  {/* Rounded gradient background */}
+  <rect width="32" height="32" rx="8" fill="url(#logo-grad)" />
+  
+  {/* Logo icon symbol */}
+  <g transform="translate(4, 4)">
+    {/* Outer document board */}
+    <path
+      d="M5 4C5 2.89543 5.89543 2 7 2H13.5L19 7.5V20C19 21.1046 18.1046 22 17 22H7C5.89543 22 5 21.1046 5 20V4Z"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    {/* Folded corner */}
+    <path
+      d="M13.5 2V7.5H19"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinejoin="round"
+    />
+    {/* Form Line 1 */}
+    <path
+      d="M9 12H13"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    {/* Form Line 2 */}
+    <path
+      d="M9 16H15"
+      stroke="white"
+      strokeWidth="2"
+      strokeLinecap="round"
+    />
+    {/* Field checkbox / checkmark */}
+    <path
+      d="M8.5 7.5L9.5 8.5L11.5 6"
+      stroke="white"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Solid Sparkle (Gemini AI indicator) emerging from top-right */}
+    <path
+      d="M19 1L19.3 2.2C19.35 2.4 19.6 2.6 19.8 2.7L21 3L19.8 3.3C19.6 3.4 19.35 3.6 19.3 3.8L19 5L18.7 3.8C18.65 3.6 18.4 3.4 18.2 3.3L17 3L18.2 2.7C18.4 2.6 18.65 2.4 18.7 2.2L19 1Z"
+      fill="white"
+    />
+  </g>
+
+  <defs>
+    <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="50%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#7c3aed" />
+    </linearGradient>
+  </defs>
+</svg>

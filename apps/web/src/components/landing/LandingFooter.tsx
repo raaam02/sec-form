@@ -1,10 +1,11 @@
-"use client";
-
 import React from "react";
 import Link from "next/link";
-import { Sparkles, Github, Twitter, Code, Lock } from "lucide-react";
+import { Github, Twitter, Code, Lock } from "lucide-react";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
+import { Logo } from "@/components/Logo";
+
+const apiDocsUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`;
 
 const NAV_COLUMNS = [
   {
@@ -19,8 +20,8 @@ const NAV_COLUMNS = [
   {
     title: "Developers",
     links: [
-      { label: "API Docs", href: "http://localhost:4000/docs", external: true },
-      { label: "REST API", href: "http://localhost:4000/docs", external: true },
+      { label: "API Docs", href: apiDocsUrl, external: true },
+      { label: "REST API", href: apiDocsUrl, external: true },
       { label: "Webhooks", href: "/docs/webhooks" },
       { label: "Open Source", href: "https://github.com", external: true },
     ],
@@ -58,12 +59,7 @@ export function LandingFooter() {
           {/* Brand column */}
           <div className="col-span-2 lg:col-span-1 flex flex-col gap-5">
             <Link href="/" className="flex items-center gap-2.5 w-fit">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/20">
-                <Sparkles className="h-4.5 w-4.5 text-primary-foreground" />
-              </div>
-              <span className="font-outfit text-[20px] font-black tracking-tight">
-                Formu<span className="text-primary">.AI</span>
-              </span>
+              <Logo size="md" />
             </Link>
 
             <p className="text-[13px] text-muted-foreground leading-relaxed max-w-[260px]">

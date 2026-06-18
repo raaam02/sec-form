@@ -17,6 +17,7 @@ import { ThemeToggle } from "../../components/ThemeToggle";
 import { useTranslations } from "next-intl";
 import { OrganicBlob } from "@/components/landing/HandDrawn";
 import { LoginMascot } from "@/components/landing/LoginMascot";
+import { Logo } from "@/components/Logo";
 
 // ─── Floating security badges ────────────────────────────────────────────────
 
@@ -123,12 +124,7 @@ function LoginForm() {
           >
             {/* Logo */}
             <Link href="/" className="inline-flex items-center gap-2.5 mb-4">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary shadow-md shadow-primary/20">
-                <Sparkles className="h-4.5 w-4.5 text-primary-foreground" />
-              </div>
-              <span className="font-outfit text-xl font-bold tracking-tight">
-                Formu<span className="text-primary">.AI</span>
-              </span>
+              <Logo size="md" />
             </Link>
 
             {/* Navigation links */}
