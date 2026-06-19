@@ -1,0 +1,44 @@
+# Formu.AI - Premium AI-Powered Form Builder
+
+Formu.AI is a next-generation Software-as-a-SaaS (SaaS) platform designed for building, customizing, embedding, and analyzing forms instantly with artificial intelligence. Built for high conversion, modern aesthetics, and seamless user experiences.
+
+## Core Features
+
+- **AI-Powered Form Generation**: Instantly generate complete questionnaires, surveys, and forms from a single text prompt using Google Gemini.
+- **Dynamic CSS Theming**: Live custom themes supporting custom primary colors, card colors, text colors, background colors, and border radiuses.
+- **Embeddable Forms**: Embed any form onto an external website or blog using a single script tag: `<script src="https://form.emoicons.com/embed.js" data-form-id="YOUR_FORM_ID"></script>`.
+- **Advanced Response Analytics**: View submission rates, trends over time, and generate Gemini-powered sentiment summaries of responses.
+- **Local Sandbox (Demo Account)**: Sign in as `demo@demo.com` to test all builder features safely. Form data, themes, and submissions are stored in browser `localStorage` (copy-on-write enabled).
+- **Multi-Step Form Layouts**: Support standard single-page forms, one-question-at-a-time (Typeform style), or custom multi-step breaks.
+
+## Product Architecture & Tech Stack
+
+- **Frontend**: Next.js App Router (React), Tailwind CSS, Radix UI, Shadcn UI components.
+- **Backend & Database**: PostgreSQL database managed via Drizzle ORM, cached/throttled using Redis.
+- **API & Protocol**: Type-safe client-server communication using tRPC.
+- **AI Engine**: Google Gemini Pro API for schema generation and submission sentiment analysis.
+
+## Key Public Routes
+
+- **Homepage (`https://form.emoicons.com/`)**: Hero page, features, interactive demo showcase, and call-to-actions.
+- **Explore (`https://form.emoicons.com/explore`)**: Public gallery of pre-designed templates (contact forms, customer satisfaction surveys, registration forms, etc.) that can be cloned and customized.
+- **Pricing (`https://form.emoicons.com/pricing`)**: Transparent plan tiers including Free, Pro, and Enterprise features.
+- **Contact (`https://form.emoicons.com/contact`)**: Help center, contact form, and customer support.
+- **Form Filling (`https://form.emoicons.com/f/[slug]`)**: The public responder view where users fill out and submit published forms.
+
+## Frequently Asked Questions
+
+### What is Formu.AI?
+Formu.AI is an AI-driven online builder that lets you create conversion-focused forms, customize their design to match your brand, embed them anywhere, and analyze user submissions with automated AI insight summaries.
+
+### How does the AI Form Builder work?
+Users type a description of the form they need (e.g. "hackathon registration form with food preference"). The Gemini AI processes the request and instantly responds with a structured schema containing matching fields, placeholders, validation criteria (e.g. email, number ranges), and helper text.
+
+### Can I try it without signing up?
+Yes! You can log in using the demo account credentials `demo@demo.com`. This runs a full sandbox where your created forms and submissions are stored directly in your browser's local storage.
+
+### How do I embed a form?
+Publish your form in the builder, click the "Share" tab, and copy the embed script code. Paste it into your website's HTML body, and the form will render seamlessly inside your webpage.
+
+### Are forms responsive?
+Yes, all public form views (`/f/[slug]`) are built with mobile-first responsive design, supporting smooth keyboard navigation, custom theme styling, and shadcn-compliant checkbox designs.

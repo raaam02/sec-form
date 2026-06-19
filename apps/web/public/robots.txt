@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Allow: /f/
+Disallow: /dashboard/
+Disallow: /api/
+
+Sitemap: https://form.emoicons.com/sitemap.xml

@@ -530,7 +530,7 @@ export function BuilderCanvas({
           }
           rightElement={
             middleTab === "form" ? (
-              <div className="flex items-center gap-1 bg-secondary/50 shadow-sm rounded-full p-0.5 mr-3 backdrop-blur-sm animate-in fade-in zoom-in duration-200 hidden sm:flex">
+              <div className="items-center gap-1 bg-secondary/50 shadow-sm rounded-full p-0.5 mr-3 backdrop-blur-sm animate-in fade-in zoom-in duration-200 hidden sm:flex">
                  <Tooltip delayDuration={0}>
                    <TooltipTrigger asChild>
                      <Button variant="ghost" size="icon" onClick={handleUndo} disabled={!canUndo} className="h-6 w-7 rounded-full">

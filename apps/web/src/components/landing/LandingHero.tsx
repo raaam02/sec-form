@@ -21,7 +21,7 @@ const DashboardPreview = () => (
       <div className="h-2.5 w-2.5 rounded-full bg-rose-400" />
       <div className="h-2.5 w-2.5 rounded-full bg-amber-400" />
       <div className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-      <span className="ml-3 font-mono text-[10px] text-muted-foreground select-none">formu.ai/dashboard</span>
+      <span className="ml-3 font-mono text-[10px] text-muted-foreground select-none">form.emoicons.com/dashboard</span>
     </div>
 
     {/* Stats */}
