@@ -50,6 +50,7 @@ export default function PublicFormPage() {
 
   // Mutation
   const submitMutation = trpc.submissions.submit.useMutation();
+  const sendTelegramMutation = trpc.submissions.sendTelegramNotification.useMutation();
 
   // Local state for answers
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -202,6 +203,18 @@ export default function PublicFormPage() {
           createdAt: new Date().toISOString(),
         };
         saveLocalSubmission(mockSubmission);
+
+        // Send Telegram Notification if enabled
+        const telegram = (localFormFound.schemaJson as any)?.telegram;
+        if (telegram && telegram.enabled && telegram.chatId) {
+          sendTelegramMutation.mutate({
+            chatId: telegram.chatId,
+            formTitle: localFormFound.title,
+            fields: (localFormFound.schemaJson as any).fields || [],
+            answers: result.data,
+          });
+        }
+
         setIsSubmitted(true);
         confetti({
           particleCount: 100,

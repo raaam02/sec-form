@@ -1,5 +1,5 @@
 import { ThemeConfig } from "@sec-form/shared";
-import { FormField } from "@sec-form/validators";
+import { FormField, FormSchemaType } from "@sec-form/validators";
 
 export interface LocalForm {
   id: string;
@@ -7,12 +7,7 @@ export interface LocalForm {
   description?: string | null;
   slug: string;
   visibility: "draft" | "public" | "unlisted";
-  schemaJson: { 
-    fields: FormField[];
-    layout?: {
-      mode: "standard" | "single_field" | "custom_steps";
-    } | null;
-  };
+  schemaJson: FormSchemaType;
   themeJson?: ThemeConfig | null;
   userId: string;
   createdAt: string;

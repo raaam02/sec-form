@@ -9,6 +9,7 @@ import { eq, and } from "@sec-form/db";
 import { buildSubmissionValidator } from "@sec-form/validators";
 import crypto from "crypto";
 import { cache } from "./redis";
+import { sendTelegramMessage, checkAndSendTelegramNotification } from "./services/telegramService";
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
@@ -105,6 +106,11 @@ app.post("/api/v1/forms/:formId/submissions", async (req, res) => {
       })
       .returning();
 
+    // Trigger Telegram notification if enabled
+    checkAndSendTelegramNotification(form, parsedAnswers).catch((e) =>
+      console.error("[TelegramService] Failed to send REST submission notification:", e)
+    );
+
     res.status(201).json({ success: true, submissionId: sub.id });
   } catch (err: any) {
     if (err.name === "ZodError") {
@@ -164,6 +170,68 @@ app.get("/api/v1/forms/:formId/submissions/csv", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
+});
+
+// POST Telegram Bot Webhook
+app.post("/api/telegram-webhook", async (req, res) => {
+  const update = req.body;
+  if (!update || !update.message) {
+    return res.status(200).send("No message update received");
+  }
+
+  const { chat, text } = update.message;
+
+  if (text && text.startsWith("/start")) {
+    const match = text.match(/\/start\s+([a-fA-F0-9-]{36})/);
+    if (match) {
+      const formId = match[1];
+      try {
+        const form = await db.query.forms.findFirst({
+          where: eq(forms.id, formId),
+        });
+
+        if (form) {
+          const schema = (form.schemaJson as any) || {};
+          const updatedSchema = {
+            ...schema,
+            telegram: {
+              enabled: true,
+              chatId: String(chat.id),
+              chatName: chat.first_name || chat.title || "Private Chat",
+            },
+          };
+
+          await db
+            .update(forms)
+            .set({ schemaJson: updatedSchema })
+            .where(eq(forms.id, formId));
+
+          await sendTelegramMessage(
+            String(chat.id),
+            `🎉 *Success!* Your form *${form.title}* is now successfully connected to this Telegram chat.\n\nYou will receive real-time notifications here when new responses are submitted.`
+          );
+        } else {
+          await sendTelegramMessage(
+            String(chat.id),
+            `❌ *Error:* Could not link form. Form with ID \`${formId}\` was not found.`
+          );
+        }
+      } catch (err) {
+        console.error("Telegram webhook error:", err);
+        await sendTelegramMessage(
+          String(chat.id),
+          `❌ *Error:* An error occurred while attempting to connect your form. Please try again.`
+        );
+      }
+    } else {
+      await sendTelegramMessage(
+        String(chat.id),
+        `👋 *Hello!* To link a form to this chat, please use the "Connect" link inside your Formu.AI Form Settings panel.`
+      );
+    }
+  }
+
+  res.status(200).send("OK");
 });
 
 // OpenAPI 3.0 specification endpoint
@@ -306,4 +374,15 @@ app.use(
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
   console.log(`Scalar API docs available at http://localhost:${PORT}/docs`);
+
+  // Auto-register Telegram Bot webhook on startup if token and API URL are available
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const apiUrl = process.env.API_URL;
+  if (botToken && apiUrl) {
+    const webhookUrl = `${apiUrl}/api/telegram-webhook`;
+    fetch(`https://api.telegram.org/bot${botToken}/setWebhook?url=${webhookUrl}`)
+      .then((r) => r.json())
+      .then((res) => console.log("[Telegram Bot] Auto setWebhook result:", res))
+      .catch((err) => console.error("[Telegram Bot] setWebhook failed:", err));
+  }
 });

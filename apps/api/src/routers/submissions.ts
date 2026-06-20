@@ -6,6 +6,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import { TRPCError } from "@trpc/server";
 import { cache } from "../redis";
+import { checkAndSendTelegramNotification } from "../services/telegramService";
 
 export const submissionsRouter = router({
   submit: publicProcedure
@@ -74,6 +75,11 @@ export const submissionsRouter = router({
           createdAt: new Date(),
         })
         .returning();
+
+      // Trigger Telegram notification if enabled
+      checkAndSendTelegramNotification(form, answersJson).catch((e) =>
+        console.error("[TelegramService] Failed to send tRPC submission notification:", e)
+      );
 
       return { success: true, submissionId: newSubmission.id };
     }),
@@ -152,5 +158,35 @@ export const submissionsRouter = router({
         csv: csvRows.join("\n"),
         filename: `${form.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-responses.csv`
       };
+    }),
+
+  sendTelegramNotification: publicProcedure
+    .input(z.object({
+      chatId: z.string(),
+      formTitle: z.string(),
+      fields: z.array(z.any()),
+      answers: z.record(z.any())
+    }))
+    .mutation(async ({ input }) => {
+      const { chatId, formTitle, fields, answers } = input;
+      
+      let message = `*New Submission for:* ${formTitle}\n`;
+      message += `-----------------------------------------\n\n`;
+      
+      for (const field of fields) {
+        const val = answers[field.id];
+        if (val !== undefined && val !== null) {
+          const displayValue = Array.isArray(val) ? val.join(", ") : String(val);
+          message += `*${field.label}*\n${displayValue}\n\n`;
+        }
+      }
+      
+      message += `-----------------------------------------\n`;
+      message += `_Sent via Formu.AI (Local Sandbox)_`;
+      
+      const { sendTelegramMessage } = await import("../services/telegramService");
+      await sendTelegramMessage(chatId, message);
+      
+      return { success: true };
     })
 });

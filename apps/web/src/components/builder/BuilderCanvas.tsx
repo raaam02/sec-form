@@ -15,7 +15,8 @@ import {
   Plus,
   GripVertical,
   Undo2,
-  Redo2
+  Redo2,
+  Send
 } from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -376,6 +377,13 @@ interface BuilderCanvasProps {
   handleRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  telegramEnabled: boolean;
+  setTelegramEnabled: (v: boolean) => void;
+  telegramChatId: string;
+  setTelegramChatId: (v: string) => void;
+  telegramChatName: string;
+  setTelegramChatName: (v: string) => void;
+  formId: string;
 }
 
 export function BuilderCanvas({
@@ -413,6 +421,13 @@ export function BuilderCanvas({
   handleRedo,
   canUndo,
   canRedo,
+  telegramEnabled,
+  setTelegramEnabled,
+  telegramChatId,
+  setTelegramChatId,
+  telegramChatName,
+  setTelegramChatName,
+  formId,
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
   const tCommon = useTranslations("Common");
@@ -653,7 +668,7 @@ export function BuilderCanvas({
 
 
         {middleTab === "settings" && (
-          <div className="max-w-xl mx-auto space-y-6">
+          <div className="max-w-xl mx-auto space-y-6 bg-transparent backdrop-blur-[1px] p-6 rounded-2xl border">
             <h3 className="font-outfit font-bold text-foreground text-sm pb-2 border-b border-border">Visibility & Custom URL</h3>
             
             <form onSubmit={handleSaveSettings} className="space-y-5 text-xs text-muted-foreground font-semibold">
@@ -672,7 +687,7 @@ export function BuilderCanvas({
                     </Button>
                   ))}
                 </div>
-                <p className="text-[9px] text-muted-foreground mt-2 font-normal leading-normal">
+                <p className="text-[11px] text-muted-foreground mt-2 font-normal leading-normal">
                   {visibility === "draft" && "Draft forms are not accessible publicly and do not accept responses."}
                   {visibility === "public" && "Public forms are visible in the explore page/gallery and accept responses."}
                   {visibility === "unlisted" && "Unlisted forms accept responses, but are hidden from general explore listings."}
@@ -698,7 +713,7 @@ export function BuilderCanvas({
                     </Button>
                   ))}
                 </div>
-                <p className="text-[9px] text-muted-foreground mt-2 font-normal leading-normal">
+                <p className="text-[11px] text-muted-foreground mt-2 font-normal leading-normal">
                   {layoutMode === "standard" && "All fields are displayed on a single page."}
                   {layoutMode === "single_field" && "Each field gets its own separate page with Next/Back buttons."}
                   {layoutMode === "custom_steps" && "Drag and drop 'Step Break' fields into the canvas to split the form into custom pages."}
@@ -718,7 +733,91 @@ export function BuilderCanvas({
                     required
                   />
                 </div>
-                <p className="text-[9px] text-muted-foreground mt-1 font-normal">Shorthand slug name. Letters, numbers, and dashes only.</p>
+                <p className="text-[11px] text-muted-foreground mt-1 font-normal">Shorthand slug name. Letters, numbers, and dashes only.</p>
+              </div>
+
+              {/* Telegram Notifications */}
+              <div className="pt-4 border-t border-border space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Telegram Notifications</label>
+                    <p className="text-[11px] text-muted-foreground font-normal leading-normal">
+                      Receive real-time notifications in your own Telegram chats when answers are submitted.
+                    </p>
+                  </div>
+                  <Switch
+                    checked={telegramEnabled}
+                    onCheckedChange={setTelegramEnabled}
+                  />
+                </div>
+
+                {telegramEnabled && (
+                  <div className="space-y-4 pt-2 bg-muted/20 p-4 rounded-xl border border-border">
+                    {telegramChatId ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
+                          <CheckCircle2 className="h-4 w-4 shrink-0" />
+                          <div>
+                            <div className="text-[10px] font-bold">Connected to Telegram</div>
+                            <div className="text-[9px] font-normal opacity-90">
+                              Linked chat: <span className="font-semibold">{telegramChatName || telegramChatId}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          onClick={() => {
+                            setTelegramChatId("");
+                            setTelegramChatName("");
+                          }}
+                          className="h-8 px-3 text-[10px] font-bold rounded-xl"
+                        >
+                          Disconnect Telegram
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <div className="text-xs font-bold text-foreground">Option 1: Quick Connect (Simplest)</div>
+                          <p className="text-[11px] text-muted-foreground font-normal leading-normal">
+                            Click the button below to open our Telegram Bot, then press <strong>Start</strong> to link this form.
+                          </p>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || "FormuAIBot";
+                              window.open(`https://t.me/${botName}?start=${formId}`, "_blank");
+                            }}
+                            className="h-8 px-3 font-bold text-[10px] uppercase rounded-xl flex items-center justify-center gap-1.5"
+                          >
+                            <Send className="h-3.5 w-3.5" />
+                            Connect Telegram Bot
+                          </Button>
+                        </div>
+
+                        <div className="border-t border-border/60 my-2" />
+
+                        <div className="space-y-2">
+                          <div className="text-xs font-bold text-foreground">Option 2: Manual Chat ID Connection</div>
+                          <p className="text-[11px] text-muted-foreground font-normal leading-normal">
+                            Or enter your Telegram Chat ID manually. You can get your Chat ID by messaging the bot <code>@userinfobot</code> on Telegram.
+                          </p>
+                          <Input
+                            type="text"
+                            value={telegramChatId}
+                            onChange={(e) => {
+                              setTelegramChatId(e.target.value);
+                              setTelegramChatName("Manual Input");
+                            }}
+                            placeholder="e.g. 555123456"
+                            className="h-9 px-3 bg-muted/50 text-xs text-foreground rounded-xl"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-3 justify-end pt-4 border-t border-border">

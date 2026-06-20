@@ -105,6 +105,9 @@ export default function BuilderPage() {
   const [slug, setSlug] = useState("");
   const [visibility, setVisibility] = useState<"draft" | "public" | "unlisted">("draft");
   const [layoutMode, setLayoutMode] = useState<"standard" | "single_field" | "custom_steps">("single_field");
+  const [telegramEnabled, setTelegramEnabled] = useState(false);
+  const [telegramChatId, setTelegramChatId] = useState("");
+  const [telegramChatName, setTelegramChatName] = useState("");
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showContactAdminModal, setShowContactAdminModal] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState<"build" | "theme" | "preview" | "embed" | "settings">("build");
@@ -245,6 +248,11 @@ export default function BuilderPage() {
       setVisibility(activeForm.visibility as any);
       setLayoutMode((activeForm.schemaJson as any).layout?.mode || "single_field");
 
+      const telegram = (activeForm.schemaJson as any).telegram || {};
+      setTelegramEnabled(telegram.enabled || false);
+      setTelegramChatId(telegram.chatId || "");
+      setTelegramChatName(telegram.chatName || "");
+
       setFormHistory((prev) => {
         if (prev.states.length === 0) {
           return {
@@ -299,7 +307,12 @@ export default function BuilderPage() {
           visibility: nextVisibility,
           schemaJson: { 
             fields: updatedFields,
-            layout: { mode: updatedLayoutMode || layoutMode }
+            layout: { mode: updatedLayoutMode || layoutMode },
+            telegram: {
+              enabled: telegramEnabled,
+              chatId: telegramChatId || undefined,
+              chatName: telegramChatName || undefined,
+            }
           },
           themeJson: updatedTheme !== undefined ? updatedTheme : (activeTheme || null),
           userId: "demo-user-id",
@@ -326,7 +339,12 @@ export default function BuilderPage() {
         description,
         schemaJson: { 
           fields: updatedFields,
-          layout: { mode: updatedLayoutMode || layoutMode }
+          layout: { mode: updatedLayoutMode || layoutMode },
+          telegram: {
+            enabled: telegramEnabled,
+            chatId: telegramChatId || undefined,
+            chatName: telegramChatName || undefined,
+          }
         },
         themeJson: updatedTheme || activeTheme || undefined,
         visibility: nextVisibility,
@@ -567,7 +585,12 @@ export default function BuilderPage() {
           visibility,
           schemaJson: {
             fields,
-            layout: { mode: layoutMode }
+            layout: { mode: layoutMode },
+            telegram: {
+              enabled: telegramEnabled,
+              chatId: telegramChatId || undefined,
+              chatName: telegramChatName || undefined,
+            }
           },
           themeJson: activeTheme || null,
           userId: "demo-user-id",
@@ -598,6 +621,15 @@ export default function BuilderPage() {
         description,
         slug,
         visibility,
+        schemaJson: {
+          fields,
+          layout: { mode: layoutMode },
+          telegram: {
+            enabled: telegramEnabled,
+            chatId: telegramChatId || undefined,
+            chatName: telegramChatName || undefined,
+          }
+        }
       });
       utils.forms.get.invalidate({ id });
       utils.forms.list.invalidate();
@@ -772,6 +804,13 @@ export default function BuilderPage() {
               handleRedo={handleRedo}
               canUndo={formHistory.index > 0}
               canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
+              telegramEnabled={telegramEnabled}
+              setTelegramEnabled={setTelegramEnabled}
+              telegramChatId={telegramChatId}
+              setTelegramChatId={setTelegramChatId}
+              telegramChatName={telegramChatName}
+              setTelegramChatName={setTelegramChatName}
+              formId={id}
             />
           </ResizablePanel>
 
@@ -893,6 +932,13 @@ export default function BuilderPage() {
                 handleRedo={handleRedo}
                 canUndo={formHistory.index > 0}
                 canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
+                telegramEnabled={telegramEnabled}
+                setTelegramEnabled={setTelegramEnabled}
+                telegramChatId={telegramChatId}
+                setTelegramChatId={setTelegramChatId}
+                telegramChatName={telegramChatName}
+                setTelegramChatName={setTelegramChatName}
+                formId={id}
               />
             </div>
           )}

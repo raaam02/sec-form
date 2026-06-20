@@ -35,11 +35,18 @@ export const FormFieldSchema = z.object({
 
 export type FormField = z.infer<typeof FormFieldSchema>;
 
+export const TelegramSettingsSchema = z.object({
+  enabled: z.boolean().default(false),
+  chatId: z.string().optional(),
+  chatName: z.string().optional()
+}).optional();
+
 export const FormSchemaJSON = z.object({
   fields: z.array(FormFieldSchema),
   layout: z.object({
     mode: z.enum(["standard", "single_field", "custom_steps"]).default("standard")
-  }).optional()
+  }).optional(),
+  telegram: TelegramSettingsSchema
 });
 
 export type FormSchemaType = z.infer<typeof FormSchemaJSON>;
