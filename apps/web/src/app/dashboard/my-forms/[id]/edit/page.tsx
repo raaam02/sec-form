@@ -105,6 +105,7 @@ export default function BuilderPage() {
   const [slug, setSlug] = useState("");
   const [visibility, setVisibility] = useState<"draft" | "public" | "unlisted">("draft");
   const [layoutMode, setLayoutMode] = useState<"standard" | "single_field" | "custom_steps">("single_field");
+  const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showContactAdminModal, setShowContactAdminModal] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState<"build" | "theme" | "preview" | "embed" | "settings">("build");
@@ -238,6 +239,7 @@ export default function BuilderPage() {
       setSlug(activeForm.slug);
       setVisibility(activeForm.visibility as any);
       setLayoutMode((activeForm.schemaJson as any).layout?.mode || "single_field");
+      setAllowedDomains((activeForm.schemaJson as any).allowedDomains || []);
 
       setFormHistory((prev) => {
         if (prev.states.length === 0) {
@@ -289,7 +291,8 @@ export default function BuilderPage() {
           visibility: nextVisibility,
           schemaJson: { 
             fields: updatedFields,
-            layout: { mode: updatedLayoutMode || layoutMode }
+            layout: { mode: updatedLayoutMode || layoutMode },
+            allowedDomains
           },
           themeJson: updatedTheme !== undefined ? updatedTheme : (activeTheme || null),
           userId: "demo-user-id",
@@ -316,7 +319,8 @@ export default function BuilderPage() {
         description,
         schemaJson: { 
           fields: updatedFields,
-          layout: { mode: updatedLayoutMode || layoutMode }
+          layout: { mode: updatedLayoutMode || layoutMode },
+          allowedDomains
         },
         themeJson: updatedTheme || activeTheme || undefined,
         visibility: nextVisibility,
@@ -545,7 +549,8 @@ export default function BuilderPage() {
           visibility,
           schemaJson: {
             fields,
-            layout: { mode: layoutMode }
+            layout: { mode: layoutMode },
+            allowedDomains
           },
           themeJson: activeTheme || null,
           userId: "demo-user-id",
@@ -576,6 +581,11 @@ export default function BuilderPage() {
         description,
         slug,
         visibility,
+        schemaJson: {
+          fields,
+          layout: { mode: layoutMode },
+          allowedDomains
+        }
       });
       utils.forms.get.invalidate({ id });
       utils.forms.list.invalidate();
@@ -761,6 +771,8 @@ export default function BuilderPage() {
               slug={slug}
               setSlug={setSlug}
               handleSaveSettings={handleSaveSettings}
+              allowedDomains={allowedDomains}
+              setAllowedDomains={setAllowedDomains}
               handleUndo={handleUndo}
               handleRedo={handleRedo}
               canUndo={formHistory.index > 0}
@@ -882,6 +894,8 @@ export default function BuilderPage() {
                 slug={slug}
                 setSlug={setSlug}
                 handleSaveSettings={handleSaveSettings}
+                allowedDomains={allowedDomains}
+                setAllowedDomains={setAllowedDomains}
                 handleUndo={handleUndo}
                 handleRedo={handleRedo}
                 canUndo={formHistory.index > 0}

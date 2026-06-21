@@ -12,6 +12,7 @@ export interface LocalForm {
     layout?: {
       mode: "standard" | "single_field" | "custom_steps";
     } | null;
+    allowedDomains?: string[];
   };
   themeJson?: ThemeConfig | null;
   userId: string;

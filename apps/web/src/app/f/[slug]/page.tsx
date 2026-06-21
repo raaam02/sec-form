@@ -51,6 +51,12 @@ export default function PublicFormPage() {
   // Mutation
   const submitMutation = trpc.submissions.submit.useMutation();
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   // Local state for answers
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -277,6 +283,49 @@ export default function PublicFormPage() {
       </div>
     );
   }
+
+  // Check embed restrictions
+  const allowedDomains: string[] = form.schemaJson ? (form.schemaJson as any).allowedDomains || [] : [];
+  const isEmbedded = isMounted && typeof window !== "undefined" && window.self !== window.top;
+  
+  let isEmbedRestricted = false;
+  if (isEmbedded && allowedDomains.length > 0) {
+    try {
+      const referrer = document.referrer;
+      if (!referrer) {
+        isEmbedRestricted = true;
+      } else {
+        const referrerUrl = new URL(referrer);
+        const referrerHost = referrerUrl.hostname.toLowerCase();
+        
+        const isAllowed = allowedDomains.some((domain) => {
+          const cleanDomain = domain.trim().toLowerCase();
+          return referrerHost === cleanDomain || referrerHost.endsWith("." + cleanDomain);
+        });
+        
+        if (!isAllowed) {
+          isEmbedRestricted = true;
+        }
+      }
+    } catch (e) {
+      isEmbedRestricted = true;
+    }
+  }
+
+  if (isEmbedRestricted) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6 gap-4 text-center">
+        <AlertCircle className="h-12 w-12 text-destructive" />
+        <h1 className="font-outfit text-2xl font-bold text-foreground">
+          Embed Restricted
+        </h1>
+        <p className="text-muted-foreground max-w-sm text-sm">
+          This form cannot be embedded on this website. Please contact the form owner or view the form directly.
+        </p>
+      </div>
+    );
+  }
+
   const theme = form.themeJson as any;
 
   // Custom theme variables mapped from database theme settings

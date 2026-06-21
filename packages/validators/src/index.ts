@@ -39,7 +39,8 @@ export const FormSchemaJSON = z.object({
   fields: z.array(FormFieldSchema),
   layout: z.object({
     mode: z.enum(["standard", "single_field", "custom_steps"]).default("standard")
-  }).optional()
+  }).optional(),
+  allowedDomains: z.array(z.string()).optional()
 });
 
 export type FormSchemaType = z.infer<typeof FormSchemaJSON>;
