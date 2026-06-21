@@ -54,7 +54,9 @@ export const ThemeSchema = z.object({
   backgroundColor: z.string(),    // e.g. "#f3f4f6"
   textColor: z.string(),          // e.g. "#1f2937"
   cardColor: z.string().default("#ffffff"),
-  borderRadius: z.string().default("0.5rem")
+  borderRadius: z.string().default("0.5rem"),
+  inputBgColor: z.string().optional(),
+  inputBorderColor: z.string().optional()
 });
 
 export type Theme = z.infer<typeof ThemeSchema>;

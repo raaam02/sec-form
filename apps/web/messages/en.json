@@ -149,12 +149,12 @@
       },
       "pro": {
         "name": "Professional",
-        "price": "$29",
+        "price": "$19",
         "desc": "Best for growing creators and developers."
       },
       "enterprise": {
         "name": "Enterprise",
-        "price": "$99",
+        "price": "Custom",
         "desc": "For scaling teams requiring full API controls."
       }
     }

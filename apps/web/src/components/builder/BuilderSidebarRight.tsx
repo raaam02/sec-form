@@ -38,6 +38,8 @@ export function BuilderSidebarRight({
   layoutMode = "standard",
 }: BuilderSidebarRightProps) {
   const t = useTranslations("Builder");
+  const inputBg = activeTheme?.inputBgColor || "transparent";
+  const inputBorder = activeTheme?.inputBorderColor || "rgba(128,128,128,0.2)";
   const tCommon = useTranslations("Common");
 
   const RIGHT_TABS = [
@@ -154,7 +156,8 @@ export function BuilderSidebarRight({
                               placeholder={field.placeholder || "Your answer..."}
                               className="text-foreground bg-transparent pointer-events-none transition-colors" 
                               style={{ 
-                                borderColor: "rgba(128,128,128,0.2)",
+                                borderColor: inputBorder,
+                                backgroundColor: inputBg,
                                 borderRadius: activeTheme?.borderRadius || "0.5rem"
                               }}
                               readOnly
@@ -166,7 +169,8 @@ export function BuilderSidebarRight({
                               placeholder="0"
                               className="max-w-[150px] text-foreground bg-transparent pointer-events-none transition-colors" 
                               style={{ 
-                                borderColor: "rgba(128,128,128,0.2)",
+                                borderColor: inputBorder,
+                                backgroundColor: inputBg,
                                 borderRadius: activeTheme?.borderRadius || "0.5rem"
                               }}
                               readOnly
@@ -177,7 +181,8 @@ export function BuilderSidebarRight({
                               type="time" 
                               className="max-w-[150px] text-foreground bg-transparent pointer-events-none transition-colors" 
                               style={{ 
-                                borderColor: "rgba(128,128,128,0.2)",
+                                borderColor: inputBorder,
+                                backgroundColor: inputBg,
                                 borderRadius: activeTheme?.borderRadius || "0.5rem"
                               }}
                               readOnly
@@ -188,7 +193,8 @@ export function BuilderSidebarRight({
                               placeholder={field.placeholder || "Your response..."}
                               className="text-foreground bg-transparent pointer-events-none transition-colors" 
                               style={{ 
-                                borderColor: "rgba(128,128,128,0.2)",
+                                borderColor: inputBorder,
+                                backgroundColor: inputBg,
                                 borderRadius: activeTheme?.borderRadius || "0.5rem"
                               }}
                               readOnly
@@ -201,7 +207,8 @@ export function BuilderSidebarRight({
                                   className="w-full text-foreground bg-transparent transition-colors"
                                   style={{
                                     borderRadius: activeTheme?.borderRadius || "0.5rem",
-                                    borderColor: "rgba(128,128,128,0.2)"
+                                    borderColor: inputBorder,
+                                    backgroundColor: inputBg
                                   }}
                                 >
                                   <SelectValue placeholder="Choose option..." />
@@ -213,7 +220,14 @@ export function BuilderSidebarRight({
                             <div className="space-y-1.5 pl-1 pointer-events-none">
                               {field.options.map((opt) => (
                                 <label key={opt} className="flex items-center gap-3 p-2 rounded-lg transition-colors group">
-                                  <Checkbox className="border-slate-300" checked={false} />
+                                  <Checkbox 
+                                    className="border-slate-300" 
+                                    checked={false} 
+                                    style={{
+                                      borderColor: inputBorder,
+                                      backgroundColor: inputBg
+                                    }}
+                                  />
                                   <span className="font-medium select-none text-sm text-foreground">{opt}</span>
                                 </label>
                               ))}
@@ -221,7 +235,14 @@ export function BuilderSidebarRight({
                           )}
                           {field.type === "checkbox" && (
                             <label className="flex items-center gap-3 p-2 rounded-lg transition-colors group w-fit pointer-events-none">
-                              <Checkbox className="border-slate-300" checked={false} />
+                              <Checkbox 
+                                className="border-slate-300" 
+                                checked={false} 
+                                style={{
+                                  borderColor: inputBorder,
+                                  backgroundColor: inputBg
+                                }}
+                              />
                               <span className="font-medium select-none text-sm text-foreground">I confirm this detail</span>
                             </label>
                           )}

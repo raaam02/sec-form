@@ -285,7 +285,9 @@ export default function PublicFormPage() {
     "--background-color": theme.backgroundColor || "#f3f4f6",
     "--text-color": theme.textColor || "#1f2937",
     "--card-color": theme.cardColor || "#ffffff",
-    "--border-radius": theme.borderRadius || "0.5rem"
+    "--border-radius": theme.borderRadius || "0.5rem",
+    "--input-bg": theme.inputBgColor || "transparent",
+    "--input-border": theme.inputBorderColor || "rgba(128,128,128,0.2)"
   } as React.CSSProperties;
 
   return (
@@ -356,7 +358,8 @@ export default function PublicFormPage() {
                           className="text-foreground bg-transparent transition-colors hover:bg-muted/10 focus:bg-transparent"
                           style={{
                             borderRadius: "var(--border-radius)",
-                            borderColor: "rgba(128,128,128,0.2)"
+                            borderColor: "var(--input-border)",
+                            backgroundColor: "var(--input-bg)"
                           }}
                         />
                       )}
@@ -370,7 +373,8 @@ export default function PublicFormPage() {
                           className="text-foreground bg-transparent transition-colors hover:bg-muted/10 focus:bg-transparent"
                           style={{
                             borderRadius: "var(--border-radius)",
-                            borderColor: "rgba(128,128,128,0.2)"
+                            borderColor: "var(--input-border)",
+                            backgroundColor: "var(--input-bg)"
                           }}
                         />
                       )}
@@ -385,7 +389,8 @@ export default function PublicFormPage() {
                           className="text-foreground bg-transparent transition-colors hover:bg-muted/10 focus:bg-transparent"
                           style={{
                             borderRadius: "var(--border-radius)",
-                            borderColor: "rgba(128,128,128,0.2)"
+                            borderColor: "var(--input-border)",
+                            backgroundColor: "var(--input-bg)"
                           }}
                         />
                       )}
@@ -400,7 +405,8 @@ export default function PublicFormPage() {
                           className="text-foreground bg-transparent transition-colors hover:bg-muted/10 focus:bg-transparent"
                           style={{
                             borderRadius: "var(--border-radius)",
-                            borderColor: "rgba(128,128,128,0.2)"
+                            borderColor: "var(--input-border)",
+                            backgroundColor: "var(--input-bg)"
                           }}
                         />
                       )}
@@ -415,7 +421,8 @@ export default function PublicFormPage() {
                           className="max-w-[150px] text-foreground bg-transparent transition-colors hover:bg-muted/10 focus:bg-transparent"
                           style={{
                             borderRadius: "var(--border-radius)",
-                            borderColor: "rgba(128,128,128,0.2)"
+                            borderColor: "var(--input-border)",
+                            backgroundColor: "var(--input-bg)"
                           }}
                         />
                       )}
@@ -430,7 +437,8 @@ export default function PublicFormPage() {
                             className="w-full text-foreground bg-transparent transition-colors hover:bg-muted/10 focus:bg-transparent"
                             style={{
                               borderRadius: "var(--border-radius)",
-                              borderColor: "rgba(128,128,128,0.2)"
+                              borderColor: "var(--input-border)",
+                              backgroundColor: "var(--input-bg)"
                             }}
                           >
                             <SelectValue placeholder="Choose option..." />
@@ -456,6 +464,10 @@ export default function PublicFormPage() {
                                   checked={isChecked}
                                   onCheckedChange={(checked) => handleMultiSelectChange(field.id, opt, !!checked)}
                                   className="border-slate-300 data-[state=checked]:bg-[var(--primary)] data-[state=checked]:border-[var(--primary)] data-[state=checked]:text-white transition-all group-hover:border-[var(--primary)]/50 focus-visible:ring-[var(--primary)]"
+                                  style={{
+                                    borderColor: "var(--input-border)",
+                                    backgroundColor: isChecked ? "var(--primary)" : "var(--input-bg)"
+                                  }}
                                 />
                                 <span className="font-medium select-none text-sm text-foreground">{opt}</span>
                               </label>
@@ -472,6 +484,10 @@ export default function PublicFormPage() {
                             checked={answers[field.id] || false}
                             onCheckedChange={(checked) => handleCheckboxChange(field.id, !!checked)}
                             className="border-slate-300 data-[state=checked]:bg-[var(--primary)] data-[state=checked]:border-[var(--primary)] data-[state=checked]:text-white transition-all group-hover:border-[var(--primary)]/50 focus-visible:ring-[var(--primary)]"
+                            style={{
+                              borderColor: "var(--input-border)",
+                              backgroundColor: answers[field.id] ? "var(--primary)" : "var(--input-bg)"
+                            }}
                           />
                           <span className="font-medium select-none text-sm text-foreground">I confirm this detail</span>
                         </label>
@@ -509,7 +525,8 @@ export default function PublicFormPage() {
                             className="text-foreground bg-transparent transition-colors hover:bg-muted/10 focus:bg-transparent"
                             style={{
                               borderRadius: "var(--border-radius)",
-                              borderColor: "rgba(128,128,128,0.2)"
+                              borderColor: "var(--input-border)",
+                              backgroundColor: "var(--input-bg)"
                             }}
                           />
                         </div>
@@ -525,7 +542,8 @@ export default function PublicFormPage() {
                             className="text-foreground bg-transparent transition-colors hover:bg-muted/10 focus:bg-transparent"
                             style={{
                               borderRadius: "var(--border-radius)",
-                              borderColor: "rgba(128,128,128,0.2)"
+                              borderColor: "var(--input-border)",
+                              backgroundColor: "var(--input-bg)"
                             }}
                           />
                         </div>

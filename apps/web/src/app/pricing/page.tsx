@@ -4,9 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { CheckCircle, Sparkles, Code } from "lucide-react";
-import { ThemeToggle } from "../../components/ThemeToggle";
-import { LocaleSwitcher } from "../../components/LocaleSwitcher";
+import { CheckCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { ContactAdminModal } from "../../components/builder/ContactAdminModal";
 
@@ -16,8 +14,7 @@ export default function PricingPage() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [showContactAdminModal, setShowContactAdminModal] = useState(false);
   const [contactPlan, setContactPlan] = useState<"general" | "pro" | "enterprise">("pro");
-  
-  const tLanding = useTranslations("Landing");
+
   const tPricing = useTranslations("Pricing");
 
   const handleDemoLogin = async () => {
@@ -51,7 +48,7 @@ export default function PricingPage() {
         "100 submissions per month",
         "Standard templates library",
         "Rate limiting validation",
-        "Basic theme selection",
+        "Full theme & color customization",
       ],
       cta: tPricing("getStarted"),
       href: "/signup",

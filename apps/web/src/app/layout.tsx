@@ -15,7 +15,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Formu.AI | Premium AI-Powered Form Builder",
-  description: "Create, theme, embed, and analyze forms instantly utilizing next-gen AI insights. Built for high conversion.",
+  description: "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
   keywords: [
     "form builder",
     "AI form generator",
@@ -27,7 +27,11 @@ export const metadata: Metadata = {
     "feedback analysis",
     "Next.js form builder",
     "Shadcn form builder",
-    "Formu.AI"
+    "Formu.AI",
+    "custom color form builder",
+    "fully customizable forms",
+    "brand form builder",
+    "custom theme forms"
   ],
   metadataBase: new URL("https://form.emoicons.com"),
   alternates: {
@@ -35,7 +39,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Formu.AI | Premium AI-Powered Form Builder",
-    description: "Create, theme, embed, and analyze forms instantly utilizing next-gen AI insights. Built for high conversion.",
+    description: "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
     url: "https://form.emoicons.com",
     siteName: "Formu.AI",
     images: [
@@ -52,7 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Formu.AI | Premium AI-Powered Form Builder",
-    description: "Create, theme, embed, and analyze forms instantly utilizing next-gen AI insights. Built for high conversion.",
+    description: "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
     images: ["/icon.png"],
   },
   robots: {
@@ -82,7 +86,7 @@ export default async function RootLayout({
     "name": "Formu.AI",
     "operatingSystem": "All",
     "applicationCategory": "BusinessApplication",
-    "description": "Create, theme, embed, and analyze forms instantly utilizing next-gen AI insights. Built for high conversion.",
+    "description": "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
     "offers": {
       "@type": "Offer",
       "price": "0.00",
@@ -91,7 +95,7 @@ export default async function RootLayout({
     },
     "featureList": [
       "AI-Powered Form Generation",
-      "Dynamic CSS Theming",
+      "Full Theme & Color Customization",
       "Seamless Form Embedding",
       "Advanced AI Response Summaries",
       "Multi-step Forms"

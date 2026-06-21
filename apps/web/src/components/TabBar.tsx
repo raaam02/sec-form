@@ -75,20 +75,19 @@ export function TabBar<T extends string>({
             </button>
           );
 
-          if (item.shortcut) {
-            return (
-              <Tooltip key={item.value}>
-                <TooltipTrigger asChild>
-                  {button}
-                </TooltipTrigger>
-                <TooltipContent>
-                  {item.label} <kbd className="ml-1 text-[10px] font-mono opacity-80 uppercase">[{item.shortcut}]</kbd>
-                </TooltipContent>
-              </Tooltip>
-            );
-          }
-
-          return button;
+          return (
+            <Tooltip key={item.value}>
+              <TooltipTrigger asChild>
+                {button}
+              </TooltipTrigger>
+              <TooltipContent>
+                {item.label}
+                {item.shortcut && (
+                  <kbd className="ml-1 text-[10px] font-mono opacity-80 uppercase">[{item.shortcut}]</kbd>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          );
         })}
       </div>
       </div>
