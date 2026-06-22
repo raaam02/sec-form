@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { CheckCircle } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { trpc } from "../../utils/trpc";
 import { ContactAdminModal } from "../../components/builder/ContactAdminModal";
 
 export default function PricingPage() {
@@ -16,6 +17,10 @@ export default function PricingPage() {
   const [contactPlan, setContactPlan] = useState<"general" | "pro" | "enterprise">("pro");
 
   const tPricing = useTranslations("Pricing");
+  const locale = useLocale();
+
+  // Query plans dynamically
+  const { data: plans } = (trpc as any).admin.getPlans.useQuery();
 
   const handleDemoLogin = async () => {
     setIsLoggingIn(true);
@@ -37,8 +42,9 @@ export default function PricingPage() {
     }
   };
 
-  const tiers = [
+  const staticTiers = [
     {
+      id: "free",
       name: tPricing("plans.free.name"),
       price: tPricing("plans.free.price"),
       description: tPricing("plans.free.desc"),
@@ -55,6 +61,7 @@ export default function PricingPage() {
       popular: false
     },
     {
+      id: "pro",
       name: tPricing("plans.pro.name"),
       price: tPricing("plans.pro.price"),
       description: tPricing("plans.pro.desc"),
@@ -72,6 +79,7 @@ export default function PricingPage() {
       popular: true
     },
     {
+      id: "enterprise",
       name: tPricing("plans.enterprise.name"),
       price: tPricing("plans.enterprise.price"),
       description: tPricing("plans.enterprise.desc"),
@@ -89,6 +97,38 @@ export default function PricingPage() {
     }
   ];
 
+  const formatPrice = (prices: any, planId: string) => {
+    if (planId === "free") return "Free";
+    
+    // Choose currency based on locale
+    const currency = locale === "hi" ? "INR" : "USD";
+    const priceVal = prices?.[currency] ?? prices?.["USD"] ?? 0;
+    
+    if (currency === "INR") {
+      return `₹${priceVal}`;
+    }
+    return `$${priceVal}`;
+  };
+
+  const tiers = React.useMemo(() => {
+    if (!plans || plans.length === 0) {
+      return staticTiers;
+    }
+
+    return plans.map((plan: any) => {
+      const staticTier = staticTiers.find(t => t.id === plan.id) || staticTiers[0];
+      return {
+        name: plan.name,
+        price: formatPrice(plan.prices, plan.id),
+        description: plan.description || staticTier.description,
+        features: (plan.features as string[]) || staticTier.features,
+        cta: staticTier.cta,
+        href: staticTier.href,
+        popular: plan.id === "pro",
+      };
+    });
+  }, [plans, locale]);
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col justify-between transition-colors duration-200">
       <main className="flex-1 py-16 pt-28 container mx-auto px-4 sm:px-6">
@@ -102,7 +142,7 @@ export default function PricingPage() {
         </div>
 
         <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-          {tiers.map((tier) => (
+          {tiers.map((tier: any) => (
             <div
               key={tier.name}
               className={`rounded-2xl bg-card border p-8 shadow-sm flex flex-col justify-between relative ${
@@ -125,7 +165,7 @@ export default function PricingPage() {
                 </div>
                 
                 <ul className="mt-8 space-y-4 text-sm text-muted-foreground">
-                  {tier.features.map((feat) => (
+                  {tier.features.map((feat: any) => (
                     <li key={feat} className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 text-primary shrink-0" />
                       <span>{feat}</span>

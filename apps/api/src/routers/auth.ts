@@ -173,6 +173,7 @@ export const authRouter = router({
         email: synced.email,
         image: synced.image,
         role: synced.role,
+        planId: synced.planId,
       };
     }),
 
@@ -188,6 +189,7 @@ export const authRouter = router({
       return {
         id: user.id,
         role: user.role,
+        planId: user.planId,
       };
     }),
   

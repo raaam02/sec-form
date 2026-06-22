@@ -5,6 +5,17 @@ import { relations } from "drizzle-orm";
 // AUTH TABLES (Auth.js Schema)
 // ----------------------------------------------------
 
+export const plans = pgTable("plans", {
+  id: text("id").primaryKey(), // e.g. "free", "pro", "enterprise"
+  name: text("name").notNull(),
+  description: text("description"),
+  prices: jsonb("prices").notNull(), // e.g. { "USD": 29, "INR": 2400 }
+  features: jsonb("features").notNull(), // e.g. ["5 Active Forms", "Custom Styling"]
+  maxPublicForms: integer("maxPublicForms").default(5).notNull(),
+  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
+});
+
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name"),
@@ -13,6 +24,7 @@ export const users = pgTable("users", {
   image: text("image"),
   passwordHash: text("passwordHash"), // Standard helper for dev credentials
   role: text("role").default("user").notNull(),
+  planId: text("planId").references(() => plans.id).default("free").notNull(),
   createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
   updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
 });
@@ -136,10 +148,18 @@ export const aiModels = pgTable("ai_models", {
 // RELATIONS
 // ----------------------------------------------------
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const plansRelations = relations(plans, ({ many }) => ({
+  users: many(users),
+}));
+
+export const usersRelations = relations(users, ({ many, one }) => ({
   forms: many(forms),
   accounts: many(accounts),
   sessions: many(sessions),
+  plan: one(plans, {
+    fields: [users.planId],
+    references: [plans.id],
+  }),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({

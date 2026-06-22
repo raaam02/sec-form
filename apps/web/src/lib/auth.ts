@@ -78,6 +78,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         if (token.sub) session.user.id = token.sub;
         session.user.role = (token.role as string) || "user";
+        session.user.planId = (token.planId as string) || "free";
       }
       return session;
     },
@@ -90,17 +91,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (dbUser) {
             token.sub = dbUser.id;
             token.role = dbUser.role;
+            token.planId = (dbUser as any).planId || "free";
           } else {
             token.sub = user.id;
             token.role = user.role || "user";
+            token.planId = (user as any).planId || "free";
           }
         } catch (e) {
           token.sub = user.id;
           token.role = "user";
+          token.planId = "free";
         }
       } else if (user) {
         token.sub = user.id;
         token.role = user.role || "user";
+        token.planId = (user as any).planId || "free";
       }
       return token;
     }

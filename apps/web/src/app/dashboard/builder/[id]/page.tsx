@@ -132,6 +132,7 @@ export default function BuilderPage() {
   }, [middleTab]);
 
   const { data: formsList } = trpcAny.forms.list.useQuery();
+  const { data: plansList } = trpcAny.admin.getPlans.useQuery();
   
   // Share state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -428,7 +429,12 @@ export default function BuilderPage() {
     if (targetVisibility === "public") {
       const otherPublicForms = formsList?.filter((f: any) => f.visibility === "public" && f.id !== id) || [];
       console.log("[BuilderPage] otherPublicForms count:", otherPublicForms.length, "formsList:", formsList);
-      if (otherPublicForms.length >= PUBLIC_FORM_LIMIT) {
+      
+      const userPlanId = session?.user?.planId || "free";
+      const currentPlan = plansList?.find((p: any) => p.id === userPlanId);
+      const limit = currentPlan?.maxPublicForms ?? PUBLIC_FORM_LIMIT;
+      
+      if (otherPublicForms.length >= limit) {
         console.log("[BuilderPage] Limit reached! Showing limit modal.");
         setShowLimitModal(true);
         return true;

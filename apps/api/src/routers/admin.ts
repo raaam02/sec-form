@@ -1,6 +1,5 @@
-import { router, protectedProcedure, middleware } from "../trpc";
-import { aiModels } from "@sec-form/db";
-import { eq } from "@sec-form/db";
+import { router, protectedProcedure, middleware, publicProcedure } from "../trpc";
+import { aiModels, users, forms, submissions, plans, eq, sql, desc } from "@sec-form/db";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 
@@ -117,4 +116,63 @@ export const adminRouter = router({
 
       return { success: true };
     }),
+
+  getUsers: adminProcedure.query(async ({ ctx }) => {
+    const usersList = await ctx.db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        planId: users.planId,
+        image: users.image,
+        createdAt: users.createdAt,
+        formCount: sql<number>`count(distinct ${forms.id})`.mapWith(Number),
+        responseCount: sql<number>`count(distinct ${submissions.id})`.mapWith(Number),
+      })
+      .from(users)
+      .leftJoin(forms, eq(forms.userId, users.id))
+      .leftJoin(submissions, eq(submissions.formId, forms.id))
+      .groupBy(users.id, users.name, users.email, users.role, users.planId, users.image, users.createdAt)
+      .orderBy(desc(users.createdAt));
+
+    return usersList;
+  }),
+
+  updateUserPlan: adminProcedure
+    .input(
+      z.object({
+        userId: z.string().uuid(),
+        planId: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const plan = await ctx.db.query.plans.findFirst({
+        where: eq(plans.id, input.planId),
+      });
+
+      if (!plan) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Plan not found",
+        });
+      }
+
+      await ctx.db
+        .update(users)
+        .set({
+          planId: input.planId,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, input.userId));
+
+      return { success: true };
+    }),
+
+  getPlans: publicProcedure.query(async ({ ctx }) => {
+    const allPlans = await ctx.db.query.plans.findMany({
+      orderBy: (p, { asc }) => [asc(p.maxPublicForms)],
+    });
+    return allPlans;
+  }),
 });

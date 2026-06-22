@@ -15,6 +15,13 @@
       "when": 1781413311508,
       "tag": "0001_right_wolfsbane",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1782095471116,
+      "tag": "0002_goofy_white_queen",
+      "breakpoints": true
     }
   ]
 }

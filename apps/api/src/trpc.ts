@@ -12,6 +12,7 @@ export interface Context {
     email: string;
     name?: string;
     role: string;
+    planId: string;
   } | null;
   ip: string;
 }
@@ -59,6 +60,7 @@ export async function createContext({ req, res }: trpcExpress.CreateExpressConte
           email: dbUser.email,
           name: dbUser.name || undefined,
           role: dbUser.role,
+          planId: dbUser.planId,
         };
       }
     } catch (e) {
@@ -85,6 +87,7 @@ export async function createContext({ req, res }: trpcExpress.CreateExpressConte
           email: session.user.email,
           name: session.user.name || undefined,
           role: session.user.role,
+          planId: session.user.planId,
         };
       }
     } catch (e) {
