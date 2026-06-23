@@ -5,12 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { motion, useTransform } from "motion/react";
-import { Sparkles, Code, ArrowRight, Zap, CheckCircle2 } from "lucide-react";
+import { Sparkles, Code, ArrowRight, Zap, CheckCircle2, Github } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { HighlightedWord, OrganicBlob } from "./HandDrawn";
 import { fadeUp, stagger } from "./motion";
+import { Button } from "../ui/button";
+import { cn } from "@/lib/utils";
 
 // ─── Product preview mock ───────────────────────────────────────────────────
 
@@ -104,11 +106,11 @@ export function LandingHero() {
   };
 
   return (
-    <section className="relative min-h-[84vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[84vh] flex flex-col items-center justify-center overflow-hidden py-16">
       {/* Background */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
-        <OrganicBlob className="top-[-10%] right-[-4%] w-[540px] h-[540px] text-primary/6" />
-        <OrganicBlob className="bottom-[-12%] left-[-8%] w-[440px] h-[440px] text-[#a78bfa]/7 rotate-45" />
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        {/* <OrganicBlob className="top-[-10%] right-[-4%] w-[540px] h-[540px] text-primary/6" />
+        <OrganicBlob className="bottom-[-12%] left-[-8%] w-[440px] h-[440px] text-[#a78bfa]/7 rotate-45" /> */}
         {/* Dot grid */}
         <div
           className="absolute inset-0 opacity-[0.028]"
@@ -121,61 +123,68 @@ export function LandingHero() {
         />
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 py-10 max-w-6xl">
-        <motion.div variants={stagger} initial="hidden" animate="visible" className="grid lg:grid-cols-[1.1fr_0.9fr] gap-16 items-center">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6 py-10 max-w-6xl flex flex-col items-center">
+        <motion.div variants={stagger} initial="hidden" animate="visible" className="flex flex-col items-center w-full">
 
-          {/* ── Left ── */}
-          <div>
+          {/* ── Top Content ── */}
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
             {/* Badge */}
-            <motion.div
+            <motion.a
+              href="https://github.com/raaam02/sec-form"
+              target="_blank"
+              rel="noopener noreferrer"
               variants={fadeUp}
-              className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-[11px] font-bold text-primary tracking-widest uppercase mb-8"
+              className="inline-flex items-center gap-2.5 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary/10 px-4 py-1.5 text-[11px] font-semibold text-primary tracking-wide transition-all mb-8 shadow-sm cursor-pointer group"
             >
-              <Zap className="h-3 w-3" />
-              {t("badgeText")}
-            </motion.div>
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>100% Open Source AI Form Builder</span>
+              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+            </motion.a>
 
             {/* Headline */}
             <motion.h1
               variants={fadeUp}
-              className="font-outfit text-5xl lg:text-[62px] font-black tracking-tight leading-[1.05] text-foreground"
+              className="font-outfit text-5xl md:text-6xl lg:text-[72px] font-black tracking-tight leading-[1.08] text-foreground max-w-4xl mx-auto"
             >
-              Build forms<br />
-              powered by{" "}
-              <HighlightedWord className="text-primary">Gemini AI</HighlightedWord>
+              Build Your Form With AI<br className="hidden md:inline" />
+              <HighlightedWord className="text-primary">Publish in Minutes</HighlightedWord>
             </motion.h1>
 
-            <motion.p
+            {/* Paragraph */}
+            {/* <motion.p
               variants={fadeUp}
-              className="mt-6 text-[17px] text-muted-foreground leading-relaxed max-w-[420px]"
+              className="mt-6 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto"
             >
-              {t("heroDescription")}
-            </motion.p>
+              The premium open-source alternative to Typeform. Generate forms from a prompt, customize with drag-and-drop ease, and analyze responses with built-in AI analytics.
+            </motion.p> */}
 
             {/* CTAs */}
-            <motion.div variants={fadeUp} className="mt-9 flex flex-wrap gap-3">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
+            <motion.div variants={fadeUp} className="mt-9 flex flex-wrap gap-3 items-center justify-center">
+              <Button
                 onClick={handleDemoLogin}
                 disabled={isLoggingIn}
-                className="inline-flex h-12 items-center gap-2.5 rounded-xl bg-primary px-7 text-[14px] font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors disabled:opacity-60"
+                className={cn("group h-12 px-7 text-[14px] font-bold shadow-lg",
+                  "shadow-primary/20 hover:bg-primary/90 transition-colors",
+                  "rounded-b-[4px] rounded-t-3xl hover:rounded-b-3xl transition-all duration-500",
+                )}
               >
                 {isLoggingIn ? t("loggingIn") : t("ctaStart")}
-                <ArrowRight className="h-4 w-4" />
-              </motion.button>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                <Link
-                  href="/explore"
-                  className="inline-flex h-12 items-center gap-2 rounded-xl border border-border bg-card px-6 text-[14px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors shadow-sm"
-                >
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </Button>
+
+              {/* <Button
+                variant="outline"
+                asChild
+                className="h-12 px-5 text-[14px] font-semibold rounded-xl bg-card border-border hover:bg-accent transition-colors shadow-sm"
+              >
+                <Link href="/explore">
                   Templates
                 </Link>
-              </motion.div>
+              </Button> */}
             </motion.div>
 
             {/* Trust line */}
-            <motion.div variants={fadeUp} className="mt-8 flex flex-wrap gap-5">
+            <motion.div variants={fadeUp} className="mt-8 flex flex-wrap gap-5 justify-center">
               {(["No credit card", "1-min setup", "Open source"] as const).map((item) => (
                 <span key={item} className="flex items-center gap-1.5 text-[12px] font-medium text-muted-foreground">
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
@@ -185,17 +194,17 @@ export function LandingHero() {
             </motion.div>
           </div>
 
-          {/* ── Right — product card ── */}
+          {/* ── Bottom — product card ── */}
           <motion.div
             variants={fadeUp}
-            className="relative hidden lg:block"
+            className="relative mt-16 w-full max-w-4xl mx-auto px-2 sm:px-6"
           >
             {/* Glow */}
-            <div className="absolute inset-0 rounded-3xl bg-primary/15 blur-3xl scale-90 pointer-events-none" />
+            <div className="absolute inset-0 rounded-3xl bg-primary/10 blur-3xl scale-95 pointer-events-none" />
 
-            {/* Floating annotations — opacity-only animation prevents positional jumping */}
+            {/* Floating annotations */}
             <motion.div
-              className="absolute -top-4 -right-4 z-10"
+              className="absolute -top-4 right-4 sm:-right-4 z-10 hidden sm:block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.7, duration: 0.4 }}
@@ -205,7 +214,7 @@ export function LandingHero() {
               </Annotation>
             </motion.div>
             <motion.div
-              className="absolute -bottom-4 -left-4 z-10"
+              className="absolute -bottom-4 left-4 sm:-left-4 z-10 hidden sm:block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.0, duration: 0.4 }}
@@ -218,6 +227,7 @@ export function LandingHero() {
             <motion.div
               whileHover={{ y: -6 }}
               transition={{ type: "tween", ease: "easeOut", duration: 0.25 }}
+              className="w-full"
             >
               <DashboardPreview />
             </motion.div>

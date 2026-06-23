@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { motion } from "motion/react";
-import { Code } from "lucide-react";
+import { Code, Github } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
@@ -30,6 +30,29 @@ export function LandingNav() {
     }
   };
 
+  const NAV_LINKS = [
+    {
+      href: "/explore",
+      label: t("navExplore"),
+      target: "_self",
+    },
+    {
+      href: "/themes",
+      label: t("navThemes"),
+      target: "_self",
+    },
+    {
+      href: "/pricing",
+      label: t("navPricing"),
+      target: "_self",
+    },
+    {
+      href: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`,
+      label: t("navApiDocs"),
+      target: "_blank",
+    }
+  ]
+
   return (
     <motion.header
       initial={{ opacity: 0, y: -12 }}
@@ -37,7 +60,7 @@ export function LandingNav() {
       transition={{ type: "tween", ease: "easeOut", duration: 0.3 }}
       className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6"
     >
-      <div className="mx-auto max-w-6xl w-full rounded-2xl border border-border/60 bg-background/80 backdrop-blur-xl shadow-sm">
+      <div className="mx-auto max-w-6xl w-full rounded-2xl border border-border bg-background/80 backdrop-blur-xl">
         <div className="flex h-14 items-center justify-between px-4 sm:px-5">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
@@ -45,20 +68,21 @@ export function LandingNav() {
           </Link>
           {/* Nav */}
           <nav className="hidden md:flex gap-6 text-[13px] font-medium text-muted-foreground">
-            <Link href="/explore" className="hover:text-foreground transition-colors">{t("navExplore")}</Link>
-            <Link href="/themes" className="hover:text-foreground transition-colors">{t("navThemes")}</Link>
-            <Link href="/pricing" className="hover:text-foreground transition-colors">{t("navPricing")}</Link>
-            <a
-              href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-foreground transition-colors flex items-center gap-1"
-            >
-              {t("navApiDocs")} <Code className="h-3 w-3" />
-            </a>
+            {NAV_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} target={link.target} className="hover:text-foreground transition-colors">{link.label}</Link>
+            ))}
           </nav>
           {/* Actions */}
           <div className="flex items-center gap-2">
+            <a
+              href="https://github.com/raaam02/sec-form"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              title="GitHub Repository"
+            >
+              <Github className="h-5 w-5" />
+            </a>
             <ThemeToggle />
             {session ? (
               <div className="flex items-center gap-2">
@@ -88,7 +112,7 @@ export function LandingNav() {
                   whileTap={{ scale: 0.97 }}
                   onClick={handleDemoLogin}
                   disabled={isLoggingIn}
-                  className="hidden sm:inline-flex h-8 items-center rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-60"
+                  className="hidden sm:inline-flex h-8 items-center rounded-lg bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground px-4 text-[13px] font-semibold transition-colors disabled:opacity-60"
                 >
                   {isLoggingIn ? t("loggingIn") : t("tryDemo")}
                 </motion.button>

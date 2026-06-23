@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Page background */
-    --background: 326 78% 97%;
+    --background: 326 78% 97.5%;
     --foreground: 333 40% 10%;
 
     /* Cards: slightly warmer/lighter than bg to create gentle layering */

@@ -9,17 +9,17 @@ export const ScribbleUnderline = ({ className = "" }: { className?: string }) =>
   <svg
     viewBox="0 0 200 12"
     fill="none"
-    className={`absolute -bottom-1 left-0 w-full pointer-events-none ${className}`}
+    className={`absolute -bottom-3 left-0 w-full pointer-events-none ${className}`}
     preserveAspectRatio="none"
     aria-hidden
   >
     <path
-      d="M2 8 C20 4, 48 10, 72 6 C96 2, 115 9, 140 7 C160 5, 180 9, 198 5"
+      d="M2 8 C20 4, 48 10, 72 6 C96 2, 115 9, 140 7 C160 5, 180 9, 199 7"
       stroke="currentColor"
       strokeWidth="3"
       strokeLinecap="round"
       fill="none"
-      className="opacity-75"
+      className="opacity-25"
     />
   </svg>
 );
