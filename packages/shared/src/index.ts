@@ -7,6 +7,8 @@ export interface ThemeConfig {
   textColor: string;
   cardColor: string;
   borderRadius: string;
+  inputBgColor?: string;
+  inputBorderColor?: string;
 }
 
 export const BUILTIN_THEMES: ThemeConfig[] = [

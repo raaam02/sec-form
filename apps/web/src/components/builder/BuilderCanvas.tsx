@@ -2,28 +2,20 @@ import React from "react";
 import { 
   ChevronUp, 
   ChevronDown, 
-  Trash2, 
-  Download, 
-  FileText, 
-  Sparkles, 
+  Trash2,
   AlertCircle, 
-  BarChart3, 
   Settings, 
-  CheckCircle2,
-  Eye,
-  Percent,
   Plus,
   GripVertical,
   Undo2,
   Redo2,
-  Send
-} from "lucide-react";
+  FileText,
+  CheckCircle2,
+  Send,} from "lucide-react";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip } from "recharts";
 import { FormField } from "@sec-form/validators";
-import { LoadingSpinner } from "@sec-form/ui";
 import { TabBar } from "../TabBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +27,7 @@ import { useTranslations } from "next-intl";
 import { useTheme } from "@/components/ThemeProvider";
 
 function SortableFieldItem({
-  field, index, selectedFieldId, setSelectedFieldId, handleUpdateField, handleDeleteField
+  field, selectedFieldId, setSelectedFieldId, handleUpdateField, handleDeleteField
 }: {
   field: FormField;
   index: number;
@@ -129,7 +121,7 @@ function SortableFieldItem({
               {["select", "multiselect"].includes(field.type) && field.options && (
                 <div className="flex flex-wrap gap-1">
                   {field.options.map((opt) => (
-                    <span key={opt} className="rounded bg-muted px-2 py-0.5 text-[9px] font-bold text-muted-foreground border border-border/40">
+                    <span key={opt} className="rounded bg-muted px-2 py-0.5 text-xs font-bold text-muted-foreground border border-border/40">
                       {opt}
                     </span>
                   ))}
@@ -302,7 +294,7 @@ function SortableFieldItem({
           </div>
 
         {/* Actions (Delete and Collapse/Expand) */}
-        <div className="flex items-center gap-1 shrink-0 self-center">
+        <div className="flex items-center gap-1 shrink-0 flex-row-reverse">
           <Button
             type="button"
             variant="ghost"
@@ -384,6 +376,8 @@ interface BuilderCanvasProps {
   telegramChatName: string;
   setTelegramChatName: (v: string) => void;
   formId: string;
+  allowedDomains?: string[];
+  setAllowedDomains?: (domains: string[]) => void;
 }
 
 export function BuilderCanvas({
@@ -401,15 +395,6 @@ export function BuilderCanvas({
   handleDeleteField,
   handleUpdateField,
   saveForm,
-  responses,
-  isResponsesLoading,
-  handleExportCSV,
-  analytics,
-  isAnalyticsLoading,
-  aiInsights,
-  isInsightsGenerating,
-  insightsError,
-  handleGenerateInsights,
   visibility,
   setVisibility,
   layoutMode,
@@ -428,9 +413,30 @@ export function BuilderCanvas({
   telegramChatName,
   setTelegramChatName,
   formId,
+  allowedDomains,
+  setAllowedDomains,
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
   const tCommon = useTranslations("Common");
+
+  const [allowedDomainsText, setAllowedDomainsText] = React.useState("");
+
+  React.useEffect(() => {
+    if (allowedDomains) {
+      setAllowedDomainsText(allowedDomains.join(", "));
+    }
+  }, [allowedDomains]);
+
+  const handleDomainsChange = (text: string) => {
+    setAllowedDomainsText(text);
+    const parsed = text
+      .split(",")
+      .map((d) => d.trim().toLowerCase())
+      .filter(Boolean);
+    if (setAllowedDomains) {
+      setAllowedDomains(parsed);
+    }
+  };
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -614,7 +620,7 @@ export function BuilderCanvas({
               </div>
             )}
 
-            <Card className="border-border bg-card/20 backdrop-blur-[1px] p-6 shadow-sm flex flex-col gap-5 relative">
+            <Card className="border-border rounded-3xl bg-card/20 backdrop-blur-[1px] p-6 shadow-sm flex flex-col gap-5 relative">
               <div className="">
                 <input
                   type="text"
@@ -668,12 +674,12 @@ export function BuilderCanvas({
 
 
         {middleTab === "settings" && (
-          <div className="max-w-xl mx-auto space-y-6 bg-transparent backdrop-blur-[1px] p-6 rounded-2xl border">
-            <h3 className="font-outfit font-bold text-foreground text-sm pb-2 border-b border-border">Visibility & Custom URL</h3>
+          <div className="max-w-xl mx-auto space-y-6">
+            {/* <h3 className="font-outfit font-bold text-foreground text-sm pb-2 border-b border-border">Visibility & Custom URL</h3> */}
             
-            <form onSubmit={handleSaveSettings} className="space-y-5 text-xs text-muted-foreground font-semibold">
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Visibility Mode</label>
+            <form onSubmit={handleSaveSettings} className="backdrop-blur-[1px] p-4 rounded-3xl border border-border/70 space-y-5 flex flex-col gap-2 text-xs text-muted-foreground font-semibold">
+              <div className="p-4 rounded-lg bg-card/30 backdrop-blur-[1px]">
+                <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-2">Visibility Mode</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(["draft", "public", "unlisted"] as const).map((mode) => (
                     <Button
@@ -681,21 +687,21 @@ export function BuilderCanvas({
                       type="button"
                       variant={visibility === mode ? "default" : "outline"}
                       onClick={() => setVisibility(mode)}
-                      className={`h-9 w-full font-bold text-[10px] uppercase transition-colors rounded-xl`}
+                      className={`h-9 w-full font-bold text-xs capitalize transition-colors rounded-xl`}
                     >
                       {mode}
                     </Button>
                   ))}
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-2 font-normal leading-normal">
+                <p className="text-xs text-muted-foreground mt-2 font-normal leading-normal">
                   {visibility === "draft" && "Draft forms are not accessible publicly and do not accept responses."}
                   {visibility === "public" && "Public forms are visible in the explore page/gallery and accept responses."}
                   {visibility === "unlisted" && "Unlisted forms accept responses, but are hidden from general explore listings."}
                 </p>
               </div>
 
-              <div className="pt-2">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Form Display Layout</label>
+              <div className="p-4 rounded-lg bg-card/30 backdrop-blur-[1px]">
+                <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-2">Form Display Layout</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { mode: "standard", label: "Standard (1 Page)" },
@@ -707,23 +713,23 @@ export function BuilderCanvas({
                       type="button"
                       variant={layoutMode === option.mode ? "default" : "outline"}
                       onClick={() => setLayoutMode && setLayoutMode(option.mode as any)}
-                      className={`h-9 w-full font-bold text-[10px] uppercase transition-colors rounded-xl`}
+                      className={`h-9 w-full font-bold text-xs uppercase transition-colors rounded-xl`}
                     >
                       {option.label}
                     </Button>
                   ))}
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-2 font-normal leading-normal">
+                <p className="text-xs text-muted-foreground mt-2 font-normal leading-normal">
                   {layoutMode === "standard" && "All fields are displayed on a single page."}
                   {layoutMode === "single_field" && "Each field gets its own separate page with Next/Back buttons."}
                   {layoutMode === "custom_steps" && "Drag and drop 'Step Break' fields into the canvas to split the form into custom pages."}
                 </p>
               </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">Custom Form URL Slug</label>
-                <div className="flex items-center rounded-xl border border-border overflow-hidden bg-muted/50">
-                  <span className="text-[10px] font-mono text-muted-foreground px-3 bg-muted h-9 flex items-center border-r border-border">/f/</span>
+              <div className="p-4 rounded-lg bg-card/30 backdrop-blur-[1px]">
+                <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Custom Form URL Slug</label>
+                <div className="flex items-center rounded-xl border border-border overflow-hidden">
+                  <span className="text-xs font-mono text-muted-foreground px-3 bg-muted/40 h-9 flex items-center border-r border-border">/f/</span>
                   <Input
                     type="text"
                     value={slug}
@@ -733,7 +739,7 @@ export function BuilderCanvas({
                     required
                   />
                 </div>
-                <p className="text-[11px] text-muted-foreground mt-1 font-normal">Shorthand slug name. Letters, numbers, and dashes only.</p>
+                <p className="text-sm text-muted-foreground mt-1 font-normal">Shorthand slug name. Letters, numbers, and dashes only.</p>
               </div>
 
               {/* Telegram Notifications */}
@@ -820,7 +826,21 @@ export function BuilderCanvas({
                 )}
               </div>
 
-              <div className="flex gap-3 justify-end pt-4 border-t border-border">
+              <div className="p-4 rounded-lg bg-card/30 backdrop-blur-[1px]">
+                <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Allowed Embed Domains</label>
+                <Input
+                  type="text"
+                  value={allowedDomainsText}
+                  onChange={(e) => handleDomainsChange(e.target.value)}
+                  className="h-9 px-3 bg-transparent text-xs text-foreground rounded-xl"
+                  placeholder="e.g. mywebsite.com, anotherdomain.com"
+                />
+                <p className="text-xs text-muted-foreground mt-1 font-normal leading-normal">
+                  Restrict where your form can be embedded. Enter a comma-separated list of domains. Leave empty to allow embedding anywhere.
+                </p>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4">
                 <Button
                   type="submit"
                   className="h-9 px-4 font-semibold text-xs rounded-xl"

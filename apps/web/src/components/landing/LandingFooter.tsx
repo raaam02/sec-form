@@ -23,7 +23,7 @@ const NAV_COLUMNS = [
       { label: "API Docs", href: apiDocsUrl, external: true },
       { label: "REST API", href: apiDocsUrl, external: true },
       { label: "Webhooks", href: "/docs/webhooks" },
-      { label: "Open Source", href: "https://github.com", external: true },
+      { label: "Open Source", href: "https://github.com/raaam02/sec-form", external: true },
     ],
   },
   {
@@ -69,7 +69,7 @@ export function LandingFooter() {
             {/* Social links */}
             <div className="flex items-center gap-2">
               {[
-                { icon: Github, label: "GitHub", href: "https://github.com" },
+                { icon: Github, label: "GitHub", href: "https://github.com/raaam02/sec-form" },
                 { icon: Twitter, label: "Twitter", href: "https://twitter.com" },
                 { icon: Code, label: "API", href: "http://localhost:4000/docs" },
               ].map(({ icon: Icon, label, href }) => (

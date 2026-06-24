@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* Page background */
-    --background: 326 78% 97%;
+    --background: 326 78% 97.5%;
     --foreground: 333 40% 10%;
 
     /* Cards: slightly warmer/lighter than bg to create gentle layering */
@@ -70,7 +70,7 @@
     --popover-foreground: 210 20% 96%;
 
     --primary: 333 71% 65%; /* Pink accent in dark mode */
-    --primary-foreground: 210 20% 98%;
+    --primary-foreground: 210 20% 7%;
 
     --secondary: 220 20% 16%;
     --secondary-foreground: 210 20% 96%;

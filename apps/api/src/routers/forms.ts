@@ -1,6 +1,6 @@
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { CreateFormInput, UpdateFormInput } from "@sec-form/validators";
-import { forms, formViews, submissions } from "@sec-form/db";
+import { forms, formViews, submissions, plans } from "@sec-form/db";
 import { eq, and, ne, count } from "@sec-form/db";
 import { z } from "zod";
 import crypto from "crypto";
@@ -169,10 +169,17 @@ export const formsRouter = router({
           );
         
         const countVal = Number(publicFormsCount[0]?.count || 0);
-        if (countVal >= PUBLIC_FORM_LIMIT) {
+        
+        // Fetch user plan details dynamically
+        const userPlan = await ctx.db.query.plans.findFirst({
+          where: eq(plans.id, ctx.user.planId || "free"),
+        });
+        const limit = userPlan?.maxPublicForms ?? PUBLIC_FORM_LIMIT;
+
+        if (countVal >= limit) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: `LIMIT_REACHED: You have reached the limit of ${PUBLIC_FORM_LIMIT} active public forms.`,
+            message: `LIMIT_REACHED: You have reached the limit of ${limit} active public forms.`,
           });
         }
       }

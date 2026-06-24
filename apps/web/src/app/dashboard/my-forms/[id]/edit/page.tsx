@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import { getLocalForm, saveLocalForm, LocalForm, getLocalSubmissions, getLocalForms } from "@/utils/localForms";
 import { ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
-import { AlertCircle, Plus, Palette, FileText, BarChart3, Settings, Inbox, Smartphone, Code } from "lucide-react";
+import { AlertCircle, Plus, Palette, Settings, Smartphone, Code } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 
 import { BuilderHeader } from "@/components/builder/BuilderHeader";
@@ -20,7 +20,6 @@ import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { LimitModal } from "@/components/builder/LimitModal";
 import { ContactAdminModal } from "@/components/builder/ContactAdminModal";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 // Cast trpc to bypass Next.js 15 type collision checks
@@ -108,6 +107,7 @@ export default function BuilderPage() {
   const [telegramEnabled, setTelegramEnabled] = useState(false);
   const [telegramChatId, setTelegramChatId] = useState("");
   const [telegramChatName, setTelegramChatName] = useState("");
+  const [allowedDomains, setAllowedDomains] = useState<string[]>([]);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showContactAdminModal, setShowContactAdminModal] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState<"build" | "theme" | "preview" | "embed" | "settings">("build");
@@ -134,6 +134,7 @@ export default function BuilderPage() {
   }, [middleTab]);
 
   const { data: formsList } = trpcAny.forms.list.useQuery();
+  const { data: plansList } = trpcAny.admin.getPlans.useQuery();
   
   // Share state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -241,6 +242,7 @@ export default function BuilderPage() {
       setSlug(activeForm.slug);
       setVisibility(activeForm.visibility as any);
       setLayoutMode((activeForm.schemaJson as any).layout?.mode || "single_field");
+      setAllowedDomains((activeForm.schemaJson as any).allowedDomains || []);
 
       const telegram = (activeForm.schemaJson as any).telegram || {};
       setTelegramEnabled(telegram.enabled || false);
@@ -302,7 +304,8 @@ export default function BuilderPage() {
               enabled: telegramEnabled,
               chatId: telegramChatId || undefined,
               chatName: telegramChatName || undefined,
-            }
+            },
+            allowedDomains
           },
           themeJson: updatedTheme !== undefined ? updatedTheme : (activeTheme || null),
           userId: "demo-user-id",
@@ -334,7 +337,8 @@ export default function BuilderPage() {
             enabled: telegramEnabled,
             chatId: telegramChatId || undefined,
             chatName: telegramChatName || undefined,
-          }
+          },
+          allowedDomains
         },
         themeJson: updatedTheme || activeTheme || undefined,
         visibility: nextVisibility,
@@ -419,7 +423,12 @@ export default function BuilderPage() {
     if (targetVisibility === "public") {
       const otherPublicForms = formsList?.filter((f: any) => f.visibility === "public" && f.id !== id) || [];
       console.log("[EditPage] otherPublicForms count:", otherPublicForms.length, "formsList:", formsList);
-      if (otherPublicForms.length >= PUBLIC_FORM_LIMIT) {
+      
+      const userPlanId = session?.user?.planId || "free";
+      const currentPlan = plansList?.find((p: any) => p.id === userPlanId);
+      const limit = currentPlan?.maxPublicForms ?? PUBLIC_FORM_LIMIT;
+      
+      if (otherPublicForms.length >= limit) {
         console.log("[EditPage] Limit reached! Showing limit modal.");
         setShowLimitModal(true);
         return true;
@@ -568,7 +577,8 @@ export default function BuilderPage() {
               enabled: telegramEnabled,
               chatId: telegramChatId || undefined,
               chatName: telegramChatName || undefined,
-            }
+            },
+            allowedDomains
           },
           themeJson: activeTheme || null,
           userId: "demo-user-id",
@@ -606,7 +616,8 @@ export default function BuilderPage() {
             enabled: telegramEnabled,
             chatId: telegramChatId || undefined,
             chatName: telegramChatName || undefined,
-          }
+          },
+          allowedDomains
         }
       });
       utils.forms.get.invalidate({ id });
@@ -793,6 +804,8 @@ export default function BuilderPage() {
               slug={slug}
               setSlug={setSlug}
               handleSaveSettings={handleSaveSettings}
+              allowedDomains={allowedDomains}
+              setAllowedDomains={setAllowedDomains}
               handleUndo={handleUndo}
               handleRedo={handleRedo}
               canUndo={formHistory.index > 0}
@@ -921,6 +934,8 @@ export default function BuilderPage() {
                 slug={slug}
                 setSlug={setSlug}
                 handleSaveSettings={handleSaveSettings}
+                allowedDomains={allowedDomains}
+                setAllowedDomains={setAllowedDomains}
                 handleUndo={handleUndo}
                 handleRedo={handleRedo}
                 canUndo={formHistory.index > 0}

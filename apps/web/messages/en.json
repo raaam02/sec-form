@@ -20,7 +20,7 @@
     "loggingIn": "Logging in...",
     "badgeText": "Next-Generation Form builder",
     "heroTitle": "Dynamic Forms Powered by Gemini AI",
-    "heroDescription": "Draft a questionnaire from a prompt, customize with drag & drop builder, apply beautiful preset themes, and unlock deep insights from responses automatically.",
+    "heroDescription": "A premium, open-source AI form builder. Draft a questionnaire from a prompt, customize with drag & drop builder, apply beautiful preset themes, and unlock deep insights from responses automatically.",
     "ctaStart": "Start Building with AI",
     "mockDashboardTitle": "My Forms Dashboard",
     "mockDashboardSubtitle": "Manage your dynamic forms and AI summaries",
@@ -149,12 +149,12 @@
       },
       "pro": {
         "name": "Professional",
-        "price": "$29",
+        "price": "$19",
         "desc": "Best for growing creators and developers."
       },
       "enterprise": {
         "name": "Enterprise",
-        "price": "$99",
+        "price": "Custom",
         "desc": "For scaling teams requiring full API controls."
       }
     }

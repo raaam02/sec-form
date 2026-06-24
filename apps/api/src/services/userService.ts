@@ -70,5 +70,6 @@ export async function verifyCredentials(email: string, passwordPlain: string) {
     email: user.email,
     image: user.image,
     role: user.role,
+    planId: user.planId,
   };
 }

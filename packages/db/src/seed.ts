@@ -17,8 +17,39 @@ async function main() {
   try {
     // 1. Clean existing data (safely using cascade references)
     await db.delete(schema.users);
+    await db.delete(schema.plans);
     await db.delete(schema.aiModels);
     console.log("Cleared existing database tables.");
+
+    // Seed Subscription Plans
+    const initialPlans = [
+      {
+        id: "free",
+        name: "Free",
+        description: "Perfect for small personal projects and hobbyists.",
+        prices: { USD: 0, INR: 0 },
+        features: ["5 Active Forms", "Standard Form Layouts", "Basic AI Responses", "Community Support"],
+        maxPublicForms: 5,
+      },
+      {
+        id: "pro",
+        name: "Professional",
+        description: "For creators and small businesses needing more capacity.",
+        prices: { USD: 29, INR: 2400 },
+        features: ["50 Active Forms", "Full Theme & Color Customization", "Allowed Embed Domains", "Advanced AI Insights"],
+        maxPublicForms: 50,
+      },
+      {
+        id: "enterprise",
+        name: "Enterprise",
+        description: "For organizations requiring custom scale and high limits.",
+        prices: { USD: 99, INR: 8000 },
+        features: ["Unlimited Active Forms", "Dedicated Support & SLAs", "Custom Integration Limits", "Priority System Performance"],
+        maxPublicForms: 999999,
+      },
+    ];
+    await db.insert(schema.plans).values(initialPlans as any);
+    console.log("Seeded subscription plans.");
 
     // Seed AI Models
     const initialModels = [

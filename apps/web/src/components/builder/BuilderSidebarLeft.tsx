@@ -21,11 +21,20 @@ import { FormField } from "@sec-form/validators";
 import { TabBar } from "../TabBar";
 import { ThemePresetCard } from "./ThemePresetCard";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { ColorPicker } from "./ColorPicker";
+
+const CUSTOM_EDITOR_FIELDS: { key: keyof ThemeConfig; label: string; defaultVal: string }[] = [
+  { key: "primaryColor", label: "Button & Accent Color", defaultVal: BUILTIN_THEMES[0].primaryColor },
+  { key: "backgroundColor", label: "Page Background", defaultVal: BUILTIN_THEMES[0].backgroundColor },
+  { key: "textColor", label: "Text Color", defaultVal: BUILTIN_THEMES[0].textColor },
+  { key: "cardColor", label: "Card Background", defaultVal: BUILTIN_THEMES[0].cardColor },
+  { key: "inputBgColor", label: "Input Background", defaultVal: "#ffffff" },
+  { key: "inputBorderColor", label: "Input Border Color", defaultVal: "rgba(128,128,128,0.2)" }
+];
 
 interface BuilderSidebarLeftProps {
   leftTab: "builder" | "themes";
@@ -96,6 +105,32 @@ export function BuilderSidebarLeft({
   const activeExpanded = isExpanded !== undefined ? isExpanded : localExpanded;
   const activeSetExpanded = setIsExpanded !== undefined ? setIsExpanded : setLocalExpanded;
 
+  const handleColorChange = (key: keyof ThemeConfig, val: string) => {
+    const defaultTheme = BUILTIN_THEMES[0];
+    const newTheme = {
+      ...(activeTheme || defaultTheme),
+      id: "custom",
+      name: "Custom",
+      [key]: val
+    } as ThemeConfig;
+    setActiveTheme(newTheme);
+  };
+
+  const handleColorComplete = (key: keyof ThemeConfig, val: string) => {
+    const defaultTheme = BUILTIN_THEMES[0];
+    const newTheme = {
+      ...(activeTheme || defaultTheme),
+      id: "custom",
+      name: "Custom",
+      [key]: val
+    } as ThemeConfig;
+    setActiveTheme(newTheme);
+    saveForm(fields, newTheme);
+    if (pushToHistory) {
+      pushToHistory(fields, newTheme);
+    }
+  };
+
   return (
     <aside className={`@container relative w-full h-full border-r border-border bg-sidebar overflow-hidden flex flex-col transition-all duration-300 ${activeExpanded ? "w-40 z-30 absolute inset-y-0 left-0 md:relative md:w-full" : "w-14 md:w-full"}`}>
       {/* Mobile-only Toggle Button */}
@@ -159,6 +194,75 @@ export function BuilderSidebarLeft({
 
         {leftTab === "themes" && (
           <>
+            {/* Custom Theme Editor */}
+            <div className="space-y-4 pb-6 hidden @[150px]:block">
+              <h3 className="font-outfit font-extrabold text-foreground text-sm">Custom Styling</h3>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  {CUSTOM_EDITOR_FIELDS.map((field) => (
+                    <ColorPicker
+                      key={field.key}
+                      label={field.label}
+                      value={(activeTheme as any)?.[field.key] || field.defaultVal}
+                      onChange={(val) => handleColorChange(field.key, val)}
+                      onComplete={(val) => handleColorComplete(field.key, val)}
+                    />
+                  ))}
+                </div>
+
+                <div className="space-y-1.5 pt-2 border-t border-border/50">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Border Radius</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { label: "none", value: "0px" },
+                      { label: "xs", value: "2px" },
+                      { label: "sm", value: "4px" },
+                      { label: "md", value: "8px" },
+                      { label: "lg", value: "16px" },
+                      { label: "full", value: "9999px" },
+                    ].map((radius) => (
+                      <motion.button
+                        key={radius.value}
+                        whileHover={{ scale: 1.02, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
+                        whileTap={{ scale: 0.98, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                        onClick={() => {
+                          const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", borderRadius: radius.value } as ThemeConfig;
+                          setActiveTheme(newTheme);
+                          saveForm(fields, newTheme);
+                          if (pushToHistory) pushToHistory(fields, newTheme);
+                        }}
+                        className={`flex-1 min-w-[60px] py-1.5 text-[10px] font-medium rounded-md border transition-colors ${
+                          (activeTheme?.borderRadius || "0.5rem") === radius.value || (radius.value === "8px" && activeTheme?.borderRadius === "0.5rem")
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-card text-muted-foreground hover:bg-accent"
+                        }`}
+                      >
+                        {radius.label}
+                      </motion.button>
+                    ))}
+                  </div>
+                  <div className="pt-2">
+                    <Input
+                      type="text"
+                      placeholder="Custom radius (e.g. 12px or 1rem)"
+                      value={activeTheme?.borderRadius || ""}
+                      onChange={(e) => {
+                        const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", borderRadius: e.target.value } as ThemeConfig;
+                        setActiveTheme(newTheme);
+                      }}
+                      onBlur={() => {
+                        const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", borderRadius: activeTheme?.borderRadius || "0.5rem" } as ThemeConfig;
+                        saveForm(fields, newTheme);
+                        if (pushToHistory) pushToHistory(fields, newTheme);
+                      }}
+                      className="h-8 text-xs rounded-lg"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Built-in Preset Themes */}
             <div className="space-y-4">
               <h3 className="font-outfit font-extrabold text-foreground text-sm hidden @[150px]:block">{t("themePresets")}</h3>
@@ -180,69 +284,6 @@ export function BuilderSidebarLeft({
                     />
                   </motion.div>
                 ))}
-              </div>
-            </div>
-
-            {/* Custom Theme Editor */}
-            <div className="space-y-4 pt-6 border-t border-border mt-6 pb-6 hidden @[150px]:block">
-              <h3 className="font-outfit font-extrabold text-foreground text-sm">Custom Styling</h3>
-              
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Background Color</label>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      "#ffffff", "#f8fafc", "#f1f5f9", "#fdf4ff", "#eff6ff", "#f0fdf4", // Light
-                      "#020617", "#0f172a", "#1e1e24", "#18181b", "#171717", "#09090b"  // Dark
-                    ].map((color) => (
-                      <motion.button
-                        key={color}
-                        whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
-                        whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-                        onClick={() => {
-                          const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", backgroundColor: color } as ThemeConfig;
-                          setActiveTheme(newTheme);
-                          saveForm(fields, newTheme);
-                        }}
-                        className={`h-8 w-8 shrink-0 rounded-md border-2 transition-colors duration-200 ${activeTheme?.backgroundColor === color ? "border-primary scale-105" : "border-border"}`}
-                        style={{ backgroundColor: color }}
-                        title={color}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1.5 pt-2">
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Border Radius</label>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { label: "none", value: "0px" },
-                      { label: "xs", value: "2px" },
-                      { label: "sm", value: "4px" },
-                      { label: "md", value: "8px" },
-                      { label: "lg", value: "16px" },
-                      { label: "full", value: "9999px" },
-                    ].map((radius) => (
-                      <motion.button
-                        key={radius.value}
-                        whileHover={{ scale: 1.02, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
-                        whileTap={{ scale: 0.98, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-                        onClick={() => {
-                          const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", borderRadius: radius.value } as ThemeConfig;
-                          setActiveTheme(newTheme);
-                          saveForm(fields, newTheme);
-                        }}
-                        className={`flex-1 min-w-[60px] py-1.5 text-[10px] font-medium rounded-md border transition-colors ${
-                          (activeTheme?.borderRadius || "0.5rem") === radius.value || (radius.value === "8px" && activeTheme?.borderRadius === "0.5rem")
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-border bg-card text-muted-foreground hover:bg-accent"
-                        }`}
-                      >
-                        {radius.label}
-                      </motion.button>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           </>
