@@ -58,7 +58,13 @@ export default function BuilderPage() {
   // Queries
   const { data: form, isLoading: isFormLoading, error: formError } = trpcAny.forms.get.useQuery(
     { id },
-    { enabled: !isDemo || (!hasLoadedLocal ? false : !localForm) }
+    { 
+      enabled: !isDemo || (!hasLoadedLocal ? false : !localForm),
+      refetchInterval: (data: any) => {
+        const telegram = (data?.schemaJson as any)?.telegram;
+        return (telegram?.enabled && !telegram?.chatId) ? 3000 : false;
+      }
+    }
   );
 
   const activeForm = isDemo && localForm ? localForm : form;
@@ -101,6 +107,7 @@ export default function BuilderPage() {
   const [insightsError, setInsightsError] = useState("");
 
   // Settings state
+  const [hasInitialized, setHasInitialized] = useState(false);
   const [slug, setSlug] = useState("");
   const [visibility, setVisibility] = useState<"draft" | "public" | "unlisted">("draft");
   const [layoutMode, setLayoutMode] = useState<"standard" | "single_field" | "custom_steps">("single_field");
@@ -229,9 +236,13 @@ export default function BuilderPage() {
     setRightTab("embed");
   }, "Builder Navigation");
 
+  useEffect(() => {
+    setHasInitialized(false);
+  }, [id]);
+
   // Sync state from query load
   useEffect(() => {
-    if (activeForm) {
+    if (activeForm && !hasInitialized) {
       setTitle(activeForm.title);
       setDescription(activeForm.description || "");
       
@@ -257,6 +268,23 @@ export default function BuilderPage() {
           };
         }
         return prev;
+      });
+      setHasInitialized(true);
+    }
+  }, [activeForm, hasInitialized]);
+
+  // Sync Telegram status from activeForm in the background
+  useEffect(() => {
+    if (activeForm) {
+      const telegram = (activeForm.schemaJson as any).telegram || {};
+      setTelegramChatId((prevId) => {
+        const newId = telegram.chatId || "";
+        if (newId !== prevId) {
+          setTelegramChatName(telegram.chatName || "");
+          setTelegramEnabled(telegram.enabled || false);
+          return newId;
+        }
+        return prevId;
       });
     }
   }, [activeForm]);
