@@ -293,7 +293,7 @@ export default function BuilderPage() {
       try {
         const updatedLocal: LocalForm = {
           id,
-          title,
+          title: title.trim() === "" ? "Untitled Form" : title,
           description,
           slug,
           visibility: nextVisibility,
@@ -328,7 +328,7 @@ export default function BuilderPage() {
     try {
       await updateFormMutation.mutateAsync({
         id,
-        title,
+        title: title.trim() === "" ? "Untitled Form" : title,
         description,
         schemaJson: { 
           fields: updatedFields,
@@ -351,6 +351,32 @@ export default function BuilderPage() {
       setSaveErrorMessage(e.message || "Auto-save failed");
     }
   };
+
+  // Refs to prevent stale closure in debounced save
+  const saveFormRef = React.useRef(saveForm);
+  React.useEffect(() => {
+    saveFormRef.current = saveForm;
+  });
+
+  const saveTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const saveFormDebounced = React.useCallback((updatedFields: FormField[], updatedTheme?: ThemeConfig | null, updatedLayoutMode?: "standard" | "single_field" | "custom_steps") => {
+    setSaveStatus("saving");
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      saveFormRef.current(updatedFields, updatedTheme, updatedLayoutMode);
+    }, 1000);
+  }, []);
+
+  React.useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleAddField = (type: FormField["type"]) => {
     const newField: FormField = {
@@ -384,7 +410,7 @@ export default function BuilderPage() {
       return f;
     });
     setFields(updated);
-    saveForm(updated);
+    saveFormDebounced(updated);
     pushToHistory(updated, activeTheme);
   };
 
@@ -566,7 +592,7 @@ export default function BuilderPage() {
 
         const updatedLocal: LocalForm = {
           id,
-          title,
+          title: title.trim() === "" ? "Untitled Form" : title,
           description,
           slug,
           visibility,
@@ -605,7 +631,7 @@ export default function BuilderPage() {
     try {
       await updateFormMutation.mutateAsync({
         id,
-        title,
+        title: title.trim() === "" ? "Untitled Form" : title,
         description,
         slug,
         visibility,
@@ -789,7 +815,7 @@ export default function BuilderPage() {
               handleDragReorder={handleDragReorder}
               handleDeleteField={handleDeleteField}
               handleUpdateField={handleUpdateField}
-              saveForm={saveForm}
+              saveForm={saveFormDebounced}
               responses={activeResponses}
               isResponsesLoading={isResponsesLoading && !localForm}
               handleExportCSV={handleExportCSV}
@@ -919,7 +945,7 @@ export default function BuilderPage() {
                 handleDragReorder={handleDragReorder}
                 handleDeleteField={handleDeleteField}
                 handleUpdateField={handleUpdateField}
-                saveForm={saveForm}
+                saveForm={saveFormDebounced}
                 responses={activeResponses}
                 isResponsesLoading={isResponsesLoading && !localForm}
                 handleExportCSV={handleExportCSV}
