@@ -114,4 +114,26 @@ The services will start on:
 4. **Themes presets & AI Theme Engine**: Toggle built-in themes (Minimal, Modern SaaS, Dark, Corporate, Gradient) or write a prompt like *"neon retro style"* to generate colors and border radiuses.
 5. **Responses Grid & CSV Export**: Check raw submission lists and compile custom CSV downloads.
 6. **Recharts Analytics & Gemini insights**: Inspect total views, response rates, conversion rate indicators, and visual charts. Click "Analyze Feedbacks" to prompt Gemini to compile a report detailing summaries, sentiments, keywords, common complaints, and recommendations based on submissions.
-7. **Embed Settings & mobile sharing**: Copy iframe embedding scripts, script tag SDK loaders, or scan dynamically generated QR codes.
+7. **Embed Settings & Mobile Sharing**: Copy iframe embedding scripts, script tag SDK loaders, or scan dynamically generated QR codes.
+
+---
+
+## 🛠️ Production-Grade Enhancements & Fixes
+
+1. **Robust Custom Slugs & Validation**:
+   - Built-in validation that avoids dash-only slugs (like `----`).
+   - Resilient handling of network/server connection issues (displays a fallback warning instead of falsely claiming a slug is "already taken").
+   - Decoupled from global query error cache traps to prevent random error toasts on unused slugs.
+2. **On-Demand Telegram Syncing**:
+   - Seamless Telegram bot linkage that polls only on-demand when the user requests it.
+   - Dynamic button indicators showing the exact state (pulsing dot with `Listening...` between ticks, spinning loader with `Checking...` during fetch queries).
+   - Configured with a 60-second connection timeout safety mechanism to prevent infinite polling, falling back to a structured connection error alert.
+3. **Allowed Embed Domains Refactoring**:
+   - Supports up to 4 distinct domain restriction fields with independent validation.
+   - Features intelligent auto-sanitization on input blur: automatically strips protocols (`http://` / `https://`), paths, query strings, and trailing slashes to isolate the correct domain/hostname.
+4. **Keyboard Editing Preservation**:
+   - Prevents global workspace builder keyboard shortcuts (like `Undo/Redo` via `Ctrl+Z` / `Ctrl+Y`) from hijacking native text input edits.
+5. **Radix Confirmation Overlays**:
+   - Built-in Radix-powered `ConfirmationPopover` triggers to prevent accidental unlisting of active public forms.
+6. **Enhanced Route Guards**:
+   - Added validation check to the public form route to ensure unlisted/draft forms are not visible even if cached in local storage.
