@@ -94,8 +94,21 @@ export function DashboardSidebar({
     });
   }
 
+  const bottomItems = [
+    {
+      label: "Shortcuts [Ctrl + Space]",
+      icon: Keyboard,
+      onClick: showShortcutsHelp,
+    },
+    {
+      label: t("navDocs"),
+      icon: Code,
+      onClick: () => window.open(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`)
+    },
+  ];
+
   return (
-    <aside className="hidden md:flex md:w-20 bg-sidebar border-r border-border flex-col justify-between shrink-0 transition-all duration-200">
+    <aside className="hidden md:flex md:w-16 bg-sidebar border-r border-border flex-col justify-between shrink-0 transition-all duration-200">
       <div className="flex flex-col h-full justify-between">
         <div>
           {/* Brand header - same height as fixed headers (h-16) */}
@@ -104,7 +117,7 @@ export function DashboardSidebar({
           </div>
 
           {/* Nav Links */}
-          <nav className="p-4 space-y-2">
+          <nav className="p-3 space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -116,7 +129,7 @@ export function DashboardSidebar({
                     >
                       <Link
                         href={item.href}
-                        className={`group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-sm font-semibold transition-all ${
+                        className={`group relative flex items-center justify-center h-10 mx-auto rounded-xl text-sm font-semibold transition-all ${
                           item.active
                             ? "bg-primary/10 text-primary"
                             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -134,75 +147,39 @@ export function DashboardSidebar({
                 </Tooltip>
               );
             })}
-
-            {/* Create Form Button (opens Modal) */}
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
-                <motion.div
-                  whileHover={{ scale: 1.05, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
-                  whileTap={{ scale: 0.95, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-                >
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => setIsCreateModalOpen(true)}
-                    className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-muted-foreground hover:bg-accent hover:text-accent-foreground p-0"
-                  >
-                    <PlusCircle className="h-[22px] w-[22px] shrink-0 transition-colors duration-200 group-hover:text-primary" />
-                  </Button>
-                </motion.div>
-              </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={14}>{t("newForm")} [N]</TooltipContent>
-            </Tooltip>
           </nav>
         </div>
 
         {/* Sticky Bottom Menus */}
-        <div className="p-4 border-t border-border space-y-2">
-          {/* Keyboard Shortcuts */}
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <motion.div
-                whileHover={{ scale: 1.05, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
-                whileTap={{ scale: 0.95, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-              >
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={showShortcutsHelp}
-                  className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-muted-foreground hover:bg-accent hover:text-accent-foreground p-0"
-                >
-                  <Keyboard className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
-                </Button>
-              </motion.div>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={14}>Shortcuts [Ctrl + Space]</TooltipContent>
-          </Tooltip>
-
-          {/* API Docs */}
-          <Tooltip delayDuration={0}>
-            <TooltipTrigger asChild>
-              <motion.div
-                whileHover={{ scale: 1.05, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
-                whileTap={{ scale: 0.95, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-              >
-                <a
-                  href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group relative flex items-center justify-center h-10 w-12 mx-auto rounded-xl text-sm font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all"
-                >
-                  <Code className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
-                </a>
-              </motion.div>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={14}>{t("navDocs")}</TooltipContent>
-          </Tooltip>
+        <div className="p-3 pb-0 space-y-2">
+          {bottomItems.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <Tooltip key={idx} delayDuration={0}>
+                <TooltipTrigger asChild>
+                  <motion.div
+                    whileHover={{ scale: 1.05, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                    whileTap={{ scale: 0.95, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+                  >
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={item.onClick}
+                      className="group p-3 relative flex items-center justify-center mx-auto rounded-xl text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    >
+                      <Icon className="h-5 w-5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
+                    </Button>
+                  </motion.div>
+                </TooltipTrigger>
+                <TooltipContent side="right" sideOffset={14}>{item.label}</TooltipContent>
+              </Tooltip>
+            );
+          })}
         </div>
       </div>
 
       {/* User profile footer */}
-      <div className="p-4 border-t border-border flex flex-col items-center justify-center shrink-0 relative">
+      <div className="p-4 flex flex-col items-center justify-center shrink-0 relative">
         <Popover open={isUserPopoverOpen} onOpenChange={setIsUserPopoverOpen}>
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>

@@ -38,10 +38,18 @@ export function ColorPicker({ label, value, onChange, onComplete }: ColorPickerP
     setLocalVal(value);
   }, [value]);
 
+  const onChangeRef = React.useRef(onChange);
+  const onCompleteRef = React.useRef(onComplete);
+
+  React.useEffect(() => {
+    onChangeRef.current = onChange;
+    onCompleteRef.current = onComplete;
+  }, [onChange, onComplete]);
+
   // Create a throttled parent update function, preserved across renders
   const throttledOnChange = React.useRef(
     throttle((val: string) => {
-      onChange(val);
+      onChangeRef.current(val);
     }, 60) // 60ms throttle provides super smooth UI dragging (approx 16-17 updates/sec)
   );
 
@@ -52,7 +60,7 @@ export function ColorPicker({ label, value, onChange, onComplete }: ColorPickerP
 
   const handleBlur = () => {
     if (localVal !== value) {
-      onComplete(localVal);
+      onCompleteRef.current(localVal);
     }
   };
 

@@ -50,8 +50,8 @@ app.get("/api/v1/forms/slug/:slug", async (req, res) => {
       return res.status(404).json({ error: "Form not found" });
     }
 
-    if (form.visibility === "draft") {
-      return res.status(403).json({ error: "Draft forms are not accessible publicly." });
+    if (form.visibility !== "public") {
+      return res.status(403).json({ error: "This form is not public." });
     }
 
     // Increment view count asynchronously
@@ -60,7 +60,14 @@ app.get("/api/v1/forms/slug/:slug", async (req, res) => {
       formId: form.id,
     }).catch(err => console.error("Failed recording REST view:", err));
 
-    res.json(form);
+    // Return published version
+    res.json({
+      ...form,
+      title: form.publishedTitle || form.title,
+      description: form.publishedDescription || form.description,
+      schemaJson: form.publishedSchemaJson || form.schemaJson,
+      themeJson: form.publishedThemeJson || form.themeJson,
+    });
   } catch (err) {
     res.status(500).json({ error: "Internal server error" });
   }
@@ -88,12 +95,13 @@ app.post("/api/v1/forms/:formId/submissions", async (req, res) => {
       return res.status(404).json({ error: "Form not found" });
     }
 
-    if (form.visibility === "draft") {
-      return res.status(403).json({ error: "Draft forms are not accepting submissions" });
+    if (form.visibility !== "public") {
+      return res.status(403).json({ error: "This form is not public and does not accept submissions." });
     }
 
-    // Dynamic Zod Validation
-    const fields = (form.schemaJson as any).fields || [];
+    // Dynamic Zod Validation against published fields
+    const schemaData = (form.publishedSchemaJson || form.schemaJson) as any;
+    const fields = schemaData.fields || [];
     const validator = buildSubmissionValidator(fields);
     const parsedAnswers = validator.parse(answersJson);
 

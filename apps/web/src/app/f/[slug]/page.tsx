@@ -281,16 +281,16 @@ export default function PublicFormPage() {
 
   // Handle visibility error blocks
   if (error || !form) {
-    const isDraftError = error?.message?.includes("draft");
+    const isNotPublicError = error?.message?.includes("not public") || error?.message?.includes("draft") || (form && form.visibility !== "public");
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6 gap-4 text-center">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <h1 className="font-outfit text-2xl font-bold text-foreground">
-          {isDraftError ? "Form is a Draft" : "Form Not Available"}
+          {isNotPublicError ? "This form is not public" : "Form Not Available"}
         </h1>
         <p className="text-muted-foreground max-w-sm text-sm">
-          {isDraftError
-            ? "This questionnaire is in draft mode and is not currently accepting submissions."
+          {isNotPublicError
+            ? "This form is not public. Create your own form."
             : "The form you are trying to reach does not exist or has been deleted by the owner."}
         </p>
       </div>

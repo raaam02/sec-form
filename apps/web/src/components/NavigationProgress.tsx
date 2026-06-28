@@ -63,6 +63,16 @@ export function NavigationProgress() {
       const target = (e.target as Element).closest("a");
       if (!target) return;
 
+      // Ignore links that don't open in the current window/tab
+      const linkTarget = target.getAttribute("target");
+      if (linkTarget && linkTarget !== "_self") return;
+
+      // Ignore download links
+      if (target.hasAttribute("download")) return;
+
+      // Ignore modified clicks (Ctrl, Cmd, Shift, right-click, etc.)
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+
       const href = target.getAttribute("href");
       if (!href) return;
 

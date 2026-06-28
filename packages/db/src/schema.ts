@@ -95,7 +95,11 @@ export const forms = pgTable(
     schemaJson: jsonb("schemaJson").notNull(), // Form fields setup
     themeJson: jsonb("themeJson").notNull(),   // Colors, fonts, radius
     isPublished: boolean("isPublished").default(false).notNull(), // true if public/unlisted
-    visibility: text("visibility").default("draft").notNull(), // draft, public, unlisted
+    visibility: text("visibility").default("unlisted").notNull(), // public, unlisted
+    publishedTitle: text("publishedTitle"),
+    publishedDescription: text("publishedDescription"),
+    publishedSchemaJson: jsonb("publishedSchemaJson"),
+    publishedThemeJson: jsonb("publishedThemeJson"),
     createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
     updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
   },

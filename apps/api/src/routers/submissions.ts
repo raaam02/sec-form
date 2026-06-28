@@ -41,16 +41,16 @@ export const submissionsRouter = router({
         });
       }
 
-      // Check visibility
-      if (form.visibility === "draft") {
+      // Check visibility: only public forms accept submissions
+      if (form.visibility !== "public") {
         throw new TRPCError({
           code: "FORBIDDEN",
-          message: "This form is in draft mode and is not accepting responses.",
+          message: "This form is not public and does not accept responses.",
         });
       }
 
-      // 3. Compile validation Zod schema and check answers
-      const schemaData = form.schemaJson as any;
+      // 3. Compile validation Zod schema and check answers (against published schema)
+      const schemaData = (form.publishedSchemaJson || form.schemaJson) as any;
       const fields = schemaData.fields || [];
       
       try {

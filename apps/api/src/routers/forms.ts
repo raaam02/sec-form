@@ -216,6 +216,37 @@ export const formsRouter = router({
       return updatedForm;
     }),
 
+  publish: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ input, ctx }) => {
+      const form = await ctx.db.query.forms.findFirst({
+        where: and(eq(forms.id, input.id), eq(forms.userId, ctx.user.id)),
+      });
+
+      if (!form) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Form not found",
+        });
+      }
+
+      const [updatedForm] = await ctx.db
+        .update(forms)
+        .set({
+          publishedTitle: form.title,
+          publishedDescription: form.description,
+          publishedSchemaJson: form.schemaJson,
+          publishedThemeJson: form.themeJson,
+          isPublished: true,
+          visibility: "public",
+          updatedAt: new Date(),
+        })
+        .where(eq(forms.id, input.id))
+        .returning();
+
+      return updatedForm;
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ input, ctx }) => {
@@ -236,9 +267,17 @@ export const formsRouter = router({
 
   listExplore: publicProcedure.query(async ({ ctx }) => {
     // Return published public forms (unlisted is excluded)
-    return ctx.db.query.forms.findMany({
+    const activeForms = await ctx.db.query.forms.findMany({
       where: and(eq(forms.isPublished, true), eq(forms.visibility, "public")),
       orderBy: (forms, { desc }) => [desc(forms.createdAt)],
     });
+
+    return activeForms.map((f) => ({
+      ...f,
+      title: f.publishedTitle || f.title,
+      description: f.publishedDescription || f.description,
+      schemaJson: f.publishedSchemaJson || f.schemaJson,
+      themeJson: f.publishedThemeJson || f.themeJson,
+    }));
   }),
 });

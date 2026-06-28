@@ -12,7 +12,8 @@ import {
   Globe, 
   EyeOff, 
   Lock,
-  Keyboard
+  Keyboard,
+  Upload
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -27,6 +28,9 @@ interface BuilderHeaderProps {
   handleUpdateVisibility: (mode: "draft" | "public" | "unlisted") => void;
   setIsShareModalOpen: (open: boolean) => void;
   publicFormUrl: string;
+  hasUnpublishedChanges: boolean;
+  handlePublish: () => void;
+  isPublishing: boolean;
 }
 
 export function BuilderHeader({
@@ -37,6 +41,9 @@ export function BuilderHeader({
   handleUpdateVisibility,
   setIsShareModalOpen,
   publicFormUrl,
+  hasUnpublishedChanges,
+  handlePublish,
+  isPublishing,
 }: BuilderHeaderProps) {
   const t = useTranslations("Builder");
   const showShortcutsHelp = useGlobalShortcutHelp();
@@ -66,16 +73,15 @@ export function BuilderHeader({
         </Link>
         <div className="min-w-0">
           <h1 className="font-outfit text-base font-bold text-foreground truncate max-w-[180px] sm:max-w-xs md:max-w-md">{title || t("canvasTitlePlaceholder")}</h1>
-          <p className="text-muted-foreground text-[10px] truncate max-w-[180px] sm:max-w-xs md:max-w-md mt-0.5">{description || t("canvasDescPlaceholder")}</p>
         </div>
       </div>
 
       {/* Share actions & Save indicators */}
       <div className="flex items-center gap-3 shrink-0">
-        {visibility === "public" && (
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/20 text-amber-700 dark:text-amber-500 rounded-lg text-[10px] font-bold tracking-wider animate-pulse select-none">
+        {hasUnpublishedChanges && (
+          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/20 text-amber-700 dark:text-amber-500 rounded-lg text-[10px] font-bold tracking-wider select-none">
             <span className="h-1.5 w-1.5 bg-amber-500 rounded-full shrink-0" />
-            Editing Live Public Form
+            Unpublished Changes
           </div>
         )}
         {/* Continuous saving indicator */}
@@ -96,7 +102,7 @@ export function BuilderHeader({
         </div>
 
         {/* Visibility Dropdown Selector */}
-        <div className="relative">
+        {/* <div className="relative">
           <Button
             variant="outline"
             size="sm"
@@ -104,7 +110,7 @@ export function BuilderHeader({
             className="h-9 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-bold text-muted-foreground transition-colors"
           >
             {getVisibilityIcon(visibility)}
-            <span className="capitalize hidden sm:inline">{visibility}</span>
+            <span className="capitalize hidden sm:inline">{visibility === "draft" ? "unlisted" : visibility}</span>
             <ChevronDown className="h-3 w-3 text-muted-foreground" />
           </Button>
 
@@ -112,7 +118,7 @@ export function BuilderHeader({
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowVisibilityDropdown(false)} />
               <div className="absolute right-0 mt-2 z-50 w-40 rounded-xl border border-border bg-popover text-popover-foreground p-1.5 shadow-xl ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-150">
-                {(["draft", "public", "unlisted"] as const).map((mode) => (
+                {(["public", "unlisted"] as const).map((mode) => (
                   <button
                     key={mode}
                     onClick={() => {
@@ -135,7 +141,7 @@ export function BuilderHeader({
               </div>
             </>
           )}
-        </div>
+        </div> */}
 
         {/* Share Button (triggers modal) */}
         {(visibility === "public" || visibility === "unlisted") && (
@@ -160,7 +166,8 @@ export function BuilderHeader({
           <TooltipTrigger asChild>
             <Button
               size="sm"
-              className="h-9 items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-sm transition-colors"
+              variant="outline"
+              className="h-9 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-bold text-muted-foreground transition-colors"
               asChild
             >
               <a href={publicFormUrl} target="_blank" rel="noopener noreferrer">
@@ -170,6 +177,30 @@ export function BuilderHeader({
             </Button>
           </TooltipTrigger>
           <TooltipContent>Preview Form [Ctrl + P]</TooltipContent>
+        </Tooltip>
+
+        {/* Publish Button */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              size="sm"
+              onClick={handlePublish}
+              disabled={isPublishing}
+              className={`h-9 items-center gap-1.5 rounded-xl text-xs font-bold transition-all relative ${
+                hasUnpublishedChanges
+                  ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.35)]"
+                  : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              }`}
+            >
+              {isPublishing ? (
+                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Upload className="h-3.5 w-3.5" />
+              )}
+              <span>Publish</span>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Publish changes to live form</TooltipContent>
         </Tooltip>
       </div>
     </header>

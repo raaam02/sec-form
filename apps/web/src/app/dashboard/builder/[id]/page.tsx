@@ -109,7 +109,7 @@ export default function BuilderPage() {
   // Settings state
   const [hasInitialized, setHasInitialized] = useState(false);
   const [slug, setSlug] = useState("");
-  const [visibility, setVisibility] = useState<"draft" | "public" | "unlisted">("draft");
+  const [visibility, setVisibility] = useState<"draft" | "public" | "unlisted">("unlisted");
   const [layoutMode, setLayoutMode] = useState<"standard" | "single_field" | "custom_steps">("single_field");
   const [telegramEnabled, setTelegramEnabled] = useState(false);
   const [telegramChatId, setTelegramChatId] = useState("");
@@ -321,11 +321,6 @@ export default function BuilderPage() {
     setSaveStatus("saving");
     
     let nextVisibility = visibility;
-    if (visibility === "public" || visibility === "unlisted") {
-      nextVisibility = "draft";
-      setVisibility("draft");
-      toast.info("Form reverted to draft due to live edits. Please publish again to make changes public.");
-    }
     
     if (isDemo) {
       try {
@@ -415,6 +410,101 @@ export default function BuilderPage() {
       }
     };
   }, []);
+
+  const publishFormMutation = trpcAny.forms.publish.useMutation();
+  const [isPublishing, setIsPublishing] = useState(false);
+
+  const hasUnpublishedChanges = React.useMemo(() => {
+    if (!form) return false;
+    
+    // Check if never published
+    if (!form.publishedSchemaJson || !form.isPublished) return true;
+    
+    // Compare title
+    if (title !== form.publishedTitle) return true;
+    
+    // Compare description
+    if ((description || "") !== (form.publishedDescription || "")) return true;
+    
+    // Compare schema
+    const currentSchema = {
+      fields,
+      layout: { mode: layoutMode },
+      telegram: {
+        enabled: telegramEnabled,
+        chatId: telegramChatId || undefined,
+        chatName: telegramChatName || undefined,
+      },
+      allowedDomains
+    };
+    
+    // Compare fields
+    if (JSON.stringify(currentSchema.fields || []) !== JSON.stringify((form.publishedSchemaJson as any)?.fields || [])) return true;
+    
+    // Compare layout mode
+    if ((currentSchema.layout?.mode || "standard") !== ((form.publishedSchemaJson as any)?.layout?.mode || "standard")) return true;
+    
+    // Compare telegram config
+    const curTel = currentSchema.telegram || {};
+    const pubTel = (form.publishedSchemaJson as any)?.telegram || {};
+    if (!!curTel.enabled !== !!pubTel.enabled) return true;
+    if ((curTel.chatId || "") !== (pubTel.chatId || "")) return true;
+    if ((curTel.chatName || "") !== (pubTel.chatName || "")) return true;
+    
+    // Compare allowed domains
+    const curDomains = Array.isArray(currentSchema.allowedDomains) ? currentSchema.allowedDomains : [];
+    const pubDomains = Array.isArray((form.publishedSchemaJson as any)?.allowedDomains) ? (form.publishedSchemaJson as any).allowedDomains : [];
+    if (curDomains.length !== pubDomains.length) return true;
+    for (let i = 0; i < curDomains.length; i++) {
+      if (curDomains[i] !== pubDomains[i]) return true;
+    }
+    
+    // Compare theme
+    const currentThemeStr = JSON.stringify(activeTheme);
+    const publishedThemeStr = JSON.stringify(form.publishedThemeJson);
+    if (currentThemeStr !== publishedThemeStr) return true;
+    
+    return false;
+  }, [
+    form, 
+    title, 
+    description, 
+    fields, 
+    layoutMode, 
+    telegramEnabled, 
+    telegramChatId, 
+    telegramChatName, 
+    allowedDomains, 
+    activeTheme
+  ]);
+
+  const handlePublish = async () => {
+    if (isDemo) {
+      toast.info("Publishing is mocked in Demo mode!");
+      return;
+    }
+    setIsPublishing(true);
+    try {
+      // Force save current local changes immediately
+      await saveForm(fields, activeTheme, layoutMode);
+      
+      // Call publish mutation
+      await publishFormMutation.mutateAsync({ id });
+      
+      // Update local visibility state
+      setVisibility("public");
+      
+      // Refetch and invalidate
+      await utils.forms.get.invalidate({ id });
+      await utils.forms.list.invalidate();
+      
+      toast.success("Form published successfully! All changes are now live.");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to publish form");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
   const handleAddField = (type: FormField["type"]) => {
     const newField: FormField = {
@@ -804,6 +894,9 @@ export default function BuilderPage() {
         handleUpdateVisibility={handleUpdateVisibility}
         setIsShareModalOpen={setIsShareModalOpen}
         publicFormUrl={publicFormUrl}
+        hasUnpublishedChanges={hasUnpublishedChanges}
+        handlePublish={handlePublish}
+        isPublishing={isPublishing}
       />
 
       {/* WORKSPACE AREA */}

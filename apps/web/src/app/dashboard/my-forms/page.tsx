@@ -72,7 +72,7 @@ export default function DashboardPage() {
   
   // Filters state
   const [searchQuery, setSearchQuery] = useState("");
-  const [visibilityFilter, setVisibilityFilter] = useState<"all" | "public" | "draft" | "unlisted">("all");
+  const [visibilityFilter, setVisibilityFilter] = useState<"all" | "public" | "unlisted">("all");
 
   const filteredForms = combinedForms?.filter((form) => {
     const matchesSearch = form.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -97,11 +97,7 @@ export default function DashboardPage() {
     setVisibilityFilter("public");
   }, "Filters");
 
-  useGlobalShortcut("filter-draft", "shift+3", "Filter: Draft", () => {
-    setVisibilityFilter("draft");
-  }, "Filters");
-
-  useGlobalShortcut("filter-unlisted", "shift+4", "Filter: Unlisted", () => {
+  useGlobalShortcut("filter-unlisted", "shift+3", "Filter: Unlisted", () => {
     setVisibilityFilter("unlisted");
   }, "Filters");
 
@@ -333,8 +329,7 @@ export default function DashboardPage() {
                     items={[
                       { value: "all", label: "All Forms", icon: Layers, shortcut: "Shift+1" },
                       { value: "public", label: "Public", icon: Globe, shortcut: "Shift+2" },
-                      { value: "draft", label: "Draft", icon: FileEdit, shortcut: "Shift+3" },
-                      { value: "unlisted", label: "Unlisted", icon: LinkIcon, shortcut: "Shift+4" },
+                      { value: "unlisted", label: "Unlisted", icon: LinkIcon, shortcut: "Shift+3" },
                     ]}
                     selectedValue={visibilityFilter}
                     onChange={(val) => setVisibilityFilter(val as any)}

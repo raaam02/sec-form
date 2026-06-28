@@ -302,16 +302,6 @@ export function BuilderCanvas({
               </div>
             </div>
 
-            {visibility === "public" && (
-              <div className="flex items-start gap-2.5 p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-800 dark:text-amber-400">
-                <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 shrink-0 mt-0.5" />
-                <div className="space-y-0.5 text-left">
-                  <p className="font-bold">You are editing a live public form</p>
-                  <p className="opacity-90">Any changes you make here will automatically revert the form to <strong>Draft</strong> mode to prevent displaying a half-edited form publicly.</p>
-                </div>
-              </div>
-            )}
-
             <Card className="border-border rounded-3xl bg-card/20 backdrop-blur-[1px] p-6 shadow-sm flex flex-col gap-5 relative">
               <div className="">
                 <input
@@ -372,8 +362,8 @@ export function BuilderCanvas({
             <form onSubmit={handleSaveSettings} className="backdrop-blur-[1px] p-4 rounded-3xl border border-border/70 space-y-5 flex flex-col gap-2 text-xs text-muted-foreground font-semibold">
               <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
                 <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-2">Visibility Mode</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(["draft", "public", "unlisted"] as const).map((mode) => (
+                <div className="grid grid-cols-2 gap-2">
+                  {(["public", "unlisted"] as const).map((mode) => (
                     <Button
                       key={mode}
                       type="button"
@@ -386,9 +376,8 @@ export function BuilderCanvas({
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground mt-2 font-normal leading-normal">
-                  {visibility === "draft" && "Draft forms are not accessible publicly and do not accept responses."}
-                  {visibility === "public" && "Public forms are visible in the explore page/gallery and accept responses."}
-                  {visibility === "unlisted" && "Unlisted forms accept responses, but are hidden from general explore listings."}
+                  {visibility === "public" && "Public forms are open for anyone to view and submit responses."}
+                  {visibility === "unlisted" && "Unlisted forms are private. Only the creator can view it; public submissions are disabled."}
                 </p>
               </div>
 
