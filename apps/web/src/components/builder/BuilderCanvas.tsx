@@ -1,29 +1,19 @@
 import React from "react";
-import {
-  AlertCircle, 
-  Settings,
-  Undo2,
-  Redo2,
-  FileText,
-  CheckCircle2,
-  Send,} from "lucide-react";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { Settings, Undo2, Redo2, FileText, Palette } from "lucide-react";
 import { FormField } from "@sec-form/validators";
 import { TabBar } from "../TabBar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
 import { useTheme } from "@/components/ThemeProvider";
-import { SortableFieldItem } from "./SortableFieldItem";
+import { FormCanvasTab } from "./FormCanvasTab";
+import { SettingsCanvasTab } from "./SettingsCanvasTab";
+import { ThemeCanvasTab } from "./ThemeCanvasTab";
 
 interface BuilderCanvasProps {
-  middleTab: "form" | "responses" | "analytics" | "settings";
-  setMiddleTab: (tab: "form" | "responses" | "analytics" | "settings") => void;
+  middleTab: "form" | "theme" | "responses" | "analytics" | "settings";
+  setMiddleTab: (tab: "form" | "theme" | "responses" | "analytics" | "settings") => void;
   title: string;
   setTitle: (title: string) => void;
   description: string;
@@ -65,6 +55,9 @@ interface BuilderCanvasProps {
   formId: string;
   allowedDomains?: string[];
   setAllowedDomains?: (domains: string[]) => void;
+  activeTheme: any;
+  setActiveTheme: (theme: any) => void;
+  pushToHistory?: (fields: FormField[], theme: any | null) => void;
 }
 
 export function BuilderCanvas({
@@ -102,9 +95,11 @@ export function BuilderCanvas({
   formId,
   allowedDomains,
   setAllowedDomains,
+  activeTheme,
+  setActiveTheme,
+  pushToHistory,
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
-  const tCommon = useTranslations("Common");
 
   const [allowedDomainsText, setAllowedDomainsText] = React.useState("");
   const [manualChatIdInput, setManualChatIdInput] = React.useState(telegramChatId || "");
@@ -129,59 +124,18 @@ export function BuilderCanvas({
       setAllowedDomains(parsed);
     }
   };
+
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
   const MIDDLE_TABS = [
-    { value: "form", label: t("tabBuild"), icon: FileText, iconColorClass: "text-indigo-500", shortcut: "ctrl+3" },
-    { value: "settings", label: "Settings", icon: Settings, iconColorClass: "text-rose-500", shortcut: "ctrl+6" }
+    { value: "form", label: t("tabBuild"), icon: FileText, iconColorClass: "text-indigo-500", shortcut: "ctrl+1" },
+    { value: "theme", label: t("tabTheme"), icon: Palette, iconColorClass: "text-purple-500", shortcut: "ctrl+2" },
+    { value: "settings", label: "Settings", icon: Settings, iconColorClass: "text-rose-500", shortcut: "ctrl+3" }
   ] as const;
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (active.id !== over?.id && over) {
-      const oldIndex = fields.findIndex((f) => f.id === active.id);
-      const newIndex = fields.findIndex((f) => f.id === over.id);
-      if (handleDragReorder) {
-        handleDragReorder(oldIndex, newIndex);
-      } else {
-        // Fallback or use standard logic if not provided
-        if (oldIndex < newIndex) {
-          for (let i = oldIndex; i < newIndex; i++) handleReorder(i, "down");
-        } else {
-          for (let i = oldIndex; i > newIndex; i--) handleReorder(i, "up");
-        }
-      }
-    }
-  }
-
   return (
-    <div className={`flex-1 flex flex-col overflow-hidden min-w-0 relative ${isDark ? "bg-black" : "bg-white"}`}>
-      {/* Theme-aware Noise Colored Background */}
-      <div
-        className="absolute inset-0 z-0 pointer-events-none"
-        style={{
-          backgroundColor: isDark ? "#000000" : "#ffffff",
-          backgroundImage: isDark
-            ? `
-              radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.3) 1px, transparent 0),
-              radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.25) 1px, transparent 0),
-              radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.2) 1px, transparent 0)
-            `
-            : `
-              radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.25) 1px, transparent 0),
-              radial-gradient(circle at 1px 1px, rgba(59, 130, 246, 0.22) 1px, transparent 0),
-              radial-gradient(circle at 1px 1px, rgba(236, 72, 153, 0.18) 1px, transparent 0)
-            `,
-          backgroundSize: "20px 20px, 30px 30px, 25px 25px",
-          backgroundPosition: "0 0, 10px 10px, 15px 5px",
-        }}
-      />
+    <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative bg-transparent">
       {/* Tabs header with integrated left/right actions */}
       <div className="hidden md:block">
         <TabBar
@@ -302,250 +256,57 @@ export function BuilderCanvas({
               </div>
             </div>
 
-            <Card className="border-border rounded-3xl bg-card/20 backdrop-blur-[1px] p-6 shadow-sm flex flex-col gap-5 relative">
-              <div className="">
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => {
-                    setTitle(e.target.value);
-                    saveForm(fields);
-                  }}
-                  className="w-full text-2xl font-bold font-outfit border-none focus:outline-none bg-transparent text-foreground border-b border-transparent focus:border-border pb-1 transition-colors"
-                  placeholder={t("canvasTitlePlaceholder")}
-                />
-                <input
-                  type="text"
-                  value={description}
-                  onChange={(e) => {
-                    setDescription(e.target.value);
-                    saveForm(fields);
-                  }}
-                  className="w-full text-sm text-muted-foreground border-none focus:outline-none bg-transparent border-b border-transparent focus:border-border mt-2 pb-1 transition-colors"
-                  placeholder={t("canvasDescPlaceholder")}
-                />
-              </div>
-
-              <div className="border-t border-border pt-6 space-y-4">
-                {fields.length === 0 ? (
-                  <div className="py-16 border border-dashed border-border rounded-2xl text-center text-muted-foreground text-sm">
-                    {t("canvasEmptyDesc")}
-                  </div>
-                ) : (
-                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-                    <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-                      {fields.map((field, index) => (
-                        <SortableFieldItem 
-                          key={field.id}
-                          field={field}
-                          index={index}
-                          selectedFieldId={selectedFieldId}
-                          setSelectedFieldId={setSelectedFieldId}
-                          handleUpdateField={handleUpdateField}
-                          handleDeleteField={handleDeleteField}
-                        />
-                      ))}
-                    </SortableContext>
-                  </DndContext>
-                )}
-              </div>
-            </Card>
+            <FormCanvasTab
+              title={title}
+              setTitle={setTitle}
+              description={description}
+              setDescription={setDescription}
+              fields={fields}
+              selectedFieldId={selectedFieldId}
+              setSelectedFieldId={setSelectedFieldId}
+              handleUpdateField={handleUpdateField}
+              handleDeleteField={handleDeleteField}
+              saveForm={(f) => saveForm(f)}
+              handleReorder={handleReorder}
+              handleDragReorder={handleDragReorder}
+            />
           </div>
         )}
 
-
+        {middleTab === "theme" && (
+          <div className="max-w-xl mx-auto space-y-6">
+            <ThemeCanvasTab
+              activeTheme={activeTheme}
+              setActiveTheme={setActiveTheme}
+              saveForm={saveForm}
+              pushToHistory={pushToHistory}
+              fields={fields}
+            />
+          </div>
+        )}
 
         {middleTab === "settings" && (
           <div className="max-w-xl mx-auto space-y-6">
-            {/* <h3 className="font-outfit font-bold text-foreground text-sm pb-2 border-b border-border">Visibility & Custom URL</h3> */}
-            
-            <form onSubmit={handleSaveSettings} className="backdrop-blur-[1px] p-4 rounded-3xl border border-border/70 space-y-5 flex flex-col gap-2 text-xs text-muted-foreground font-semibold">
-              <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-                <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-2">Visibility Mode</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(["public", "unlisted"] as const).map((mode) => (
-                    <Button
-                      key={mode}
-                      type="button"
-                      variant={visibility === mode ? "default" : "outline"}
-                      onClick={() => setVisibility(mode)}
-                      className={`h-9 w-full font-bold text-xs capitalize transition-colors rounded-xl`}
-                    >
-                      {mode}
-                    </Button>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 font-normal leading-normal">
-                  {visibility === "public" && "Public forms are open for anyone to view and submit responses."}
-                  {visibility === "unlisted" && "Unlisted forms are private. Only the creator can view it; public submissions are disabled."}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-                <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-2">Form Display Layout</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { mode: "standard", label: "Standard (1 Page)" },
-                    { mode: "single_field", label: "Single Field per Step" },
-                    { mode: "custom_steps", label: "Custom Steps" }
-                  ].map((option) => (
-                    <Button
-                      key={option.mode}
-                      type="button"
-                      variant={layoutMode === option.mode ? "default" : "outline"}
-                      onClick={() => setLayoutMode && setLayoutMode(option.mode as any)}
-                      className={`h-9 w-full font-bold text-xs transition-colors rounded-xl`}
-                    >
-                      {option.label}
-                    </Button>
-                  ))}
-                </div>
-                <p className="text-xs text-muted-foreground mt-2 font-normal leading-normal">
-                  {layoutMode === "standard" && "All fields are displayed on a single page."}
-                  {layoutMode === "single_field" && "Each field gets its own separate page with Next/Back buttons."}
-                  {layoutMode === "custom_steps" && "Drag and drop 'Step Break' fields into the canvas to split the form into custom pages."}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-                <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Custom Form URL Slug</label>
-                <div className="flex items-center rounded-xl border border-border overflow-hidden">
-                  <span className="text-xs font-mono text-muted-foreground px-3 bg-muted/40 h-9 flex items-center border-r border-border">/f/</span>
-                  <Input
-                    type="text"
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                    className="flex-1 h-9 px-3 bg-transparent border-0 text-xs text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-                    placeholder="custom-slug"
-                    required
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground mt-1 font-normal">Shorthand slug name. Letters, numbers, and dashes only.</p>
-              </div>
-
-              {/* Telegram Notifications */}
-              <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Telegram Notifications</label>
-                    <p className="text-xs text-muted-foreground font-normal leading-normal">
-                      Receive real-time notifications in your own Telegram chats when answers are submitted.
-                    </p>
-                  </div>
-                  <Switch
-                    checked={telegramEnabled}
-                    onCheckedChange={setTelegramEnabled}
-                  />
-                </div>
-
-                {telegramEnabled && (
-                  <div className="space-y-4 mt-2">
-                    {telegramChatId ? (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
-                          <CheckCircle2 className="h-4 w-4 shrink-0" />
-                          <div>
-                            <div className="text-[10px] font-bold">Connected to Telegram</div>
-                            <div className="text-[9px] font-normal opacity-90">
-                              Linked chat: <span className="font-semibold">{telegramChatName || telegramChatId}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          onClick={() => {
-                            setTelegramChatId("");
-                            setTelegramChatName("");
-                          }}
-                          className="h-8 px-3 text-[10px] font-bold rounded-xl"
-                        >
-                          Disconnect Telegram
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="space-y-5">
-                        <div className="border-t border-border/60 my-2" />
-
-                        <div className="space-y-2">
-                          <div className="text-xs font-bold text-muted-foreground">
-                            Option 1: Quick Connect (Simplest)
-                            <p className="mt-0.5 text-xs text-muted-foreground font-normal leading-normal">
-                              Click the button below to open our Telegram Bot, then press <strong>Start</strong> to link this form.
-                            </p>
-                          </div>
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || "FormuAIBot";
-                              window.open(`https://t.me/${botName}?start=${formId}`, "_blank");
-                            }}
-                            className="h-8 px-3 font-bold text-[10px] uppercase rounded-xl flex items-center justify-center gap-1.5"
-                          >
-                            <Send className="h-3.5 w-3.5" />
-                            Connect Telegram Bot
-                          </Button>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div className="text-xs font-bold text-muted-foreground">
-                            Option 2: Manual Chat ID Connection
-                            <p className="mt-0.5 text-xs text-muted-foreground font-normal leading-normal">
-                              Or enter your Telegram Chat ID manually. You can get your Chat ID by messaging the bot <code>@userinfobot</code> on Telegram.
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Input
-                              type="text"
-                              value={manualChatIdInput}
-                              onChange={(e) => setManualChatIdInput(e.target.value)}
-                              placeholder="e.g. 535123456"
-                              className="h-9 px-3 bg-muted/50 text-xs text-foreground rounded-xl flex-1"
-                            />
-                            <Button
-                              type="button"
-                              onClick={() => {
-                                if (manualChatIdInput.trim()) {
-                                  setTelegramChatId(manualChatIdInput.trim());
-                                  setTelegramChatName("Manual Input");
-                                }
-                              }}
-                              disabled={!manualChatIdInput.trim()}
-                              className="h-9 px-4 font-bold text-[10px] uppercase rounded-xl shrink-0"
-                            >
-                              Link Chat
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-                <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Allowed Embed Domains</label>
-                <Input
-                  type="text"
-                  value={allowedDomainsText}
-                  onChange={(e) => handleDomainsChange(e.target.value)}
-                  className="h-9 px-3 bg-transparent text-xs text-foreground rounded-xl"
-                  placeholder="e.g. mywebsite.com, anotherdomain.com"
-                />
-                <p className="text-xs text-muted-foreground mt-1 font-normal leading-normal">
-                  Restrict where your form can be embedded. Enter a comma-separated list of domains. Leave empty to allow embedding anywhere.
-                </p>
-              </div>
-
-              <div className="flex gap-3 justify-end pt-4">
-                <Button
-                  type="submit"
-                  className="h-9 px-4 font-semibold text-xs rounded-xl"
-                >
-                  {tCommon("save")}
-                </Button>
-              </div>
-            </form>
+            <SettingsCanvasTab
+              visibility={visibility}
+              setVisibility={setVisibility}
+              layoutMode={layoutMode}
+              setLayoutMode={setLayoutMode}
+              slug={slug}
+              setSlug={setSlug}
+              telegramEnabled={telegramEnabled}
+              setTelegramEnabled={setTelegramEnabled}
+              telegramChatId={telegramChatId}
+              setTelegramChatId={setTelegramChatId}
+              telegramChatName={telegramChatName}
+              setTelegramChatName={setTelegramChatName}
+              formId={formId}
+              allowedDomainsText={allowedDomainsText}
+              handleDomainsChange={handleDomainsChange}
+              manualChatIdInput={manualChatIdInput}
+              setManualChatIdInput={setManualChatIdInput}
+              handleSaveSettings={handleSaveSettings}
+            />
           </div>
         )}
       </div>

@@ -16,6 +16,7 @@ import { BuilderSidebarLeft } from "@/components/builder/BuilderSidebarLeft";
 import { BuilderCanvas } from "@/components/builder/BuilderCanvas";
 import { BuilderSidebarRight } from "@/components/builder/BuilderSidebarRight";
 import { ShareModal } from "@/components/builder/ShareModal";
+import { NoiseBackground } from "@/components/builder/NoiseBackground";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { LimitModal } from "@/components/builder/LimitModal";
@@ -38,8 +39,7 @@ export default function BuilderPage() {
   const isDemo = session?.user?.email === "demo@demo.com";
 
   // Sub-tabs states for the three panels
-  const [leftTab, setLeftTab] = useState<"builder" | "themes">("builder");
-  const [middleTab, setMiddleTab] = useState<"form" | "responses" | "analytics" | "settings">("form");
+  const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings">("form");
   const [rightTab, setRightTab] = useState<"preview" | "embed">("preview");
 
   const [localForm, setLocalForm] = useState<LocalForm | null>(null);
@@ -118,7 +118,7 @@ export default function BuilderPage() {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showContactAdminModal, setShowContactAdminModal] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState<"build" | "theme" | "preview" | "embed" | "settings">("build");
-  const [isLeftSidebarExpanded, setIsLeftSidebarExpanded] = useState(false);
+  const [isLeftSidebarExpanded, setIsLeftSidebarExpanded] = useState(true);
 
   useEffect(() => {
     if (activeMobileTab === "preview" || activeMobileTab === "embed") {
@@ -127,16 +127,22 @@ export default function BuilderPage() {
   }, [rightTab]);
 
   useEffect(() => {
-    if (activeMobileTab === "build" || activeMobileTab === "theme") {
-      setActiveMobileTab(leftTab === "themes" ? "theme" : "build");
+    if (activeMobileTab === "build") {
+      setMiddleTab("form");
+    } else if (activeMobileTab === "theme") {
+      setMiddleTab("theme");
+    } else if (activeMobileTab === "settings") {
+      setMiddleTab("settings");
     }
-  }, [leftTab]);
+  }, [activeMobileTab]);
 
   useEffect(() => {
-    if (middleTab === "settings") {
-      setActiveMobileTab("settings");
-    } else if (middleTab === "form" && activeMobileTab === "settings") {
+    if (middleTab === "form") {
       setActiveMobileTab("build");
+    } else if (middleTab === "theme") {
+      setActiveMobileTab("theme");
+    } else if (middleTab === "settings") {
+      setActiveMobileTab("settings");
     }
   }, [middleTab]);
 
@@ -204,41 +210,23 @@ export default function BuilderPage() {
     setIsShareModalOpen(true);
   }, "Builder Tools");
 
-  useGlobalShortcut("preview-form", "ctrl+p", "Preview Form", () => {
-    setRightTab("preview");
-  }, "Builder Tools");
-
-  useGlobalShortcut("build-tab-1", "ctrl+1", "Build Canvas", () => {
-    setLeftTab("builder");
+  useGlobalShortcut("build-tab", "ctrl+1", "Build Canvas", () => {
     setMiddleTab("form");
   }, "Builder Navigation");
 
-  useGlobalShortcut("theme-tab", "ctrl+2", "Theme Presets", () => {
-    setLeftTab("themes");
+  useGlobalShortcut("theme-tab", "ctrl+2", "Theme Tab", () => {
+    setMiddleTab("theme");
   }, "Builder Navigation");
 
-  useGlobalShortcut("build-tab-3", "ctrl+3", "Build Canvas", () => {
-    setLeftTab("builder");
-    setMiddleTab("form");
-  }, "Builder Navigation");
-
-  useGlobalShortcut("responses-tab", "ctrl+4", "Submissions", () => {
-    setMiddleTab("responses");
-  }, "Builder Navigation");
-
-  useGlobalShortcut("insights-tab", "ctrl+5", "AI Insights", () => {
-    setMiddleTab("analytics");
-  }, "Builder Navigation");
-
-  useGlobalShortcut("settings-tab", "ctrl+6", "Settings", () => {
+  useGlobalShortcut("settings-tab", "ctrl+3", "Settings Tab", () => {
     setMiddleTab("settings");
   }, "Builder Navigation");
 
-  useGlobalShortcut("preview-tab", "ctrl+7", "Preview Mode", () => {
+  useGlobalShortcut("preview-tab", "ctrl+4", "Preview Mode", () => {
     setRightTab("preview");
   }, "Builder Navigation");
 
-  useGlobalShortcut("embed-tab", "ctrl+8", "Embed Mode", () => {
+  useGlobalShortcut("embed-tab", "ctrl+5", "Embed Mode", () => {
     setRightTab("embed");
   }, "Builder Navigation");
 
@@ -300,10 +288,9 @@ export default function BuilderPage() {
     const tab = searchParams.get("tab");
     if (tab) {
       if (tab === "build" || tab === "builder") {
-        setLeftTab("builder");
         setMiddleTab("form");
       } else if (tab === "theme" || tab === "themes") {
-        setLeftTab("themes");
+        setMiddleTab("theme");
       } else if (tab === "responses") {
         setMiddleTab("responses");
       } else if (tab === "analytics") {
@@ -883,7 +870,8 @@ export default function BuilderPage() {
   const publicFormUrl = `${hostOrigin}/f/${slug || activeForm?.slug}`;
 
   return (
-    <div className="h-full flex flex-col overflow-hidden text-foreground bg-transparent">
+    <div className="h-full flex flex-col overflow-hidden text-foreground bg-transparent relative isolate">
+      <NoiseBackground />
       
       {/* Top Fixed Header */}
       <BuilderHeader
@@ -904,25 +892,18 @@ export default function BuilderPage() {
       <div className="hidden md:flex flex-1 overflow-hidden min-h-0 bg-muted/20">
         <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
           
-          {/* PANEL A: LEFT SIDEBAR (Builder / Themes) */}
-          <ResizablePanel defaultSize="10" minSize="12" maxSize="20" className="flex flex-col">
+          {/* PANEL A: LEFT SIDEBAR (Builder) */}
+          <div className={`transition-all duration-300 ease-in-out border-r border-border bg-sidebar shrink-0 ${isLeftSidebarExpanded ? "w-64" : "w-14"}`}>
             <BuilderSidebarLeft
-              leftTab={leftTab}
-              setLeftTab={setLeftTab}
               focusedField={focusedField || null}
               handleUpdateField={handleUpdateField}
               handleAddField={handleAddField}
-              activeTheme={activeTheme}
-              setActiveTheme={setActiveTheme}
-              saveForm={saveForm}
-              pushToHistory={pushToHistory}
-              fields={fields}
+              isExpanded={isLeftSidebarExpanded}
+              setIsExpanded={setIsLeftSidebarExpanded}
             />
-          </ResizablePanel>
+          </div>
 
-          <ResizableHandle />
-
-          {/* PANEL B: MIDDLE CANVAS (Form Editor / Responses / Analytics / Settings) */}
+          {/* PANEL B: MIDDLE CANVAS (Form Editor / Theme / Settings) */}
           <ResizablePanel defaultSize="65" minSize="40" className="flex flex-col">
             <BuilderCanvas
               middleTab={middleTab}
@@ -971,6 +952,9 @@ export default function BuilderPage() {
               formId={id}
               allowedDomains={allowedDomains}
               setAllowedDomains={setAllowedDomains}
+              activeTheme={activeTheme}
+              setActiveTheme={setActiveTheme}
+              pushToHistory={pushToHistory}
             />
           </ResizablePanel>
 
@@ -1000,37 +984,13 @@ export default function BuilderPage() {
         {/* Mobile Viewport based on computed active tab */}
         <div className="flex-1 flex overflow-hidden min-h-0 relative">
           {activeMobileTab === "build" && (
-            <div className={`shrink-0 transition-all duration-300 ${isLeftSidebarExpanded ? "w-40" : "w-14"}`}>
+            <div className={`shrink-0 transition-all duration-300 ${isLeftSidebarExpanded ? "w-64" : "w-14"}`}>
               <BuilderSidebarLeft
-                leftTab={leftTab}
-                setLeftTab={setLeftTab}
                 focusedField={focusedField || null}
                 handleUpdateField={handleUpdateField}
                 handleAddField={handleAddField}
-                activeTheme={activeTheme}
-                setActiveTheme={setActiveTheme}
-                saveForm={saveForm}
-                pushToHistory={pushToHistory}
-                fields={fields}
                 isExpanded={isLeftSidebarExpanded}
                 setIsExpanded={setIsLeftSidebarExpanded}
-              />
-            </div>
-          )}
-
-          {activeMobileTab === "theme" && (
-            <div className="w-full h-full">
-              <BuilderSidebarLeft
-                leftTab={leftTab}
-                setLeftTab={setLeftTab}
-                focusedField={focusedField || null}
-                handleUpdateField={handleUpdateField}
-                handleAddField={handleAddField}
-                activeTheme={activeTheme}
-                setActiveTheme={setActiveTheme}
-                saveForm={saveForm}
-                pushToHistory={pushToHistory}
-                fields={fields}
               />
             </div>
           )}
@@ -1052,7 +1012,7 @@ export default function BuilderPage() {
             </div>
           )}
 
-          {(activeMobileTab === "build" || activeMobileTab === "settings") && (
+          {(activeMobileTab === "build" || activeMobileTab === "theme" || activeMobileTab === "settings") && (
             <div className="flex-1 flex flex-col min-w-0">
               <BuilderCanvas
                 middleTab={middleTab}
@@ -1101,6 +1061,9 @@ export default function BuilderPage() {
                 formId={id}
                 allowedDomains={allowedDomains}
                 setAllowedDomains={setAllowedDomains}
+                activeTheme={activeTheme}
+                setActiveTheme={setActiveTheme}
+                pushToHistory={pushToHistory}
               />
             </div>
           )}
@@ -1112,8 +1075,6 @@ export default function BuilderPage() {
             type="button"
             onClick={() => {
               setActiveMobileTab("build");
-              setMiddleTab("form");
-              setLeftTab("builder");
             }}
             className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
               activeMobileTab === "build" ? "text-primary" : "text-muted-foreground hover:text-foreground"
@@ -1127,8 +1088,6 @@ export default function BuilderPage() {
             type="button"
             onClick={() => {
               setActiveMobileTab("theme");
-              setMiddleTab("form");
-              setLeftTab("themes");
             }}
             className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
               activeMobileTab === "theme" ? "text-primary" : "text-muted-foreground hover:text-foreground"
