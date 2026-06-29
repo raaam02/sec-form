@@ -1,13 +1,13 @@
 import React from "react";
 import { motion } from "motion/react";
-import { 
-  Type, 
-  AlignLeft, 
-  Mail, 
-  Hash, 
-  List, 
-  CheckSquare, 
-  Star, 
+import {
+  Type,
+  AlignLeft,
+  Mail,
+  Hash,
+  List,
+  CheckSquare,
+  Star,
   Calendar,
   Clock,
   Phone,
@@ -97,17 +97,17 @@ export function BuilderSidebarLeft({
                   <TooltipTrigger asChild>
                     <motion.button
                       type="button"
-                      whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                      // whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
                       whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                       onClick={() => handleAddField(field.type)}
-                      className={`flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-card hover:bg-accent hover:text-accent-foreground transition-colors min-w-0 w-full ${
+                      className={`flex items-center justify-start gap-2 p-2.5 rounded-xl border border-border bg-card/50 hover:bg-accent/70 hover:text-accent-foreground transition-colors min-w-0 w-full ${
                         field.colSpan2 ? "col-span-full" : ""
                       }`}
                     >
                       <Icon className={`h-4 w-4 ${field.iconColor} shrink-0`} />
                       <span className="flex-1 justify-between items-center min-w-0 hidden @[120px]:flex text-left">
                         <span className="truncate mr-2">{field.label}</span>
-                        <kbd className="pointer-events-none select-none rounded border px-1.5 font-mono text-[10px] font-medium text-muted-foreground uppercase shrink-0">
+                        <kbd className="pointer-events-none select-none rounded border px-1.5 font-mono text-[11px] font-medium text-muted-foreground uppercase shrink-0">
                           {field.shortcut}
                         </kbd>
                       </span>

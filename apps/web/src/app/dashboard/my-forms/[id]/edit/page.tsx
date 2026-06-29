@@ -19,6 +19,8 @@ import { ShareModal } from "@/components/builder/ShareModal";
 import { NoiseBackground } from "@/components/builder/NoiseBackground";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { PanelImperativeHandle } from "react-resizable-panels";
+import { Eye } from "lucide-react";
 import { LimitModal } from "@/components/builder/LimitModal";
 import { ContactAdminModal } from "@/components/builder/ContactAdminModal";
 import { toast } from "sonner";
@@ -39,7 +41,7 @@ export default function BuilderPage() {
   const isDemo = session?.user?.email === "demo@demo.com";
 
   // Sub-tabs states for the three panels
-  const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings">("form");
+  const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">("form");
   const [rightTab, setRightTab] = useState<"preview" | "embed">("preview");
 
   const [localForm, setLocalForm] = useState<LocalForm | null>(null);
@@ -133,6 +135,8 @@ export default function BuilderPage() {
       setMiddleTab("theme");
     } else if (activeMobileTab === "settings") {
       setMiddleTab("settings");
+    } else if (activeMobileTab === "embed") {
+      setMiddleTab("embed");
     }
   }, [activeMobileTab]);
 
@@ -143,6 +147,8 @@ export default function BuilderPage() {
       setActiveMobileTab("theme");
     } else if (middleTab === "settings") {
       setActiveMobileTab("settings");
+    } else if (middleTab === "embed") {
+      setActiveMobileTab("embed");
     }
   }, [middleTab]);
 
@@ -222,12 +228,12 @@ export default function BuilderPage() {
     setMiddleTab("settings");
   }, "Builder Navigation");
 
-  useGlobalShortcut("preview-tab", "ctrl+4", "Preview Mode", () => {
-    setRightTab("preview");
+  useGlobalShortcut("embed-tab", "ctrl+4", "Embed Tab", () => {
+    setMiddleTab("embed");
   }, "Builder Navigation");
 
-  useGlobalShortcut("embed-tab", "ctrl+5", "Embed Mode", () => {
-    setRightTab("embed");
+  useGlobalShortcut("preview-toggle-tab", "ctrl+5", "Preview Mode", () => {
+    setRightTab("preview");
   }, "Builder Navigation");
 
   useEffect(() => {
@@ -294,7 +300,7 @@ export default function BuilderPage() {
       } else if (tab === "settings") {
         setMiddleTab("settings");
       } else if (tab === "embed") {
-        setRightTab("embed");
+        setMiddleTab("embed");
       }
     }
   }, [searchParams]);
@@ -888,94 +894,89 @@ export default function BuilderPage() {
 
       {/* WORKSPACE AREA */}
       {/* Desktop View (md and up) */}
-      <div className="hidden md:flex flex-1 overflow-hidden min-h-0 bg-muted/20">
-        <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
-          
-          {/* PANEL A: LEFT SIDEBAR (Builder) */}
-          <div className={`transition-all duration-300 ease-in-out border-r rounded-r-lg border-border bg-transparent backdrop-blur-[1px] shrink-0 ${isLeftSidebarExpanded ? "w-48" : "w-16"}`}>
-            <BuilderSidebarLeft
-              focusedField={focusedField || null}
-              handleUpdateField={handleUpdateField}
-              handleAddField={handleAddField}
-              isExpanded={isLeftSidebarExpanded}
-              setIsExpanded={setIsLeftSidebarExpanded}
-            />
-          </div>
+      <div className="hidden md:flex flex-1 overflow-hidden min-h-0 bg-muted/20 relative">
 
-          {/* PANEL B: MIDDLE CANVAS (Form Editor / Theme / Settings) */}
-          <ResizablePanel defaultSize="65" minSize="40" className="flex flex-col">
-            <BuilderCanvas
-              middleTab={middleTab}
-              setMiddleTab={setMiddleTab}
-              title={title}
-              setTitle={setTitle}
-              description={description}
-              setDescription={setDescription}
-              fields={fields}
-              selectedFieldId={selectedFieldId}
-              setSelectedFieldId={setSelectedFieldId}
-              layoutMode={layoutMode}
-              setLayoutMode={(mode: "standard" | "single_field" | "custom_steps") => {
-                setLayoutMode(mode);
-                saveForm(fields, activeTheme, mode);
-              }}
-              handleReorder={handleReorder}
-              handleDragReorder={handleDragReorder}
-              handleDeleteField={handleDeleteField}
-              handleUpdateField={handleUpdateField}
-              saveForm={saveFormDebounced}
-              responses={activeResponses}
-              isResponsesLoading={isResponsesLoading}
-              handleExportCSV={handleExportCSV}
-              analytics={activeAnalytics}
-              isAnalyticsLoading={isAnalyticsLoading}
-              aiInsights={aiInsights}
-              isInsightsGenerating={isInsightsGenerating}
-              insightsError={insightsError}
-              handleGenerateInsights={handleGenerateInsights}
-              visibility={visibility}
-              setVisibility={setVisibility}
-              slug={slug}
-              setSlug={setSlug}
-              handleSaveSettings={handleSaveSettings}
-              handleUndo={handleUndo}
-              handleRedo={handleRedo}
-              canUndo={formHistory.index > 0}
-              canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
-              telegramEnabled={telegramEnabled}
-              setTelegramEnabled={setTelegramEnabled}
-              telegramChatId={telegramChatId}
-              setTelegramChatId={setTelegramChatId}
-              telegramChatName={telegramChatName}
-              setTelegramChatName={setTelegramChatName}
-              formId={id}
-              allowedDomains={allowedDomains}
-              setAllowedDomains={setAllowedDomains}
-              activeTheme={activeTheme}
-              setActiveTheme={setActiveTheme}
-              pushToHistory={pushToHistory}
-            />
-          </ResizablePanel>
+        {/* PANEL A: LEFT SIDEBAR (Builder) */}
+        <div className={`transition-all duration-300 ease-in-out border-r rounded-r-lg border-border bg-transparent backdrop-blur-[1px] shrink-0 ${isLeftSidebarExpanded ? "w-48" : "w-16"}`}>
+          <BuilderSidebarLeft
+            focusedField={focusedField || null}
+            handleUpdateField={handleUpdateField}
+            handleAddField={handleAddField}
+            isExpanded={isLeftSidebarExpanded}
+            setIsExpanded={setIsLeftSidebarExpanded}
+          />
+        </div>
 
-          <ResizableHandle />
+        {/* PANEL B: MIDDLE CANVAS (Form Editor / Theme / Settings) */}
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          <BuilderCanvas
+            middleTab={middleTab}
+            setMiddleTab={setMiddleTab}
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            fields={fields}
+            selectedFieldId={selectedFieldId}
+            setSelectedFieldId={setSelectedFieldId}
+            layoutMode={layoutMode}
+            setLayoutMode={(mode: "standard" | "single_field" | "custom_steps") => {
+              setLayoutMode(mode);
+              saveForm(fields, activeTheme, mode);
+            }}
+            handleReorder={handleReorder}
+            handleDragReorder={handleDragReorder}
+            handleDeleteField={handleDeleteField}
+            handleUpdateField={handleUpdateField}
+            saveForm={saveFormDebounced}
+            responses={activeResponses}
+            isResponsesLoading={isResponsesLoading}
+            handleExportCSV={handleExportCSV}
+            analytics={activeAnalytics}
+            isAnalyticsLoading={isAnalyticsLoading}
+            aiInsights={aiInsights}
+            isInsightsGenerating={isInsightsGenerating}
+            insightsError={insightsError}
+            handleGenerateInsights={handleGenerateInsights}
+            visibility={visibility}
+            setVisibility={setVisibility}
+            slug={slug}
+            setSlug={setSlug}
+            handleSaveSettings={handleSaveSettings}
+            handleUndo={handleUndo}
+            handleRedo={handleRedo}
+            canUndo={formHistory.index > 0}
+            canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
+            telegramEnabled={telegramEnabled}
+            setTelegramEnabled={setTelegramEnabled}
+            telegramChatId={telegramChatId}
+            setTelegramChatId={setTelegramChatId}
+            telegramChatName={telegramChatName}
+            setTelegramChatName={setTelegramChatName}
+            formId={id}
+            allowedDomains={allowedDomains}
+            setAllowedDomains={setAllowedDomains}
+            activeTheme={activeTheme}
+            setActiveTheme={setActiveTheme}
+            pushToHistory={pushToHistory}
+            publicFormUrl={publicFormUrl}
+            hostOrigin={hostOrigin}
+          />
+        </div>
 
-          {/* PANEL C: RIGHT SIDEBAR (Preview / Embed) */}
-          <ResizablePanel defaultSize="25" minSize="25" maxSize="30" className="flex flex-col">
-            <BuilderSidebarRight
-              rightTab={rightTab}
-              setRightTab={setRightTab}
-              title={title}
-              description={description}
-              fields={fields}
-              activeTheme={activeTheme}
-              layoutMode={layoutMode}
-              publicFormUrl={publicFormUrl}
-              id={id}
-              hostOrigin={hostOrigin}
-            />
-          </ResizablePanel>
-
-        </ResizablePanelGroup>
+        {/* PANEL C: RIGHT SIDEBAR (Preview) */}
+        <div className="w-[320px] shrink-0 border-l border-border bg-sidebar flex flex-col">
+          <BuilderSidebarRight
+            title={title}
+            description={description}
+            fields={fields}
+            activeTheme={activeTheme}
+            layoutMode={layoutMode}
+            publicFormUrl={publicFormUrl}
+            id={id}
+            hostOrigin={hostOrigin}
+          />
+        </div>
       </div>
 
       {/* Mobile View (under md breakpoint) */}
@@ -994,7 +995,7 @@ export default function BuilderPage() {
             </div>
           )}
 
-          {(activeMobileTab === "preview" || activeMobileTab === "embed") && (
+          {activeMobileTab === "preview" && (
             <div className="w-full h-full">
               <BuilderSidebarRight
                 rightTab={rightTab}
@@ -1011,7 +1012,7 @@ export default function BuilderPage() {
             </div>
           )}
 
-          {(activeMobileTab === "build" || activeMobileTab === "theme" || activeMobileTab === "settings") && (
+          {(activeMobileTab === "build" || activeMobileTab === "theme" || activeMobileTab === "settings" || activeMobileTab === "embed") && (
             <div className="flex-1 flex flex-col min-w-0">
               <BuilderCanvas
                 middleTab={middleTab}
@@ -1063,6 +1064,8 @@ export default function BuilderPage() {
                 activeTheme={activeTheme}
                 setActiveTheme={setActiveTheme}
                 pushToHistory={pushToHistory}
+                publicFormUrl={publicFormUrl}
+                hostOrigin={hostOrigin}
               />
             </div>
           )}
@@ -1114,7 +1117,6 @@ export default function BuilderPage() {
             type="button"
             onClick={() => {
               setActiveMobileTab("embed");
-              setRightTab("embed");
             }}
             className={`flex flex-col items-center gap-1 text-[10px] font-bold transition-colors ${
               activeMobileTab === "embed" ? "text-primary" : "text-muted-foreground hover:text-foreground"

@@ -1,5 +1,5 @@
 import React from "react";
-import { Settings, Undo2, Redo2, FileText, Palette } from "lucide-react";
+import { Settings, Undo2, Redo2, FileText, Palette, Code } from "lucide-react";
 import { FormField } from "@sec-form/validators";
 import { TabBar } from "../TabBar";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,11 @@ import { useTheme } from "@/components/ThemeProvider";
 import { FormCanvasTab } from "./FormCanvasTab";
 import { SettingsCanvasTab } from "./SettingsCanvasTab";
 import { ThemeCanvasTab } from "./ThemeCanvasTab";
+import { EmbedCanvasTab } from "./EmbedCanvasTab";
 
 interface BuilderCanvasProps {
-  middleTab: "form" | "theme" | "responses" | "analytics" | "settings";
-  setMiddleTab: (tab: "form" | "theme" | "responses" | "analytics" | "settings") => void;
+  middleTab: "form" | "theme" | "responses" | "analytics" | "settings" | "embed";
+  setMiddleTab: (tab: "form" | "theme" | "responses" | "analytics" | "settings" | "embed") => void;
   title: string;
   setTitle: (title: string) => void;
   description: string;
@@ -58,6 +59,8 @@ interface BuilderCanvasProps {
   activeTheme: any;
   setActiveTheme: (theme: any) => void;
   pushToHistory?: (fields: FormField[], theme: any | null) => void;
+  publicFormUrl: string;
+  hostOrigin: string;
 }
 
 export function BuilderCanvas({
@@ -98,6 +101,8 @@ export function BuilderCanvas({
   activeTheme,
   setActiveTheme,
   pushToHistory,
+  publicFormUrl,
+  hostOrigin,
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
 
@@ -131,7 +136,8 @@ export function BuilderCanvas({
   const MIDDLE_TABS = [
     { value: "form", label: t("tabBuild"), icon: FileText, iconColorClass: "text-indigo-500", shortcut: "ctrl+1" },
     { value: "theme", label: t("tabTheme"), icon: Palette, iconColorClass: "text-purple-500", shortcut: "ctrl+2" },
-    { value: "settings", label: "Settings", icon: Settings, iconColorClass: "text-rose-500", shortcut: "ctrl+3" }
+    { value: "settings", label: "Settings", icon: Settings, iconColorClass: "text-rose-500", shortcut: "ctrl+3" },
+    { value: "embed", label: "Embed", icon: Code, iconColorClass: "text-teal-500", shortcut: "ctrl+4" }
   ] as const;
 
   return (
@@ -306,6 +312,16 @@ export function BuilderCanvas({
               manualChatIdInput={manualChatIdInput}
               setManualChatIdInput={setManualChatIdInput}
               handleSaveSettings={handleSaveSettings}
+            />
+          </div>
+        )}
+
+        {middleTab === "embed" && (
+          <div className="max-w-2xl mx-auto space-y-6">
+            <EmbedCanvasTab
+              publicFormUrl={publicFormUrl}
+              id={formId}
+              hostOrigin={hostOrigin}
             />
           </div>
         )}
