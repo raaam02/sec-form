@@ -173,3 +173,27 @@
 .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: rgba(63, 63, 70, 0.5);
 }
+
+/* Scrollbar with top/bottom margin track spacing for the middle canvas */
+.canvas-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.canvas-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+.canvas-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.18);
+  border-radius: 9999px;
+}
+.canvas-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.35);
+}
+.dark .canvas-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(63, 63, 70, 0.25);
+}
+.dark .canvas-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(63, 63, 70, 0.5);
+}

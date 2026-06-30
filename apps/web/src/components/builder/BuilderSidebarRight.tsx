@@ -10,8 +10,6 @@ import { Button } from "../ui/button";
 import { EyeOff } from "lucide-react";
 
 interface BuilderSidebarRightProps {
-  rightTab?: "preview" | "embed";
-  setRightTab?: (tab: "preview" | "embed") => void;
   title: string;
   description: string | null;
   fields: FormField[];
@@ -20,6 +18,8 @@ interface BuilderSidebarRightProps {
   id: string;
   hostOrigin: string;
   layoutMode?: "standard" | "single_field" | "custom_steps";
+  setLayoutMode?: (mode: "standard" | "single_field" | "custom_steps") => void;
+  saveForm?: (fields: FormField[], updatedTheme?: any, updatedLayoutMode?: "standard" | "single_field" | "custom_steps") => void;
 }
 
 export function BuilderSidebarRight({
@@ -28,6 +28,8 @@ export function BuilderSidebarRight({
   fields,
   activeTheme,
   layoutMode = "standard",
+  setLayoutMode,
+  saveForm,
 }: BuilderSidebarRightProps) {
   const t = useTranslations("Builder");
   const inputBg = activeTheme?.inputBgColor || "transparent";
@@ -66,17 +68,54 @@ export function BuilderSidebarRight({
   }, [layoutMode, fields.length]);
 
   return (
-    <aside className="relative w-full h-full border-l border-border bg-sidebar overflow-hidden flex flex-col">
-      {/* Header Label */}
-      <div className="border-b border-border px-5 py-4 shrink-0 flex items-center justify-between">
-        <h3 className="font-outfit font-extrabold text-foreground text-sm">Live Preview</h3>
+    <aside className="relative rounded-l-lg border-l border-y border-border bg-background/40 backdrop-blur-sm w-full h-full overflow-hidden flex flex-col">
+      {/* Header — Layout selector + toggle side by side */}
+      <div className="border-b border-border px-3 py-2.5 shrink-0">
+        <div className="flex items-center gap-2">
+          {/* Layout Mode Selector */}
+          {setLayoutMode && (
+            <Select value={layoutMode} onValueChange={(val: any) => {
+              setLayoutMode(val);
+              if (saveForm) saveForm(fields, null, val);
+            }}>
+              <SelectTrigger className="h-8 text-xs bg-secondary/50 border-0 shadow-sm hover:bg-muted/40 transition-colors focus:ring-1 focus:ring-ring focus:ring-offset-0 backdrop-blur-sm flex-1 min-w-0">
+                <SelectValue placeholder="Display Layout">
+                  {layoutMode === "standard" && "Standard (All Fields)"}
+                  {layoutMode === "single_field" && "One Field per Step"}
+                  {layoutMode === "custom_steps" && "Grouped by Steps"}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="bg-secondary/50 backdrop-blur-sm">
+                <SelectItem value="standard" className="text-xs">
+                  <div className="flex flex-col">
+                    <span className="font-semibold">Standard (All Fields)</span>
+                    <span className="text-[10px] text-muted-foreground">All fields shown on one page</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="single_field" className="text-xs">
+                  <div className="flex flex-col">
+                    <span className="font-semibold">One Field per Step</span>
+                    <span className="text-[10px] text-muted-foreground">Show one question at a time</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="custom_steps" className="text-xs">
+                  <div className="flex flex-col">
+                    <span className="font-semibold">Grouped by Steps</span>
+                    <span className="text-[10px] text-muted-foreground">Use page break elements to group</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+          <div className="w-8 shrink-0" />
+        </div>
       </div>
 
       {/* Scrollable Container Content */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar p-5 space-y-6 bg-muted/10">
         <div className="flex flex-col items-stretch">
           {/* Native preview container (No smartphone frame) */}
-          <div 
+          <div
             className="w-full rounded-2xl border border-border shadow-md overflow-hidden flex flex-col transition-all duration-300 bg-background"
             style={{
               backgroundColor: activeTheme?.backgroundColor || "#ffffff",
@@ -85,9 +124,9 @@ export function BuilderSidebarRight({
           >
             {/* Live Form Content wrapper */}
             <div className="flex-1 p-5 space-y-6">
-              
+
               {/* Form Header Card */}
-              <div 
+              <div
                 className="p-4 border transition-all duration-200"
                 style={{
                   backgroundColor: activeTheme?.cardColor || "#ffffff",
@@ -111,7 +150,7 @@ export function BuilderSidebarRight({
                   </div>
                 ) : (
                   currentFields.map((field) => (
-                    <div 
+                    <div
                       key={field.id}
                       className="p-4 border transition-all duration-200 space-y-2"
                       style={{
@@ -128,11 +167,11 @@ export function BuilderSidebarRight({
                       {/* Interactive fields inside preview */}
                       <div className="mt-1">
                         {["text", "email", "date", "phone"].includes(field.type) && (
-                          <Input 
-                            type={field.type === "email" ? "email" : field.type === "phone" ? "tel" : "text"} 
+                          <Input
+                            type={field.type === "email" ? "email" : field.type === "phone" ? "tel" : "text"}
                             placeholder={field.placeholder || "Your answer..."}
-                            className="text-foreground bg-transparent pointer-events-none transition-colors" 
-                            style={{ 
+                            className="text-foreground bg-transparent pointer-events-none transition-colors"
+                            style={{
                               borderColor: inputBorder,
                               backgroundColor: inputBg,
                               borderRadius: activeTheme?.borderRadius || "0.5rem"
@@ -141,11 +180,11 @@ export function BuilderSidebarRight({
                           />
                         )}
                         {field.type === "number" && (
-                          <Input 
-                            type="number" 
+                          <Input
+                            type="number"
                             placeholder="0"
-                            className="max-w-[150px] text-foreground bg-transparent pointer-events-none transition-colors" 
-                            style={{ 
+                            className="max-w-[150px] text-foreground bg-transparent pointer-events-none transition-colors"
+                            style={{
                               borderColor: inputBorder,
                               backgroundColor: inputBg,
                               borderRadius: activeTheme?.borderRadius || "0.5rem"
@@ -154,10 +193,10 @@ export function BuilderSidebarRight({
                           />
                         )}
                         {field.type === "time" && (
-                          <Input 
-                            type="time" 
-                            className="max-w-[150px] text-foreground bg-transparent pointer-events-none transition-colors" 
-                            style={{ 
+                          <Input
+                            type="time"
+                            className="max-w-[150px] text-foreground bg-transparent pointer-events-none transition-colors"
+                            style={{
                               borderColor: inputBorder,
                               backgroundColor: inputBg,
                               borderRadius: activeTheme?.borderRadius || "0.5rem"
@@ -166,10 +205,10 @@ export function BuilderSidebarRight({
                           />
                         )}
                         {field.type === "textarea" && (
-                          <Textarea 
+                          <Textarea
                             placeholder={field.placeholder || "Your response..."}
-                            className="text-foreground bg-transparent pointer-events-none transition-colors" 
-                            style={{ 
+                            className="text-foreground bg-transparent pointer-events-none transition-colors"
+                            style={{
                               borderColor: inputBorder,
                               backgroundColor: inputBg,
                               borderRadius: activeTheme?.borderRadius || "0.5rem"
@@ -197,9 +236,9 @@ export function BuilderSidebarRight({
                           <div className="space-y-1.5 pl-1 pointer-events-none">
                             {field.options.map((opt) => (
                               <label key={opt} className="flex items-center gap-3 p-2 rounded-lg transition-colors group">
-                                <Checkbox 
-                                  className="border-slate-300" 
-                                  checked={false} 
+                                <Checkbox
+                                  className="border-slate-300"
+                                  checked={false}
                                   style={{
                                     borderColor: inputBorder,
                                     backgroundColor: inputBg
@@ -212,9 +251,9 @@ export function BuilderSidebarRight({
                         )}
                         {field.type === "checkbox" && (
                           <label className="flex items-center gap-3 p-2 rounded-lg transition-colors group w-fit pointer-events-none">
-                            <Checkbox 
-                              className="border-slate-300" 
-                              checked={false} 
+                            <Checkbox
+                              className="border-slate-300"
+                              checked={false}
                               style={{
                                 borderColor: inputBorder,
                                 backgroundColor: inputBg
@@ -226,10 +265,10 @@ export function BuilderSidebarRight({
                         {field.type === "rating" && (
                           <div className="flex gap-2 pl-1 pointer-events-none">
                             {Array.from({ length: 5 }).map((_, i) => (
-                              <button 
-                                key={i} 
+                              <button
+                                key={i}
                                 type="button"
-                                className="text-2xl text-slate-300" 
+                                className="text-2xl text-slate-300"
                               >
                                 ★
                               </button>
@@ -240,10 +279,10 @@ export function BuilderSidebarRight({
                     </div>
                   ))
                 )}
-                
+
                 <div className="pt-2 flex gap-2">
                   {currentStepIndex > 0 && (
-                    <Button 
+                    <Button
                       onClick={() => setCurrentStepIndex((p) => Math.max(0, p - 1))}
                       variant="outline"
                       className="flex-1 h-8 text-[10px] uppercase font-bold rounded-xl transition-all shadow-sm"
@@ -254,9 +293,9 @@ export function BuilderSidebarRight({
                       Previous
                     </Button>
                   )}
-                  
+
                   {isLastStep ? (
-                    <Button 
+                    <Button
                       disabled
                       className="flex-1 h-8 text-white text-[10px] uppercase font-bold rounded-xl transition-all shadow-md opacity-50 cursor-not-allowed"
                       style={{
@@ -267,7 +306,7 @@ export function BuilderSidebarRight({
                       {t("submitBtn")}
                     </Button>
                   ) : (
-                    <Button 
+                    <Button
                       onClick={() => setCurrentStepIndex(p => p + 1)}
                       className="flex-1 h-8 text-white text-[10px] uppercase font-bold rounded-xl transition-all shadow-md"
                       style={{

@@ -20,7 +20,7 @@ import { NoiseBackground } from "@/components/builder/NoiseBackground";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { PanelImperativeHandle } from "react-resizable-panels";
-import { Eye } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { LimitModal } from "@/components/builder/LimitModal";
 import { ContactAdminModal } from "@/components/builder/ContactAdminModal";
 import { toast } from "sonner";
@@ -43,6 +43,7 @@ export default function BuilderPage() {
   // Sub-tabs states for the three panels
   const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">("form");
   const [rightTab, setRightTab] = useState<"preview" | "embed">("preview");
+  const [showRightSidebar, setShowRightSidebar] = useState(true);
 
   const [localForm, setLocalForm] = useState<LocalForm | null>(null);
   const [hasLoadedLocal, setHasLoadedLocal] = useState(false);
@@ -232,8 +233,8 @@ export default function BuilderPage() {
     setMiddleTab("embed");
   }, "Builder Navigation");
 
-  useGlobalShortcut("preview-toggle-tab", "ctrl+5", "Preview Mode", () => {
-    setRightTab("preview");
+  useGlobalShortcut("preview-toggle-tab", "ctrl+5", "Toggle Preview", () => {
+    setShowRightSidebar(prev => !prev);
   }, "Builder Navigation");
 
   useEffect(() => {
@@ -965,18 +966,37 @@ export default function BuilderPage() {
         </div>
 
         {/* PANEL C: RIGHT SIDEBAR (Preview) */}
-        <div className="w-[320px] shrink-0 border-l border-border bg-sidebar flex flex-col">
-          <BuilderSidebarRight
-            title={title}
-            description={description}
-            fields={fields}
-            activeTheme={activeTheme}
-            layoutMode={layoutMode}
-            publicFormUrl={publicFormUrl}
-            id={id}
-            hostOrigin={hostOrigin}
-          />
+        <div className={`transition-all duration-300 ease-in-out shrink-0 flex flex-col overflow-hidden ${showRightSidebar ? "w-[320px] opacity-100" : "w-0 opacity-0 pointer-events-none"}`}>
+          <div className="w-[320px] h-full flex flex-col">
+            <BuilderSidebarRight
+              title={title}
+              description={description}
+              fields={fields}
+              activeTheme={activeTheme}
+              layoutMode={layoutMode}
+              setLayoutMode={(mode: "standard" | "single_field" | "custom_steps") => {
+                setLayoutMode(mode);
+                saveForm(fields, activeTheme, mode);
+              }}
+              saveForm={saveForm}
+              publicFormUrl={publicFormUrl}
+              id={id}
+              hostOrigin={hostOrigin}
+            />
+          </div>
         </div>
+
+        <button
+          onClick={() => setShowRightSidebar(!showRightSidebar)}
+          className="absolute top-3 right-3 z-30 h-8 w-8 flex items-center justify-center rounded-lg bg-secondary/80 border border-border shadow-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-300 backdrop-blur-sm"
+          title={showRightSidebar ? "Hide Preview [Ctrl+5]" : "Show Preview [Ctrl+5]"}
+        >
+          {showRightSidebar ? (
+            <EyeOff className="h-4 w-4" />
+          ) : (
+            <Eye className="h-4 w-4" />
+          )}
+        </button>
       </div>
 
       {/* Mobile View (under md breakpoint) */}
@@ -998,8 +1018,6 @@ export default function BuilderPage() {
           {activeMobileTab === "preview" && (
             <div className="w-full h-full">
               <BuilderSidebarRight
-                rightTab={rightTab}
-                setRightTab={setRightTab}
                 title={title}
                 description={description}
                 fields={fields}
