@@ -20,7 +20,7 @@ import { NoiseBackground } from "@/components/builder/NoiseBackground";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { PanelImperativeHandle } from "react-resizable-panels";
-import { Eye, EyeOff } from "lucide-react";
+import { PanelRight } from "lucide-react";
 import { LimitModal } from "@/components/builder/LimitModal";
 import { ContactAdminModal } from "@/components/builder/ContactAdminModal";
 import { toast } from "sonner";
@@ -34,7 +34,7 @@ export default function BuilderPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const id = params.id as string;
-  
+
   const utils = trpcAny.useUtils();
 
   const { data: session } = useSession();
@@ -61,7 +61,7 @@ export default function BuilderPage() {
   // Queries
   const { data: form, isLoading: isFormLoading, error: formError } = trpcAny.forms.get.useQuery(
     { id },
-    { 
+    {
       enabled: !isDemo || (!hasLoadedLocal ? false : !localForm),
       refetchInterval: (data: any) => {
         const telegram = (data?.schemaJson as any)?.telegram;
@@ -100,7 +100,7 @@ export default function BuilderPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
-  
+
   // Theme state
   const [activeTheme, setActiveTheme] = useState<ThemeConfig | null>(null);
 
@@ -155,10 +155,10 @@ export default function BuilderPage() {
 
   const { data: formsList } = trpcAny.forms.list.useQuery();
   const { data: plansList } = trpcAny.admin.getPlans.useQuery();
-  
+
   // Share state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  
+
   // Notification banner / Auto-save status
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [, setSaveErrorMessage] = useState("");
@@ -172,9 +172,9 @@ export default function BuilderPage() {
   const pushToHistory = (newFields: FormField[], newTheme: ThemeConfig | null) => {
     setFormHistory((prev) => {
       const currentStates = prev.states.slice(0, prev.index + 1);
-      currentStates.push({ 
-        fields: JSON.parse(JSON.stringify(newFields)), 
-        theme: newTheme ? JSON.parse(JSON.stringify(newTheme)) : null 
+      currentStates.push({
+        fields: JSON.parse(JSON.stringify(newFields)),
+        theme: newTheme ? JSON.parse(JSON.stringify(newTheme)) : null
       });
       if (currentStates.length > 100) currentStates.shift();
       return {
@@ -246,7 +246,7 @@ export default function BuilderPage() {
     if (activeForm && !hasInitialized) {
       setTitle(activeForm.title);
       setDescription(activeForm.description || "");
-      
+
       const loadedFields = (activeForm.schemaJson as any).fields || [];
       const loadedTheme = activeForm.themeJson as any;
       setFields(loadedFields);
@@ -306,29 +306,43 @@ export default function BuilderPage() {
     }
   }, [searchParams]);
 
-  // Auto-Save Form Logic
-  const saveForm = async (updatedFields: FormField[], updatedTheme?: ThemeConfig | null, updatedLayoutMode?: "standard" | "single_field" | "custom_steps") => {
+  const saveForm = async (
+    updatedFields: FormField[],
+    updatedTheme?: ThemeConfig | null,
+    updatedLayoutMode?: "standard" | "single_field" | "custom_steps",
+    updatedVisibility?: "draft" | "public" | "unlisted",
+    updatedSlug?: string,
+    updatedTelegram?: { enabled: boolean; chatId?: string; chatName?: string },
+    updatedAllowedDomains?: string[]
+  ) => {
     setSaveStatus("saving");
-    
-    let nextVisibility = visibility;
-    
+
+    const activeVisibility = updatedVisibility !== undefined ? updatedVisibility : visibility;
+    const activeSlug = updatedSlug !== undefined ? updatedSlug : slug;
+    const activeTelegram = updatedTelegram !== undefined ? updatedTelegram : {
+      enabled: telegramEnabled,
+      chatId: telegramChatId || undefined,
+      chatName: telegramChatName || undefined,
+    };
+    const activeAllowedDomains = updatedAllowedDomains !== undefined ? updatedAllowedDomains : allowedDomains;
+
     if (isDemo) {
       try {
         const updatedLocal: LocalForm = {
           id,
           title: title.trim() === "" ? "Untitled Form" : title,
           description,
-          slug,
-          visibility: nextVisibility,
-          schemaJson: { 
+          slug: activeSlug,
+          visibility: activeVisibility,
+          schemaJson: {
             fields: updatedFields,
             layout: { mode: updatedLayoutMode || layoutMode },
             telegram: {
-              enabled: telegramEnabled,
-              chatId: telegramChatId || undefined,
-              chatName: telegramChatName || undefined,
+              enabled: activeTelegram.enabled,
+              chatId: activeTelegram.chatId || undefined,
+              chatName: activeTelegram.chatName || undefined,
             },
-            allowedDomains
+            allowedDomains: activeAllowedDomains
           },
           themeJson: updatedTheme !== undefined ? updatedTheme : (activeTheme || null),
           userId: "demo-user-id",
@@ -353,18 +367,19 @@ export default function BuilderPage() {
         id,
         title: title.trim() === "" ? "Untitled Form" : title,
         description,
-        schemaJson: { 
+        slug: activeSlug,
+        schemaJson: {
           fields: updatedFields,
           layout: { mode: updatedLayoutMode || layoutMode },
           telegram: {
-            enabled: telegramEnabled,
-            chatId: telegramChatId || undefined,
-            chatName: telegramChatName || undefined,
+            enabled: activeTelegram.enabled,
+            chatId: activeTelegram.chatId || undefined,
+            chatName: activeTelegram.chatName || undefined,
           },
-          allowedDomains
+          allowedDomains: activeAllowedDomains
         },
         themeJson: updatedTheme || activeTheme || undefined,
-        visibility: nextVisibility,
+        visibility: activeVisibility,
       });
       utils.forms.get.invalidate({ id });
       setSaveStatus("saved");
@@ -406,16 +421,16 @@ export default function BuilderPage() {
 
   const hasUnpublishedChanges = React.useMemo(() => {
     if (!form) return false;
-    
+
     // Check if never published
     if (!form.publishedSchemaJson || !form.isPublished) return true;
-    
+
     // Compare title
     if (title !== form.publishedTitle) return true;
-    
+
     // Compare description
     if ((description || "") !== (form.publishedDescription || "")) return true;
-    
+
     // Compare schema
     const currentSchema = {
       fields,
@@ -427,20 +442,20 @@ export default function BuilderPage() {
       },
       allowedDomains
     };
-    
+
     // Compare fields
     if (JSON.stringify(currentSchema.fields || []) !== JSON.stringify((form.publishedSchemaJson as any)?.fields || [])) return true;
-    
+
     // Compare layout mode
     if ((currentSchema.layout?.mode || "standard") !== ((form.publishedSchemaJson as any)?.layout?.mode || "standard")) return true;
-    
+
     // Compare telegram config
     const curTel = currentSchema.telegram || {};
     const pubTel = (form.publishedSchemaJson as any)?.telegram || {};
     if (!!curTel.enabled !== !!pubTel.enabled) return true;
     if ((curTel.chatId || "") !== (pubTel.chatId || "")) return true;
     if ((curTel.chatName || "") !== (pubTel.chatName || "")) return true;
-    
+
     // Compare allowed domains
     const curDomains = Array.isArray(currentSchema.allowedDomains) ? currentSchema.allowedDomains : [];
     const pubDomains = Array.isArray((form.publishedSchemaJson as any)?.allowedDomains) ? (form.publishedSchemaJson as any).allowedDomains : [];
@@ -448,23 +463,23 @@ export default function BuilderPage() {
     for (let i = 0; i < curDomains.length; i++) {
       if (curDomains[i] !== pubDomains[i]) return true;
     }
-    
+
     // Compare theme
     const currentThemeStr = JSON.stringify(activeTheme);
     const publishedThemeStr = JSON.stringify(form.publishedThemeJson);
     if (currentThemeStr !== publishedThemeStr) return true;
-    
+
     return false;
   }, [
-    form, 
-    title, 
-    description, 
-    fields, 
-    layoutMode, 
-    telegramEnabled, 
-    telegramChatId, 
-    telegramChatName, 
-    allowedDomains, 
+    form,
+    title,
+    description,
+    fields,
+    layoutMode,
+    telegramEnabled,
+    telegramChatId,
+    telegramChatName,
+    allowedDomains,
     activeTheme
   ]);
 
@@ -477,17 +492,17 @@ export default function BuilderPage() {
     try {
       // Force save current local changes immediately
       await saveForm(fields, activeTheme, layoutMode);
-      
+
       // Call publish mutation
       await publishFormMutation.mutateAsync({ id });
-      
+
       // Update local visibility state
       setVisibility("public");
-      
+
       // Refetch and invalidate
       await utils.forms.get.invalidate({ id });
       await utils.forms.list.invalidate();
-      
+
       toast.success("Form published successfully! All changes are now live.");
     } catch (error: any) {
       toast.error(error.message || "Failed to publish form");
@@ -538,7 +553,7 @@ export default function BuilderPage() {
 
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     const updated = [...fields];
-    
+
     // Swap
     const temp = updated[index];
     updated[index] = updated[targetIndex];
@@ -551,11 +566,11 @@ export default function BuilderPage() {
 
   const handleDragReorder = (oldIndex: number, newIndex: number) => {
     if (oldIndex === newIndex) return;
-    
+
     const updated = [...fields];
     const [movedItem] = updated.splice(oldIndex, 1);
     updated.splice(newIndex, 0, movedItem);
-    
+
     setFields(updated);
     saveForm(updated);
     pushToHistory(updated, activeTheme);
@@ -567,11 +582,11 @@ export default function BuilderPage() {
     if (targetVisibility === "public") {
       const otherPublicForms = formsList?.filter((f: any) => f.visibility === "public" && f.id !== id) || [];
       console.log("[EditPage] otherPublicForms count:", otherPublicForms.length, "formsList:", formsList);
-      
+
       const userPlanId = session?.user?.planId || "free";
       const currentPlan = plansList?.find((p: any) => p.id === userPlanId);
       const limit = currentPlan?.maxPublicForms ?? PUBLIC_FORM_LIMIT;
-      
+
       if (otherPublicForms.length >= limit) {
         console.log("[EditPage] Limit reached! Showing limit modal.");
         setShowLimitModal(true);
@@ -674,113 +689,75 @@ export default function BuilderPage() {
     }
   };
 
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("[EditPage] handleSaveSettings called. visibility:", visibility);
-    if (checkPublicLimit(visibility)) {
-      return;
+  const onSaveSlug = async (newSlug: string) => {
+    setSlug(newSlug);
+    await saveForm(fields, activeTheme, layoutMode, visibility, newSlug);
+    toast.success("Form URL slug updated successfully!");
+  };
+
+  const onValidateSlug = async (slugToCheck: string): Promise<"available" | "taken" | "invalid" | "network_error"> => {
+    if (!/^[a-z0-9-]+$/.test(slugToCheck) || slugToCheck.length < 3) {
+      return "invalid";
     }
-    setSaveStatus("saving");
+    const currentSavedSlug = localForm?.slug || activeForm?.slug || "";
+    if (slugToCheck === currentSavedSlug) {
+      return "available";
+    }
+
+    const isNetworkOrServerError = (err: any) => {
+      const msg = err.message?.toLowerCase() || "";
+      return msg.includes("failed to fetch") || 
+             msg.includes("fetch failed") || 
+             msg.includes("econnrefused") || 
+             msg.includes("network error") ||
+             msg.includes("load failed") ||
+             msg.includes("internal server error") ||
+             msg.includes("database") ||
+             msg.includes("connection") ||
+             err.code === "INTERNAL_SERVER_ERROR";
+    };
 
     if (isDemo) {
+      const localForms = getLocalForms();
+      const conflict = localForms.some(f => f.slug === slugToCheck && f.id !== id);
+      if (conflict) return "taken";
       try {
-        const localForms = getLocalForms();
-        const conflictLocal = localForms.some(f => f.slug === slug && f.id !== id);
-        if (conflictLocal) {
-          setSaveStatus("error");
-          toast.error("This custom slug is already taken. Please choose another.");
-          return;
-        }
-
-        try {
-          const dbForm = await utils.forms.getBySlug.fetch({ slug });
-          if (dbForm && dbForm.id !== id) {
-            setSaveStatus("error");
-            toast.error("This custom slug is already taken. Please choose another.");
-            return;
-          }
-        } catch (err: any) {
-          const isNotFound = err.message?.toLowerCase().includes("not found");
-          if (!isNotFound) {
-            setSaveStatus("error");
-            toast.error("This custom slug is already taken. Please choose another.");
-            return;
-          }
-        }
-
-        const updatedLocal: LocalForm = {
-          id,
-          title: title.trim() === "" ? "Untitled Form" : title,
-          description,
-          slug,
-          visibility,
-          schemaJson: {
-            fields,
-            layout: { mode: layoutMode },
-            telegram: {
-              enabled: telegramEnabled,
-              chatId: telegramChatId || undefined,
-              chatName: telegramChatName || undefined,
-            },
-            allowedDomains
-          },
-          themeJson: activeTheme || null,
-          userId: "demo-user-id",
-          createdAt: activeForm?.createdAt || new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          totalViews: activeForm?.totalViews || 0,
-          totalResponses: activeForm?.totalResponses || 0,
-        };
-        saveLocalForm(updatedLocal);
-        setLocalForm(updatedLocal);
-        setSaveStatus("saved");
-        setTimeout(() => setSaveStatus("idle"), 2500);
-
-        if (visibility === "public") {
-          setIsShareModalOpen(true);
-        }
-      } catch (err: any) {
-        setSaveStatus("error");
-        setSaveErrorMessage(err.message || "Failed to save settings");
+        const dbForm = await trpcAny.forms.getBySlug.fetch({ slug: slugToCheck });
+        if (dbForm && dbForm.id !== id) return "taken";
+      } catch (e: any) {
+        if (isNetworkOrServerError(e)) return "network_error";
+        const isNotFound = e.message?.toLowerCase().includes("not found") || e.code === "NOT_FOUND";
+        if (!isNotFound) return "taken"; // taken in DB (e.g. draft/forbidden)
       }
-      return;
+      return "available";
+    } else {
+      try {
+        const dbForm = await trpcAny.forms.getBySlug.fetch({ slug: slugToCheck });
+        if (dbForm && dbForm.id !== id) return "taken";
+        return "available";
+      } catch (e: any) {
+        if (isNetworkOrServerError(e)) return "network_error";
+        const isNotFound = e.message?.toLowerCase().includes("not found") || e.code === "NOT_FOUND";
+        return isNotFound ? "available" : "taken";
+      }
     }
+  };
 
-    try {
-      await updateFormMutation.mutateAsync({
-        id,
-        title: title.trim() === "" ? "Untitled Form" : title,
-        description,
-        slug,
-        visibility,
-        schemaJson: {
-          fields,
-          layout: { mode: layoutMode },
-          telegram: {
-            enabled: telegramEnabled,
-            chatId: telegramChatId || undefined,
-            chatName: telegramChatName || undefined,
-          },
-          allowedDomains
-        }
-      });
-      utils.forms.get.invalidate({ id });
-      utils.forms.list.invalidate();
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2500);
-      
-      if (visibility === "public") {
-        setIsShareModalOpen(true);
-      }
-    } catch (e: any) {
-      if (e.message?.includes("LIMIT_REACHED")) {
-        setShowLimitModal(true);
-        setSaveStatus("idle");
-        return;
-      }
-      setSaveStatus("error");
-      setSaveErrorMessage(e.message || "Failed to save settings");
+  const onSaveTelegram = async (updatedTelegram: { enabled: boolean; chatId?: string; chatName?: string }) => {
+    setTelegramEnabled(updatedTelegram.enabled);
+    if (updatedTelegram.chatId !== undefined) {
+      setTelegramChatId(updatedTelegram.chatId);
     }
+    if (updatedTelegram.chatName !== undefined) {
+      setTelegramChatName(updatedTelegram.chatName);
+    }
+    await saveForm(fields, activeTheme, layoutMode, visibility, slug, updatedTelegram);
+    toast.success("Telegram notification settings updated.");
+  };
+
+  const onSaveAllowedDomains = async (domains: string[]) => {
+    setAllowedDomains(domains);
+    await saveForm(fields, activeTheme, layoutMode, visibility, slug, undefined, domains);
   };
 
   const handleGenerateInsights = async () => {
@@ -835,7 +812,7 @@ export default function BuilderPage() {
 
     try {
       const res = await exportCSVMutation.mutateAsync({ formId: id });
-      
+
       const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -878,7 +855,7 @@ export default function BuilderPage() {
   return (
     <div className="h-full flex flex-col overflow-hidden text-foreground bg-transparent relative isolate">
       <NoiseBackground />
-      
+
       {/* Top Fixed Header */}
       <BuilderHeader
         title={title}
@@ -940,23 +917,22 @@ export default function BuilderPage() {
             insightsError={insightsError}
             handleGenerateInsights={handleGenerateInsights}
             visibility={visibility}
-            setVisibility={setVisibility}
+            onSaveVisibility={handleUpdateVisibility}
             slug={slug}
-            setSlug={setSlug}
-            handleSaveSettings={handleSaveSettings}
+            initialSlug={activeForm?.slug || ""}
+            onSaveSlug={onSaveSlug}
+            onValidateSlug={onValidateSlug}
             handleUndo={handleUndo}
             handleRedo={handleRedo}
             canUndo={formHistory.index > 0}
             canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
             telegramEnabled={telegramEnabled}
-            setTelegramEnabled={setTelegramEnabled}
+            onSaveTelegram={onSaveTelegram}
             telegramChatId={telegramChatId}
-            setTelegramChatId={setTelegramChatId}
             telegramChatName={telegramChatName}
-            setTelegramChatName={setTelegramChatName}
             formId={id}
             allowedDomains={allowedDomains}
-            setAllowedDomains={setAllowedDomains}
+            onSaveAllowedDomains={onSaveAllowedDomains}
             activeTheme={activeTheme}
             setActiveTheme={setActiveTheme}
             pushToHistory={pushToHistory}
@@ -991,11 +967,7 @@ export default function BuilderPage() {
           className="absolute top-3 right-3 z-30 h-8 w-8 flex items-center justify-center rounded-lg bg-secondary/80 border border-border shadow-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-300 backdrop-blur-sm"
           title={showRightSidebar ? "Hide Preview [Ctrl+5]" : "Show Preview [Ctrl+5]"}
         >
-          {showRightSidebar ? (
-            <EyeOff className="h-4 w-4" />
-          ) : (
-            <Eye className="h-4 w-4" />
-          )}
+          <PanelRight className="h-4 w-4" />
         </button>
       </div>
 
@@ -1062,23 +1034,22 @@ export default function BuilderPage() {
                 insightsError={insightsError}
                 handleGenerateInsights={handleGenerateInsights}
                 visibility={visibility}
-                setVisibility={setVisibility}
+                onSaveVisibility={handleUpdateVisibility}
                 slug={slug}
-                setSlug={setSlug}
-                handleSaveSettings={handleSaveSettings}
+                initialSlug={activeForm?.slug || ""}
+                onSaveSlug={onSaveSlug}
+                onValidateSlug={onValidateSlug}
                 handleUndo={handleUndo}
                 handleRedo={handleRedo}
                 canUndo={formHistory.index > 0}
                 canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
                 telegramEnabled={telegramEnabled}
-                setTelegramEnabled={setTelegramEnabled}
+                onSaveTelegram={onSaveTelegram}
                 telegramChatId={telegramChatId}
-                setTelegramChatId={setTelegramChatId}
                 telegramChatName={telegramChatName}
-                setTelegramChatName={setTelegramChatName}
                 formId={id}
                 allowedDomains={allowedDomains}
-                setAllowedDomains={setAllowedDomains}
+                onSaveAllowedDomains={onSaveAllowedDomains}
                 activeTheme={activeTheme}
                 setActiveTheme={setActiveTheme}
                 pushToHistory={pushToHistory}
@@ -1184,4 +1155,3 @@ export default function BuilderPage() {
     </div>
   );
 }
-

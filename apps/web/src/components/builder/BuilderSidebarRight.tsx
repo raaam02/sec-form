@@ -68,7 +68,7 @@ export function BuilderSidebarRight({
   }, [layoutMode, fields.length]);
 
   return (
-    <aside className="relative rounded-l-lg border-l border-y border-border bg-background/40 backdrop-blur-sm w-full h-full overflow-hidden flex flex-col">
+    <aside className="relative rounded-l-lg border-l border-border bg-transparent backdrop-blur-[1px] w-full h-full overflow-hidden flex flex-col">
       {/* Header — Layout selector + toggle side by side */}
       <div className="border-b border-border px-3 py-2.5 shrink-0">
         <div className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export function BuilderSidebarRight({
       </div>
 
       {/* Scrollable Container Content */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar p-5 space-y-6 bg-muted/10">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar p-5 space-y-6">
         <div className="flex flex-col items-stretch">
           {/* Native preview container (No smartphone frame) */}
           <div

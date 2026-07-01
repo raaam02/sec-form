@@ -75,6 +75,11 @@ export function GlobalShortcutProvider({ children }: { children: React.ReactNode
           continue;
         }
 
+        // If an input is focused, do not hijack standard text editing shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X)
+        if (isInputFocused && needsCtrl && (key === "z" || key === "y" || key === "a" || key === "c" || key === "v" || key === "x")) {
+          continue;
+        }
+
         const hasCtrlMatch = e.ctrlKey || e.metaKey;
         const isKeyMatch = e.key.toLowerCase() === key;
 

@@ -310,10 +310,25 @@ export default function BuilderPage() {
   }, [searchParams]);
 
   // Auto-Save Form Logic
-  const saveForm = async (updatedFields: FormField[], updatedTheme?: ThemeConfig | null, updatedLayoutMode?: "standard" | "single_field" | "custom_steps") => {
+  const saveForm = async (
+    updatedFields: FormField[],
+    updatedTheme?: ThemeConfig | null,
+    updatedLayoutMode?: "standard" | "single_field" | "custom_steps",
+    updatedVisibility?: "draft" | "public" | "unlisted",
+    updatedSlug?: string,
+    updatedTelegram?: { enabled: boolean; chatId?: string; chatName?: string },
+    updatedAllowedDomains?: string[]
+  ) => {
     setSaveStatus("saving");
 
-    let nextVisibility = visibility;
+    const activeVisibility = updatedVisibility !== undefined ? updatedVisibility : visibility;
+    const activeSlug = updatedSlug !== undefined ? updatedSlug : slug;
+    const activeTelegram = updatedTelegram !== undefined ? updatedTelegram : {
+      enabled: telegramEnabled,
+      chatId: telegramChatId || undefined,
+      chatName: telegramChatName || undefined,
+    };
+    const activeAllowedDomains = updatedAllowedDomains !== undefined ? updatedAllowedDomains : allowedDomains;
 
     if (isDemo) {
       try {
@@ -321,17 +336,17 @@ export default function BuilderPage() {
           id,
           title: title.trim() === "" ? "Untitled Form" : title,
           description,
-          slug,
-          visibility: nextVisibility,
+          slug: activeSlug,
+          visibility: activeVisibility,
           schemaJson: {
             fields: updatedFields,
             layout: { mode: updatedLayoutMode || layoutMode },
             telegram: {
-              enabled: telegramEnabled,
-              chatId: telegramChatId || undefined,
-              chatName: telegramChatName || undefined,
+              enabled: activeTelegram.enabled,
+              chatId: activeTelegram.chatId || undefined,
+              chatName: activeTelegram.chatName || undefined,
             },
-            allowedDomains
+            allowedDomains: activeAllowedDomains
           },
           themeJson: updatedTheme !== undefined ? updatedTheme : (activeTheme || null),
           userId: "demo-user-id",
@@ -356,18 +371,19 @@ export default function BuilderPage() {
         id,
         title: title.trim() === "" ? "Untitled Form" : title,
         description,
+        slug: activeSlug,
         schemaJson: {
           fields: updatedFields,
           layout: { mode: updatedLayoutMode || layoutMode },
           telegram: {
-            enabled: telegramEnabled,
-            chatId: telegramChatId || undefined,
-            chatName: telegramChatName || undefined,
+            enabled: activeTelegram.enabled,
+            chatId: activeTelegram.chatId || undefined,
+            chatName: activeTelegram.chatName || undefined,
           },
-          allowedDomains
+          allowedDomains: activeAllowedDomains
         },
         themeJson: updatedTheme || activeTheme || undefined,
-        visibility: nextVisibility,
+        visibility: activeVisibility,
       });
       utils.forms.get.invalidate({ id });
       setSaveStatus("saved");
@@ -689,113 +705,75 @@ export default function BuilderPage() {
     }
   };
 
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("[BuilderPage] handleSaveSettings called. visibility:", visibility);
-    if (checkPublicLimit(visibility)) {
-      return;
+  const onSaveSlug = async (newSlug: string) => {
+    setSlug(newSlug);
+    await saveForm(fields, activeTheme, layoutMode, visibility, newSlug);
+    toast.success("Form URL slug updated successfully!");
+  };
+
+  const onValidateSlug = async (slugToCheck: string): Promise<"available" | "taken" | "invalid" | "network_error"> => {
+    if (!/^[a-z0-9-]+$/.test(slugToCheck) || slugToCheck.length < 3) {
+      return "invalid";
     }
-    setSaveStatus("saving");
+    const currentSavedSlug = localForm?.slug || activeForm?.slug || "";
+    if (slugToCheck === currentSavedSlug) {
+      return "available";
+    }
+
+    const isNetworkOrServerError = (err: any) => {
+      const msg = err.message?.toLowerCase() || "";
+      return msg.includes("failed to fetch") || 
+             msg.includes("fetch failed") || 
+             msg.includes("econnrefused") || 
+             msg.includes("network error") ||
+             msg.includes("load failed") ||
+             msg.includes("internal server error") ||
+             msg.includes("database") ||
+             msg.includes("connection") ||
+             err.code === "INTERNAL_SERVER_ERROR";
+    };
 
     if (isDemo) {
+      const localForms = getLocalForms();
+      const conflict = localForms.some(f => f.slug === slugToCheck && f.id !== id);
+      if (conflict) return "taken";
       try {
-        const localForms = getLocalForms();
-        const conflictLocal = localForms.some(f => f.slug === slug && f.id !== id);
-        if (conflictLocal) {
-          setSaveStatus("error");
-          toast.error("This custom slug is already taken. Please choose another.");
-          return;
-        }
-
-        try {
-          const dbForm = await utils.forms.getBySlug.fetch({ slug });
-          if (dbForm && dbForm.id !== id) {
-            setSaveStatus("error");
-            toast.error("This custom slug is already taken. Please choose another.");
-            return;
-          }
-        } catch (err: any) {
-          const isNotFound = err.message?.toLowerCase().includes("not found");
-          if (!isNotFound) {
-            setSaveStatus("error");
-            toast.error("This custom slug is already taken. Please choose another.");
-            return;
-          }
-        }
-
-        const updatedLocal: LocalForm = {
-          id,
-          title: title.trim() === "" ? "Untitled Form" : title,
-          description,
-          slug,
-          visibility,
-          schemaJson: {
-            fields,
-            layout: { mode: layoutMode },
-            telegram: {
-              enabled: telegramEnabled,
-              chatId: telegramChatId || undefined,
-              chatName: telegramChatName || undefined,
-            },
-            allowedDomains
-          },
-          themeJson: activeTheme || null,
-          userId: "demo-user-id",
-          createdAt: activeForm?.createdAt || new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          totalViews: activeForm?.totalViews || 0,
-          totalResponses: activeForm?.totalResponses || 0,
-        };
-        saveLocalForm(updatedLocal);
-        setLocalForm(updatedLocal);
-        setSaveStatus("saved");
-        setTimeout(() => setSaveStatus("idle"), 2500);
-
-        if (visibility === "public") {
-          setIsShareModalOpen(true);
-        }
-      } catch (err: any) {
-        setSaveStatus("error");
-        setSaveErrorMessage(err.message || "Failed to save settings");
+        const dbForm = await trpcAny.forms.getBySlug.fetch({ slug: slugToCheck });
+        if (dbForm && dbForm.id !== id) return "taken";
+      } catch (e: any) {
+        if (isNetworkOrServerError(e)) return "network_error";
+        const isNotFound = e.message?.toLowerCase().includes("not found") || e.code === "NOT_FOUND";
+        if (!isNotFound) return "taken"; // taken in DB (e.g. draft/forbidden)
       }
-      return;
+      return "available";
+    } else {
+      try {
+        const dbForm = await trpcAny.forms.getBySlug.fetch({ slug: slugToCheck });
+        if (dbForm && dbForm.id !== id) return "taken";
+        return "available";
+      } catch (e: any) {
+        if (isNetworkOrServerError(e)) return "network_error";
+        const isNotFound = e.message?.toLowerCase().includes("not found") || e.code === "NOT_FOUND";
+        return isNotFound ? "available" : "taken";
+      }
     }
+  };
 
-    try {
-      await updateFormMutation.mutateAsync({
-        id,
-        title: title.trim() === "" ? "Untitled Form" : title,
-        description,
-        slug,
-        visibility,
-        schemaJson: {
-          fields,
-          layout: { mode: layoutMode },
-          telegram: {
-            enabled: telegramEnabled,
-            chatId: telegramChatId || undefined,
-            chatName: telegramChatName || undefined,
-          },
-          allowedDomains
-        }
-      });
-      utils.forms.get.invalidate({ id });
-      utils.forms.list.invalidate();
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2500);
-
-      if (visibility === "public") {
-        setIsShareModalOpen(true);
-      }
-    } catch (e: any) {
-      if (e.message?.includes("LIMIT_REACHED")) {
-        setShowLimitModal(true);
-        setSaveStatus("idle");
-        return;
-      }
-      setSaveStatus("error");
-      setSaveErrorMessage(e.message || "Failed to save settings");
+  const onSaveTelegram = async (updatedTelegram: { enabled: boolean; chatId?: string; chatName?: string }) => {
+    setTelegramEnabled(updatedTelegram.enabled);
+    if (updatedTelegram.chatId !== undefined) {
+      setTelegramChatId(updatedTelegram.chatId);
     }
+    if (updatedTelegram.chatName !== undefined) {
+      setTelegramChatName(updatedTelegram.chatName);
+    }
+    await saveForm(fields, activeTheme, layoutMode, visibility, slug, updatedTelegram);
+    toast.success("Telegram notification settings updated.");
+  };
+
+  const onSaveAllowedDomains = async (domains: string[]) => {
+    setAllowedDomains(domains);
+    await saveForm(fields, activeTheme, layoutMode, visibility, slug, undefined, domains);
   };
 
   const handleExportCSV = async () => {
@@ -940,23 +918,22 @@ export default function BuilderPage() {
             insightsError={insightsError}
             handleGenerateInsights={handleGenerateInsights}
             visibility={visibility}
-            setVisibility={setVisibility}
+            onSaveVisibility={handleUpdateVisibility}
             slug={slug}
-            setSlug={setSlug}
-            handleSaveSettings={handleSaveSettings}
+            initialSlug={activeForm?.slug || ""}
+            onSaveSlug={onSaveSlug}
+            onValidateSlug={onValidateSlug}
             handleUndo={handleUndo}
             handleRedo={handleRedo}
             canUndo={formHistory.index > 0}
             canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
             telegramEnabled={telegramEnabled}
-            setTelegramEnabled={setTelegramEnabled}
+            onSaveTelegram={onSaveTelegram}
             telegramChatId={telegramChatId}
-            setTelegramChatId={setTelegramChatId}
             telegramChatName={telegramChatName}
-            setTelegramChatName={setTelegramChatName}
             formId={id}
             allowedDomains={allowedDomains}
-            setAllowedDomains={setAllowedDomains}
+            onSaveAllowedDomains={onSaveAllowedDomains}
             activeTheme={activeTheme}
             setActiveTheme={setActiveTheme}
             pushToHistory={pushToHistory}
@@ -1063,23 +1040,22 @@ export default function BuilderPage() {
                 insightsError={insightsError}
                 handleGenerateInsights={handleGenerateInsights}
                 visibility={visibility}
-                setVisibility={setVisibility}
+                onSaveVisibility={handleUpdateVisibility}
                 slug={slug}
-                setSlug={setSlug}
-                handleSaveSettings={handleSaveSettings}
+                initialSlug={activeForm?.slug || ""}
+                onSaveSlug={onSaveSlug}
+                onValidateSlug={onValidateSlug}
                 handleUndo={handleUndo}
                 handleRedo={handleRedo}
                 canUndo={formHistory.index > 0}
                 canRedo={formHistory.index >= 0 && formHistory.index < formHistory.states.length - 1}
                 telegramEnabled={telegramEnabled}
-                setTelegramEnabled={setTelegramEnabled}
+                onSaveTelegram={onSaveTelegram}
                 telegramChatId={telegramChatId}
-                setTelegramChatId={setTelegramChatId}
                 telegramChatName={telegramChatName}
-                setTelegramChatName={setTelegramChatName}
                 formId={id}
                 allowedDomains={allowedDomains}
-                setAllowedDomains={setAllowedDomains}
+                onSaveAllowedDomains={onSaveAllowedDomains}
                 activeTheme={activeTheme}
                 setActiveTheme={setActiveTheme}
                 pushToHistory={pushToHistory}

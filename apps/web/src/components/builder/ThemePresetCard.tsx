@@ -12,9 +12,9 @@ export function ThemePresetCard({ theme, isActive, onClick }: ThemePresetCardPro
   return (
     <Card
       onClick={onClick}
-      className={`rounded-xl border p-2.5 bg-card shadow-sm flex flex-col justify-between cursor-pointer hover:border-accent-foreground transition-all ${
-        isActive 
-          ? "ring-2 ring-indigo-600 border-indigo-600" 
+      className={`rounded-xl border p-2.5 bg-card/50 shadow-sm flex flex-col justify-between cursor-pointer hover:border-accent-foreground transition-all ${
+        isActive
+          ? "ring-2 ring-indigo-600 border-indigo-600"
           : "border-border"
       }`}
     >
@@ -22,7 +22,7 @@ export function ThemePresetCard({ theme, isActive, onClick }: ThemePresetCardPro
         <span className="font-outfit font-bold text-foreground text-[11px] truncate">{theme.name}</span>
         {isActive && <span className="text-[9px] text-indigo-600 font-bold shrink-0 ml-1">✓</span>}
       </div>
-      
+
       <div className="mt-2 flex items-center gap-1">
         <div className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: theme.primaryColor }} title="Primary" />
         <div className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: theme.backgroundColor }} title="Background" />

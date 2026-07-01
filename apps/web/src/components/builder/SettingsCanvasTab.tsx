@@ -1,77 +1,150 @@
 import React from "react";
-import { CheckCircle2, Send } from "lucide-react";
+import { CheckCircle2, Send, Copy, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface SettingsCanvasTabProps {
   visibility: "draft" | "public" | "unlisted";
-  setVisibility: (mode: "draft" | "public" | "unlisted") => void;
+  onSaveVisibility: (v: "draft" | "public" | "unlisted") => Promise<void>;
   layoutMode?: "standard" | "single_field" | "custom_steps";
   setLayoutMode?: (mode: "standard" | "single_field" | "custom_steps") => void;
   slug: string;
-  setSlug: (slug: string) => void;
+  initialSlug: string;
+  onSaveSlug: (slug: string) => Promise<void>;
+  onValidateSlug: (slug: string) => Promise<"available" | "taken" | "invalid" | "network_error">;
   telegramEnabled: boolean;
-  setTelegramEnabled: (v: boolean) => void;
+  onSaveTelegram: (telegram: { enabled: boolean; chatId?: string; chatName?: string }) => Promise<void>;
   telegramChatId: string;
-  setTelegramChatId: (v: string) => void;
   telegramChatName: string;
-  setTelegramChatName: (v: string) => void;
   formId: string;
   allowedDomainsText: string;
   handleDomainsChange: (text: string) => void;
+  onSaveAllowedDomains: (domains: string[]) => Promise<void>;
   manualChatIdInput: string;
   setManualChatIdInput: (val: string) => void;
-  handleSaveSettings: (e: React.FormEvent) => void;
+  publicFormUrl: string;
 }
 
 export function SettingsCanvasTab({
   visibility,
-  setVisibility,
+  onSaveVisibility,
   layoutMode,
   setLayoutMode,
   slug,
-  setSlug,
+  initialSlug,
+  onSaveSlug,
+  onValidateSlug,
   telegramEnabled,
-  setTelegramEnabled,
+  onSaveTelegram,
   telegramChatId,
-  setTelegramChatId,
   telegramChatName,
-  setTelegramChatName,
   formId,
   allowedDomainsText,
   handleDomainsChange,
+  onSaveAllowedDomains,
   manualChatIdInput,
   setManualChatIdInput,
-  handleSaveSettings,
+  publicFormUrl,
 }: SettingsCanvasTabProps) {
   const t = useTranslations("Builder");
   const tCommon = useTranslations("Common");
 
+  const [tempSlug, setTempSlug] = React.useState(slug);
+  const [slugStatus, setSlugStatus] = React.useState<"idle" | "checking" | "available" | "taken" | "invalid" | "network_error">("idle");
+  const [isSavingSlug, setIsSavingSlug] = React.useState(false);
+  const [isCopied, setIsCopied] = React.useState(false);
+
+  React.useEffect(() => {
+    setTempSlug(slug);
+  }, [slug]);
+
+  React.useEffect(() => {
+    const trimmed = tempSlug.trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+    if (trimmed !== tempSlug) {
+      setTempSlug(trimmed);
+      return;
+    }
+
+    if (trimmed === initialSlug) {
+      setSlugStatus("idle");
+      return;
+    }
+
+    if (trimmed.length < 3 || !/^[a-z0-9-]+$/.test(trimmed)) {
+      setSlugStatus("invalid");
+      return;
+    }
+
+    setSlugStatus("checking");
+    const timeout = setTimeout(async () => {
+      const status = await onValidateSlug(trimmed);
+      setSlugStatus(status);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [tempSlug, initialSlug, onValidateSlug]);
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(publicFormUrl);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+      toast.success("Form URL copied to clipboard!");
+    } catch (err) {
+      toast.error("Failed to copy URL");
+    }
+  };
+
+  const handleSaveSlugClick = async () => {
+    if (slugStatus !== "available") return;
+    setIsSavingSlug(true);
+    try {
+      await onSaveSlug(tempSlug);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save slug");
+    } finally {
+      setIsSavingSlug(false);
+    }
+  };
+
+  const handleDomainsBlur = () => {
+    const domains = allowedDomainsText
+      .split(",")
+      .map((d) => d.trim().toLowerCase())
+      .filter(Boolean);
+    onSaveAllowedDomains(domains);
+  };
+
+  const slugBorderColor =
+    slugStatus === "available" ? "border-emerald-500 focus-within:ring-emerald-500/20" :
+    slugStatus === "taken" || slugStatus === "invalid" ? "border-rose-500 focus-within:ring-rose-500/20" :
+    slugStatus === "network_error" ? "border-amber-500 focus-within:ring-amber-500/20" :
+    "border-border";
+
   return (
-    <form onSubmit={handleSaveSettings} className="backdrop-blur-[1px] p-4 rounded-3xl border border-border/70 space-y-5 flex flex-col gap-2 text-xs text-muted-foreground font-semibold">
+    <div className="backdrop-blur-[1px] p-4 rounded-3xl border border-border/70 space-y-5 flex flex-col gap-2 text-xs text-muted-foreground font-semibold">
+      {/* Visibility Toggle */}
       <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-        <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-2">Visibility Mode</label>
-        <div className="grid grid-cols-2 gap-2">
-          {(["public", "unlisted"] as const).map((mode) => (
-            <Button
-              key={mode}
-              type="button"
-              variant={visibility === mode ? "default" : "outline"}
-              onClick={() => setVisibility(mode)}
-              className={`h-9 w-full font-bold text-xs capitalize transition-colors rounded-xl`}
-            >
-              {mode}
-            </Button>
-          ))}
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <label className="text-xs font-bold text-foreground capitalize tracking-wider block">Public Visibility</label>
+            <p className="text-[11px] font-normal leading-normal text-muted-foreground max-w-[280px]">
+              {visibility === "public"
+                ? "Public forms are open for anyone to view and submit responses."
+                : "Unlisted forms are private. Only the creator can view; public submissions are disabled."}
+            </p>
+          </div>
+          <Switch
+            checked={visibility === "public"}
+            onCheckedChange={(checked) => onSaveVisibility(checked ? "public" : "unlisted")}
+          />
         </div>
-        <p className="text-xs text-muted-foreground mt-2 font-normal leading-normal">
-          {visibility === "public" && "Public forms are open for anyone to view and submit responses."}
-          {visibility === "unlisted" && "Unlisted forms are private. Only the creator can view it; public submissions are disabled."}
-        </p>
       </div>
 
+      {/* Form Display Layout */}
       <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
         <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-2">Form Display Layout</label>
         <div className="grid grid-cols-3 gap-2">
@@ -85,7 +158,7 @@ export function SettingsCanvasTab({
               type="button"
               variant={layoutMode === option.mode ? "default" : "outline"}
               onClick={() => setLayoutMode && setLayoutMode(option.mode as any)}
-              className={`h-9 w-full font-bold text-xs transition-colors rounded-xl`}
+              className="h-9 w-full font-bold text-xs transition-colors rounded-xl"
             >
               {option.label}
             </Button>
@@ -98,20 +171,53 @@ export function SettingsCanvasTab({
         </p>
       </div>
 
+      {/* Custom Form URL Slug */}
       <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-        <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Custom Form URL Slug</label>
-        <div className="flex items-center rounded-xl border border-border overflow-hidden">
-          <span className="text-xs font-mono text-muted-foreground px-3 bg-muted/40 h-9 flex items-center border-r border-border">/f/</span>
-          <Input
-            type="text"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-            className="flex-1 h-9 px-3 bg-transparent border-0 text-xs text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-            placeholder="custom-slug"
-            required
-          />
+        <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1.5">Custom Form URL Slug</label>
+        <div className="flex items-center gap-2">
+          <div className={`flex-1 flex items-center rounded-xl border ${slugBorderColor} overflow-hidden bg-background/50 transition-colors`}>
+            <span className="text-xs font-mono text-muted-foreground px-3 bg-muted/40 h-9 flex items-center border-r border-border shrink-0 select-none">/f/</span>
+            <Input
+              type="text"
+              value={tempSlug}
+              onChange={(e) => setTempSlug(e.target.value)}
+              className="flex-1 h-9 px-3 bg-transparent border-0 text-xs text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none font-medium"
+              placeholder="custom-slug"
+            />
+            {/* Copy button */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={handleCopyUrl}
+              className="h-9 w-9 text-muted-foreground hover:text-foreground shrink-0 border-l border-border rounded-none"
+              title="Copy URL"
+            >
+              {isCopied ? <Check className="h-4 w-4 text-emerald-500 animate-in zoom-in duration-200" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+          {/* Direct Save Button */}
+          {tempSlug !== initialSlug && (
+            <Button
+              type="button"
+              onClick={handleSaveSlugClick}
+              disabled={slugStatus !== "available" || isSavingSlug}
+              className="h-9 px-3 font-semibold text-xs rounded-xl shrink-0 gap-1.5 min-w-[64px] transition-all animate-in fade-in zoom-in duration-200"
+            >
+              {isSavingSlug ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+            </Button>
+          )}
         </div>
-        <p className="text-xs text-muted-foreground mt-1 font-normal">Shorthand slug name. Letters, numbers, and dashes only.</p>
+
+        {/* Validation Feedback Messages */}
+        <div className="mt-1.5 text-xs font-normal leading-normal">
+          {slugStatus === "checking" && <span className="text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin inline" /> Checking availability...</span>}
+          {slugStatus === "available" && <span className="text-emerald-600 dark:text-emerald-500 font-medium">✓ Available & valid slug! Click Save to apply.</span>}
+          {slugStatus === "taken" && <span className="text-rose-600 dark:text-rose-500 font-medium">✗ This custom slug is already taken.</span>}
+          {slugStatus === "invalid" && <span className="text-rose-600 dark:text-rose-500 font-medium">✗ Must be 3+ characters and contain only lowercase letters, numbers, and dashes.</span>}
+          {slugStatus === "network_error" && <span className="text-amber-600 dark:text-amber-500 font-medium">⚠ Server connection issue. Please check your network or try again later.</span>}
+          {slugStatus === "idle" && <span className="text-muted-foreground font-normal">This is the current active slug.</span>}
+        </div>
       </div>
 
       {/* Telegram Notifications */}
@@ -125,7 +231,13 @@ export function SettingsCanvasTab({
           </div>
           <Switch
             checked={telegramEnabled}
-            onCheckedChange={setTelegramEnabled}
+            onCheckedChange={(checked) => {
+              onSaveTelegram({
+                enabled: checked,
+                chatId: telegramChatId || undefined,
+                chatName: telegramChatName || undefined
+              });
+            }}
           />
         </div>
 
@@ -146,8 +258,11 @@ export function SettingsCanvasTab({
                   type="button"
                   variant="destructive"
                   onClick={() => {
-                    setTelegramChatId("");
-                    setTelegramChatName("");
+                    onSaveTelegram({
+                      enabled: false,
+                      chatId: undefined,
+                      chatName: undefined
+                    });
                   }}
                   className="h-8 px-3 text-[10px] font-bold rounded-xl"
                 >
@@ -177,7 +292,7 @@ export function SettingsCanvasTab({
                     Connect Telegram Bot
                   </Button>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="text-xs font-bold text-muted-foreground">
                     Option 2: Manual Chat ID Connection
@@ -197,8 +312,11 @@ export function SettingsCanvasTab({
                       type="button"
                       onClick={() => {
                         if (manualChatIdInput.trim()) {
-                          setTelegramChatId(manualChatIdInput.trim());
-                          setTelegramChatName("Manual Input");
+                          onSaveTelegram({
+                            enabled: telegramEnabled,
+                            chatId: manualChatIdInput.trim(),
+                            chatName: undefined
+                          });
                         }
                       }}
                       disabled={!manualChatIdInput.trim()}
@@ -214,28 +332,21 @@ export function SettingsCanvasTab({
         )}
       </div>
 
+      {/* Allowed Embed Domains */}
       <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
         <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Allowed Embed Domains</label>
         <Input
           type="text"
           value={allowedDomainsText}
           onChange={(e) => handleDomainsChange(e.target.value)}
+          onBlur={handleDomainsBlur}
           className="h-9 px-3 bg-transparent text-xs text-foreground rounded-xl"
           placeholder="e.g. mywebsite.com, anotherdomain.com"
         />
         <p className="text-xs text-muted-foreground mt-1 font-normal leading-normal">
-          Restrict where your form can be embedded. Enter a comma-separated list of domains. Leave empty to allow embedding anywhere.
+          Restrict where your form can be embedded. Enter a comma-separated list of domains. Leave empty to allow embedding anywhere. Saves automatically on blur.
         </p>
       </div>
-
-      <div className="flex gap-3 justify-end pt-4">
-        <Button
-          type="submit"
-          className="h-9 px-4 font-semibold text-xs rounded-xl"
-        >
-          {tCommon("save")}
-        </Button>
-      </div>
-    </form>
+    </div>
   );
 }

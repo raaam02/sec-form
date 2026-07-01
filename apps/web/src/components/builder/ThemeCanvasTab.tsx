@@ -64,7 +64,7 @@ export function ThemeCanvasTab({
       {/* Custom Theme Editor */}
       <div className="backdrop-blur-[1px] p-6 rounded-3xl border border-border/70 bg-card/20 space-y-6">
         <h3 className="font-outfit font-extrabold text-foreground text-base">Custom Styling</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="grid grid-cols-1 gap-4">
             {CUSTOM_EDITOR_FIELDS.map((field) => (
@@ -92,7 +92,7 @@ export function ThemeCanvasTab({
                 ].map((radius) => (
                   <motion.button
                     key={radius.value}
-                    whileHover={{ scale: 1.02, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
+                    // whileHover={{ scale: 1.02, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
                     whileTap={{ scale: 0.98, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                     onClick={() => {
                       const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", borderRadius: radius.value } as ThemeConfig;
@@ -139,7 +139,7 @@ export function ThemeCanvasTab({
           {BUILTIN_THEMES.map((theme) => (
             <motion.div
               key={theme.id}
-              whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+              // whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
               whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
             >
               <ThemePresetCard

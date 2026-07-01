@@ -26,7 +26,15 @@ interface BuilderCanvasProps {
   handleDragReorder?: (oldIndex: number, newIndex: number) => void;
   handleDeleteField: (id: string) => void;
   handleUpdateField: (id: string, updates: Partial<FormField>) => void;
-  saveForm: (fields: FormField[], updatedTheme?: any, updatedLayoutMode?: "standard" | "single_field" | "custom_steps") => void;
+  saveForm: (
+    updatedFields: FormField[],
+    updatedTheme?: any,
+    updatedLayoutMode?: "standard" | "single_field" | "custom_steps",
+    updatedVisibility?: "draft" | "public" | "unlisted",
+    updatedSlug?: string,
+    updatedTelegram?: { enabled: boolean; chatId?: string; chatName?: string },
+    updatedAllowedDomains?: string[]
+  ) => void;
   responses: any;
   isResponsesLoading: boolean;
   handleExportCSV: () => void;
@@ -37,25 +45,24 @@ interface BuilderCanvasProps {
   insightsError: string;
   handleGenerateInsights: () => void;
   visibility: "draft" | "public" | "unlisted";
-  setVisibility: (mode: "draft" | "public" | "unlisted") => void;
+  onSaveVisibility: (mode: "draft" | "public" | "unlisted") => Promise<void>;
   layoutMode?: "standard" | "single_field" | "custom_steps";
   setLayoutMode?: (mode: "standard" | "single_field" | "custom_steps") => void;
   slug: string;
-  setSlug: (slug: string) => void;
-  handleSaveSettings: (e: React.FormEvent) => void;
+  initialSlug: string;
+  onSaveSlug: (slug: string) => Promise<void>;
+  onValidateSlug: (slug: string) => Promise<"available" | "taken" | "invalid" | "network_error">;
   handleUndo: () => void;
   handleRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
   telegramEnabled: boolean;
-  setTelegramEnabled: (v: boolean) => void;
+  onSaveTelegram: (telegram: { enabled: boolean; chatId?: string; chatName?: string }) => Promise<void>;
   telegramChatId: string;
-  setTelegramChatId: (v: string) => void;
   telegramChatName: string;
-  setTelegramChatName: (v: string) => void;
   formId: string;
   allowedDomains?: string[];
-  setAllowedDomains?: (domains: string[]) => void;
+  onSaveAllowedDomains: (domains: string[]) => Promise<void>;
   activeTheme: any;
   setActiveTheme: (theme: any) => void;
   pushToHistory?: (fields: FormField[], theme: any | null) => void;
@@ -79,25 +86,24 @@ export function BuilderCanvas({
   handleUpdateField,
   saveForm,
   visibility,
-  setVisibility,
+  onSaveVisibility,
   layoutMode,
   setLayoutMode,
   slug,
-  setSlug,
-  handleSaveSettings,
+  initialSlug,
+  onSaveSlug,
+  onValidateSlug,
   handleUndo,
   handleRedo,
   canUndo,
   canRedo,
   telegramEnabled,
-  setTelegramEnabled,
+  onSaveTelegram,
   telegramChatId,
-  setTelegramChatId,
   telegramChatName,
-  setTelegramChatName,
   formId,
   allowedDomains,
-  setAllowedDomains,
+  onSaveAllowedDomains,
   activeTheme,
   setActiveTheme,
   pushToHistory,
@@ -121,13 +127,6 @@ export function BuilderCanvas({
 
   const handleDomainsChange = (text: string) => {
     setAllowedDomainsText(text);
-    const parsed = text
-      .split(",")
-      .map((d) => d.trim().toLowerCase())
-      .filter(Boolean);
-    if (setAllowedDomains) {
-      setAllowedDomains(parsed);
-    }
   };
 
   const { theme } = useTheme();
@@ -219,29 +218,30 @@ export function BuilderCanvas({
           <div className="max-w-xl mx-auto space-y-6">
             <SettingsCanvasTab
               visibility={visibility}
-              setVisibility={setVisibility}
+              onSaveVisibility={onSaveVisibility}
               layoutMode={layoutMode}
               setLayoutMode={setLayoutMode}
               slug={slug}
-              setSlug={setSlug}
+              initialSlug={initialSlug}
+              onSaveSlug={onSaveSlug}
+              onValidateSlug={onValidateSlug}
               telegramEnabled={telegramEnabled}
-              setTelegramEnabled={setTelegramEnabled}
+              onSaveTelegram={onSaveTelegram}
               telegramChatId={telegramChatId}
-              setTelegramChatId={setTelegramChatId}
               telegramChatName={telegramChatName}
-              setTelegramChatName={setTelegramChatName}
               formId={formId}
               allowedDomainsText={allowedDomainsText}
               handleDomainsChange={handleDomainsChange}
+              onSaveAllowedDomains={onSaveAllowedDomains}
               manualChatIdInput={manualChatIdInput}
               setManualChatIdInput={setManualChatIdInput}
-              handleSaveSettings={handleSaveSettings}
+              publicFormUrl={publicFormUrl}
             />
           </div>
         )}
 
         {middleTab === "embed" && (
-          <div className="max-w-2xl mx-auto space-y-6">
+          <div className="max-w-xl mx-auto space-y-6">
             <EmbedCanvasTab
               publicFormUrl={publicFormUrl}
               id={formId}
@@ -253,7 +253,7 @@ export function BuilderCanvas({
 
       {/* Floating Undo/Redo bar at bottom (desktop only, form tab) */}
       {middleTab === "form" && (
-        <div className="hidden sm:flex absolute bottom-4 right-4 z-20 items-center gap-1 bg-secondary/80 border border-border shadow-lg rounded-full px-1.5 py-1 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
+        <div className="hidden sm:flex absolute bottom-4 right-4 z-20 items-center gap-1 bg-transparent border border-border shadow-md rounded-full px-1.5 py-1 backdrop-blur-[1px] animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={handleUndo} disabled={!canUndo} className="h-7 w-7 rounded-full">
