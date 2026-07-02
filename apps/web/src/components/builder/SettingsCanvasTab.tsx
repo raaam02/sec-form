@@ -3,8 +3,10 @@ import { CheckCircle2, Send, Copy, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { ConfirmationPopover } from "@/components/ui/confirmation-popover";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface SettingsCanvasTabProps {
   visibility: "draft" | "public" | "unlisted";
@@ -26,6 +28,9 @@ interface SettingsCanvasTabProps {
   manualChatIdInput: string;
   setManualChatIdInput: (val: string) => void;
   publicFormUrl: string;
+  isTelegramSyncing?: boolean;
+  isTelegramFetching?: boolean;
+  onStartTelegramSync?: () => void;
 }
 
 export function SettingsCanvasTab({
@@ -48,6 +53,9 @@ export function SettingsCanvasTab({
   manualChatIdInput,
   setManualChatIdInput,
   publicFormUrl,
+  isTelegramSyncing,
+  isTelegramFetching,
+  onStartTelegramSync,
 }: SettingsCanvasTabProps) {
   const t = useTranslations("Builder");
   const tCommon = useTranslations("Common");
@@ -73,7 +81,7 @@ export function SettingsCanvasTab({
       return;
     }
 
-    if (trimmed.length < 3 || !/^[a-z0-9-]+$/.test(trimmed)) {
+    if (trimmed.length < 3 || !/^(?=.*[a-z0-9])[a-z0-9-]+$/.test(trimmed)) {
       setSlugStatus("invalid");
       return;
     }
@@ -130,17 +138,37 @@ export function SettingsCanvasTab({
       <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <label className="text-xs font-bold text-foreground capitalize tracking-wider block">Public Visibility</label>
-            <p className="text-[11px] font-normal leading-normal text-muted-foreground max-w-[280px]">
+            <label className="text-xs font-bold text-foreground capitalize tracking-wider block">
+              {visibility === "public" ? t("public_visibility") : t("unlisted_visibility")}
+            </label>
+            <p className="text-xs font-normal leading-normal text-muted-foreground max-w-[280px]">
               {visibility === "public"
                 ? "Public forms are open for anyone to view and submit responses."
                 : "Unlisted forms are private. Only the creator can view; public submissions are disabled."}
             </p>
           </div>
-          <Switch
-            checked={visibility === "public"}
-            onCheckedChange={(checked) => onSaveVisibility(checked ? "public" : "unlisted")}
-          />
+          {visibility === "public" ? (
+            <ConfirmationPopover
+              onConfirm={() => onSaveVisibility("unlisted")}
+              title="Unlist Form?"
+              description="Are you sure you want to unlist this form? Public submissions will be disabled."
+              confirmText="Unlist"
+              cancelText="Cancel"
+            >
+              <div className="cursor-pointer">
+                <Switch checked={true} className="pointer-events-none" />
+              </div>
+            </ConfirmationPopover>
+          ) : (
+            <Switch
+              checked={false}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  onSaveVisibility("public");
+                }
+              }}
+            />
+          )}
         </div>
       </div>
 
@@ -285,11 +313,29 @@ export function SettingsCanvasTab({
                     onClick={() => {
                       const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || "FormuAIBot";
                       window.open(`https://t.me/${botName}?start=${formId}`, "_blank");
+                      onStartTelegramSync?.();
                     }}
-                    className="h-8 px-3 font-bold text-[10px] uppercase rounded-xl flex items-center justify-center gap-1.5"
+                    disabled={isTelegramSyncing}
+                    className="h-8 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 min-w-[170px]"
                   >
-                    <Send className="h-3.5 w-3.5" />
-                    Connect Telegram Bot
+                    {isTelegramSyncing ? (
+                      isTelegramFetching ? (
+                        <>
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />
+                          Checking...
+                        </>
+                      ) : (
+                        <>
+                          <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping shrink-0" />
+                          Connecting...
+                        </>
+                      )
+                    ) : (
+                      <>
+                        <Send className="h-3.5 w-3.5" />
+                        Connect Telegram Bot
+                      </>
+                    )}
                   </Button>
                 </div>
 
@@ -297,7 +343,9 @@ export function SettingsCanvasTab({
                   <div className="text-xs font-bold text-muted-foreground">
                     Option 2: Manual Chat ID Connection
                     <p className="mt-0.5 text-xs text-muted-foreground font-normal leading-normal">
-                      Or enter your Telegram Chat ID manually. You can get your Chat ID by messaging the bot <code>@userinfobot</code> on Telegram.
+                      Or enter your Telegram Chat ID manually. You can get your Chat ID by messaging the bot @
+                        <Link className="underline" target="_blank" href="https://t.me/userinfobot">userinfobot </Link>
+                      on Telegram.
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -320,7 +368,7 @@ export function SettingsCanvasTab({
                         }
                       }}
                       disabled={!manualChatIdInput.trim()}
-                      className="h-9 px-4 font-bold text-[10px] uppercase rounded-xl shrink-0"
+                      className="h-9 px-4 font-bold text-xs rounded-xl shrink-0"
                     >
                       Link Chat
                     </Button>

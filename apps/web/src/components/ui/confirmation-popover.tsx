@@ -33,9 +33,9 @@ export function ConfirmationPopover({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent 
-        className="w-72 p-4 rounded-xl border border-border shadow-lg" 
-        side="top" 
+      <PopoverContent
+        className="w-72 p-4 rounded-xl border border-border shadow-lg"
+        side="top"
         align="center"
         onClick={(e) => e.stopPropagation()}
       >
@@ -55,7 +55,7 @@ export function ConfirmationPopover({
           </div>
           <div className="flex items-center justify-end gap-2 mt-4">
             <motion.div
-              whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
+              // whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
               whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
             >
               <Button variant="outline" size="sm" onClick={() => setOpen(false)} className="h-8 px-3 text-xs">
@@ -63,7 +63,7 @@ export function ConfirmationPopover({
               </Button>
             </motion.div>
             <motion.div
-              whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
+              // whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
               whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
             >
               <Button variant="destructive" size="sm" onClick={handleConfirm} className="h-8 px-3 text-xs">

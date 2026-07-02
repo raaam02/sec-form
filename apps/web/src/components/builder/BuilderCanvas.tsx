@@ -68,6 +68,9 @@ interface BuilderCanvasProps {
   pushToHistory?: (fields: FormField[], theme: any | null) => void;
   publicFormUrl: string;
   hostOrigin: string;
+  isTelegramSyncing?: boolean;
+  isTelegramFetching?: boolean;
+  onStartTelegramSync?: () => void;
 }
 
 export function BuilderCanvas({
@@ -109,6 +112,9 @@ export function BuilderCanvas({
   pushToHistory,
   publicFormUrl,
   hostOrigin,
+  isTelegramSyncing,
+  isTelegramFetching,
+  onStartTelegramSync,
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
 
@@ -236,6 +242,9 @@ export function BuilderCanvas({
               manualChatIdInput={manualChatIdInput}
               setManualChatIdInput={setManualChatIdInput}
               publicFormUrl={publicFormUrl}
+              isTelegramSyncing={isTelegramSyncing}
+              isTelegramFetching={isTelegramFetching}
+              onStartTelegramSync={onStartTelegramSync}
             />
           </div>
         )}

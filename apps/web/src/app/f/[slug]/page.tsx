@@ -280,7 +280,7 @@ export default function PublicFormPage() {
   }
 
   // Handle visibility error blocks
-  if (error || !form) {
+  if (error || !form || form?.visibility !== "public") {
     const isNotPublicError = error?.message?.includes("not public") || error?.message?.includes("draft") || (form && form.visibility !== "public");
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6 gap-4 text-center">

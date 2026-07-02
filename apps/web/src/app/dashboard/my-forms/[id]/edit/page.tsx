@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/utils/trpc";
@@ -47,6 +47,16 @@ export default function BuilderPage() {
 
   const [localForm, setLocalForm] = useState<LocalForm | null>(null);
   const [hasLoadedLocal, setHasLoadedLocal] = useState(false);
+  const [isSyncingTelegram, setIsSyncingTelegram] = useState(false);
+  const telegramSyncTimeoutRef = useRef<any>(null);
+
+  useEffect(() => {
+    return () => {
+      if (telegramSyncTimeoutRef.current) {
+        clearTimeout(telegramSyncTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -59,13 +69,13 @@ export default function BuilderPage() {
   }, [id]);
 
   // Queries
-  const { data: form, isLoading: isFormLoading, error: formError } = trpcAny.forms.get.useQuery(
+  const { data: form, isLoading: isFormLoading, error: formError, isFetching } = trpcAny.forms.get.useQuery(
     { id },
     {
       enabled: !isDemo || (!hasLoadedLocal ? false : !localForm),
       refetchInterval: (data: any) => {
         const telegram = (data?.schemaJson as any)?.telegram;
-        return (telegram?.enabled && !telegram?.chatId) ? 3000 : false;
+        return (isSyncingTelegram && telegram?.enabled && !telegram?.chatId) ? 3000 : false;
       }
     }
   );
@@ -283,6 +293,13 @@ export default function BuilderPage() {
         if (newId !== prevId) {
           setTelegramChatName(telegram.chatName || "");
           setTelegramEnabled(telegram.enabled || false);
+          if (newId) {
+            setIsSyncingTelegram(false);
+            if (telegramSyncTimeoutRef.current) {
+              clearTimeout(telegramSyncTimeoutRef.current);
+              telegramSyncTimeoutRef.current = null;
+            }
+          }
           return newId;
         }
         return prevId;
@@ -696,7 +713,7 @@ export default function BuilderPage() {
   };
 
   const onValidateSlug = async (slugToCheck: string): Promise<"available" | "taken" | "invalid" | "network_error"> => {
-    if (!/^[a-z0-9-]+$/.test(slugToCheck) || slugToCheck.length < 3) {
+    if (!/^(?=.*[a-z0-9])[a-z0-9-]+$/.test(slugToCheck) || slugToCheck.length < 3) {
       return "invalid";
     }
     const currentSavedSlug = localForm?.slug || activeForm?.slug || "";
@@ -706,9 +723,9 @@ export default function BuilderPage() {
 
     const isNetworkOrServerError = (err: any) => {
       const msg = err.message?.toLowerCase() || "";
-      return msg.includes("failed to fetch") || 
-             msg.includes("fetch failed") || 
-             msg.includes("econnrefused") || 
+      return msg.includes("failed to fetch") ||
+             msg.includes("fetch failed") ||
+             msg.includes("econnrefused") ||
              msg.includes("network error") ||
              msg.includes("load failed") ||
              msg.includes("internal server error") ||
@@ -722,7 +739,7 @@ export default function BuilderPage() {
       const conflict = localForms.some(f => f.slug === slugToCheck && f.id !== id);
       if (conflict) return "taken";
       try {
-        const dbForm = await trpcAny.forms.getBySlug.fetch({ slug: slugToCheck });
+        const dbForm = await utils.client.forms.getBySlug.query({ slug: slugToCheck });
         if (dbForm && dbForm.id !== id) return "taken";
       } catch (e: any) {
         if (isNetworkOrServerError(e)) return "network_error";
@@ -732,7 +749,7 @@ export default function BuilderPage() {
       return "available";
     } else {
       try {
-        const dbForm = await trpcAny.forms.getBySlug.fetch({ slug: slugToCheck });
+        const dbForm = await utils.client.forms.getBySlug.query({ slug: slugToCheck });
         if (dbForm && dbForm.id !== id) return "taken";
         return "available";
       } catch (e: any) {
@@ -745,6 +762,13 @@ export default function BuilderPage() {
 
   const onSaveTelegram = async (updatedTelegram: { enabled: boolean; chatId?: string; chatName?: string }) => {
     setTelegramEnabled(updatedTelegram.enabled);
+    if (!updatedTelegram.enabled) {
+      setIsSyncingTelegram(false);
+      if (telegramSyncTimeoutRef.current) {
+        clearTimeout(telegramSyncTimeoutRef.current);
+        telegramSyncTimeoutRef.current = null;
+      }
+    }
     if (updatedTelegram.chatId !== undefined) {
       setTelegramChatId(updatedTelegram.chatId);
     }
@@ -752,7 +776,16 @@ export default function BuilderPage() {
       setTelegramChatName(updatedTelegram.chatName);
     }
     await saveForm(fields, activeTheme, layoutMode, visibility, slug, updatedTelegram);
-    toast.success("Telegram notification settings updated.");
+
+    if (updatedTelegram.enabled) {
+      if (updatedTelegram.chatId) {
+        toast.success("Telegram notifications enabled and linked successfully!");
+      } else {
+        toast.info("Telegram notifications enabled! Please connect a chat below to receive alerts.");
+      }
+    } else {
+      toast.success("Telegram notifications disabled.");
+    }
   };
 
   const onSaveAllowedDomains = async (domains: string[]) => {
@@ -852,6 +885,22 @@ export default function BuilderPage() {
   const hostOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
   const publicFormUrl = `${hostOrigin}/f/${slug || activeForm?.slug}`;
 
+  const handleStartTelegramSync = () => {
+    if (telegramSyncTimeoutRef.current) {
+      clearTimeout(telegramSyncTimeoutRef.current);
+    }
+    setIsSyncingTelegram(true);
+    telegramSyncTimeoutRef.current = setTimeout(() => {
+      setIsSyncingTelegram((currentlySyncing) => {
+        if (currentlySyncing) {
+          toast.error("Telegram connection timed out. Please try again.");
+          return false;
+        }
+        return currentlySyncing;
+      });
+    }, 60000);
+  };
+
   return (
     <div className="h-full flex flex-col overflow-hidden text-foreground bg-transparent relative isolate">
       <NoiseBackground />
@@ -938,6 +987,9 @@ export default function BuilderPage() {
             pushToHistory={pushToHistory}
             publicFormUrl={publicFormUrl}
             hostOrigin={hostOrigin}
+            isTelegramSyncing={isSyncingTelegram}
+            isTelegramFetching={isFetching}
+            onStartTelegramSync={handleStartTelegramSync}
           />
         </div>
 
@@ -1055,6 +1107,9 @@ export default function BuilderPage() {
                 pushToHistory={pushToHistory}
                 publicFormUrl={publicFormUrl}
                 hostOrigin={hostOrigin}
+                isTelegramSyncing={isSyncingTelegram}
+                isTelegramFetching={isFetching}
+                onStartTelegramSync={handleStartTelegramSync}
               />
             </div>
           )}
