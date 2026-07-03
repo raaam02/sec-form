@@ -118,22 +118,11 @@ export function BuilderCanvas({
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
 
-  const [allowedDomainsText, setAllowedDomainsText] = React.useState("");
   const [manualChatIdInput, setManualChatIdInput] = React.useState(telegramChatId || "");
-
-  React.useEffect(() => {
-    if (allowedDomains) {
-      setAllowedDomainsText(allowedDomains.join(", "));
-    }
-  }, [allowedDomains]);
 
   React.useEffect(() => {
     setManualChatIdInput(telegramChatId || "");
   }, [telegramChatId]);
-
-  const handleDomainsChange = (text: string) => {
-    setAllowedDomainsText(text);
-  };
 
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -236,8 +225,7 @@ export function BuilderCanvas({
               telegramChatId={telegramChatId}
               telegramChatName={telegramChatName}
               formId={formId}
-              allowedDomainsText={allowedDomainsText}
-              handleDomainsChange={handleDomainsChange}
+              allowedDomains={allowedDomains || []}
               onSaveAllowedDomains={onSaveAllowedDomains}
               manualChatIdInput={manualChatIdInput}
               setManualChatIdInput={setManualChatIdInput}

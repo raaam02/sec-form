@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, Send, Copy, Check, Loader2 } from "lucide-react";
+import { CheckCircle2, Send, Copy, Check, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -22,8 +22,7 @@ interface SettingsCanvasTabProps {
   telegramChatId: string;
   telegramChatName: string;
   formId: string;
-  allowedDomainsText: string;
-  handleDomainsChange: (text: string) => void;
+  allowedDomains: string[];
   onSaveAllowedDomains: (domains: string[]) => Promise<void>;
   manualChatIdInput: string;
   setManualChatIdInput: (val: string) => void;
@@ -47,8 +46,7 @@ export function SettingsCanvasTab({
   telegramChatId,
   telegramChatName,
   formId,
-  allowedDomainsText,
-  handleDomainsChange,
+  allowedDomains,
   onSaveAllowedDomains,
   manualChatIdInput,
   setManualChatIdInput,
@@ -118,12 +116,53 @@ export function SettingsCanvasTab({
     }
   };
 
-  const handleDomainsBlur = () => {
-    const domains = allowedDomainsText
-      .split(",")
-      .map((d) => d.trim().toLowerCase())
-      .filter(Boolean);
-    onSaveAllowedDomains(domains);
+  const [domainInputs, setDomainInputs] = React.useState<string[]>(allowedDomains || []);
+
+  React.useEffect(() => {
+    if (allowedDomains) {
+      setDomainInputs(allowedDomains);
+    }
+  }, [allowedDomains]);
+
+  const cleanDomain = (value: string) => {
+    let cleaned = value.trim();
+    cleaned = cleaned.replace(/^(https?:\/\/)?(www\.)?/, "");
+    cleaned = cleaned.split("/")[0];
+    cleaned = cleaned.split("?")[0];
+    return cleaned.toLowerCase();
+  };
+
+  const isValidDomain = (d: string) => {
+    if (!d) return true;
+    return /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(cleanDomain(d));
+  };
+
+  const handleDomainInputChange = (index: number, val: string) => {
+    const updated = [...domainInputs];
+    updated[index] = val;
+    setDomainInputs(updated);
+  };
+
+  const handleDomainInputBlur = () => {
+    const validDomains = domainInputs
+      .map(cleanDomain)
+      .filter((d) => d && /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(d));
+    onSaveAllowedDomains(validDomains);
+  };
+
+  const addDomainInput = () => {
+    if (domainInputs.length < 4) {
+      setDomainInputs([...domainInputs, ""]);
+    }
+  };
+
+  const removeDomainInput = (index: number) => {
+    const updated = domainInputs.filter((_, i) => i !== index);
+    setDomainInputs(updated);
+    const validDomains = updated
+      .map(cleanDomain)
+      .filter((d) => d && /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(d));
+    onSaveAllowedDomains(validDomains);
   };
 
   const slugBorderColor =
@@ -381,19 +420,68 @@ export function SettingsCanvasTab({
       </div>
 
       {/* Allowed Embed Domains */}
-      <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-        <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Allowed Embed Domains</label>
-        <Input
-          type="text"
-          value={allowedDomainsText}
-          onChange={(e) => handleDomainsChange(e.target.value)}
-          onBlur={handleDomainsBlur}
-          className="h-9 px-3 bg-transparent text-xs text-foreground rounded-xl"
-          placeholder="e.g. mywebsite.com, anotherdomain.com"
-        />
-        <p className="text-xs text-muted-foreground mt-1 font-normal leading-normal">
-          Restrict where your form can be embedded. Enter a comma-separated list of domains. Leave empty to allow embedding anywhere. Saves automatically on blur.
-        </p>
+      <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px] space-y-3">
+        <div>
+          <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Allowed Embed Domains</label>
+          <p className="text-xs text-muted-foreground font-normal leading-normal">
+            Restrict where your form can be embedded. Enter specific domains (max 4). Leave empty to allow embedding anywhere.
+          </p>
+        </div>
+
+        {domainInputs.length === 0 ? (
+          <p className="text-xs font-normal text-muted-foreground italic py-1">
+            Embedding is allowed anywhere.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {domainInputs.map((domain, index) => {
+              const valid = isValidDomain(domain);
+              return (
+                <div key={index} className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      value={domain}
+                      onChange={(e) => handleDomainInputChange(index, e.target.value)}
+                      onBlur={handleDomainInputBlur}
+                      placeholder="e.g. mywebsite.com"
+                      className={`h-9 px-3 bg-muted/40 text-xs text-foreground rounded-xl flex-1 focus-visible:ring-1 transition-colors ${
+                        !valid ? "border-rose-500 focus-visible:ring-rose-500/30" : "border-border focus-visible:ring-primary/30"
+                      }`}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeDomainInput(index)}
+                      className="h-9 w-9 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  {!valid && (
+                    <p className="text-[10px] text-rose-500 font-medium pl-1">
+                      Invalid domain format (e.g. example.com). Protocol and paths will be stripped.
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {domainInputs.length < 4 && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addDomainInput}
+            className="h-8 px-3 font-semibold text-xs rounded-xl flex items-center gap-1.5 w-fit"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add Domain
+          </Button>
+        )}
       </div>
     </div>
   );
