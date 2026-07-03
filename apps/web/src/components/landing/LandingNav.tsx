@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { motion } from "motion/react";
 import { Code, Github } from "lucide-react";
@@ -10,19 +10,41 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
 
+let isFirstMount = true;
+
 export function LandingNav() {
   const { data: session } = useSession();
+  const [shouldAnimate] = React.useState(isFirstMount);
+
+  const [isScrolled, setIsScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    isFirstMount = false;
+
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 15);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Check initial scroll position immediately
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
   const router = useRouter();
+  const pathname = usePathname();
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
   const t = useTranslations("Landing");
 
   const handleDemoLogin = async () => {
     setIsLoggingIn(true);
     try {
-      await signIn("credentials", { 
-        email: "demo@demo.com", 
-        password: "demo123", 
-        callbackUrl: "/dashboard" 
+      await signIn("credentials", {
+        email: "demo@demo.com",
+        password: "demo123",
+        callbackUrl: "/dashboard"
       });
     } catch (e) {
       console.error(e);
@@ -55,22 +77,43 @@ export function LandingNav() {
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -12 }}
+      initial={shouldAnimate ? { opacity: 0, y: -12 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "tween", ease: "easeOut", duration: 0.3 }}
-      className="fixed top-4 left-0 right-0 z-50 px-4 sm:px-6"
+      className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? "top-4 px-4 sm:px-6" : "top-0 px-0"
+      }`}
     >
-      <div className="mx-auto max-w-6xl w-full rounded-2xl border border-border bg-background/80 backdrop-blur-xl">
-        <div className="flex h-14 items-center justify-between px-4 sm:px-5">
+      <div
+        className={`mx-auto w-full transition-all duration-300 ${
+          isScrolled
+            ? "max-w-6xl rounded-2xl border border-border bg-background/80 backdrop-blur-xl"
+            : "max-w-full rounded-none border-transparent bg-transparent backdrop-blur-none"
+        }`}
+      >
+        <div className={`flex h-14 items-center justify-between transition-all duration-300 container mx-auto px-4 sm:px-6 max-w-6xl`
+        }>
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5">
             <Logo size="sm" />
           </Link>
           {/* Nav */}
-          <nav className="hidden md:flex gap-6 text-[13px] font-medium text-muted-foreground">
-            {NAV_LINKS.map((link) => (
-              <Link key={link.href} href={link.href} target={link.target} className="hover:text-foreground transition-colors">{link.label}</Link>
-            ))}
+          <nav className="hidden md:flex gap-6 text-sm font-medium">
+            {NAV_LINKS.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  target={link.target}
+                  className={`relative py-1.5 transition-colors ${
+                    isActive ? "text-primary" : "text-muted-foreground hover:text-primary"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
           {/* Actions */}
           <div className="flex items-center gap-2">
@@ -78,7 +121,7 @@ export function LandingNav() {
               href="https://github.com/raaam02/sec-form"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-8 w-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="hidden md:flex h-8 w-8 rounded-lg items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
               title="GitHub Repository"
             >
               <Github className="h-5 w-5" />
@@ -94,7 +137,7 @@ export function LandingNav() {
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="inline-flex h-8 items-center rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="hidden md:inline-flex h-8 items-center rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
                   Log Out
                 </button>
