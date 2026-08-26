@@ -9,7 +9,7 @@ import { eq, and } from "@sec-form/db";
 import { buildSubmissionValidator } from "@sec-form/validators";
 import crypto from "crypto";
 import { cache } from "./redis";
-import { sendTelegramMessage, checkAndSendTelegramNotification } from "./services/telegramService";
+import { sendTelegramMessage, checkAndSendTelegramNotification, escapeHtml } from "./services/telegramService";
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
@@ -216,25 +216,25 @@ app.post("/api/telegram-webhook", async (req, res) => {
 
           await sendTelegramMessage(
             String(chat.id),
-            `🎉 *Success!* Your form *${form.title}* is now successfully connected to this Telegram chat.\n\nYou will receive real-time notifications here when new responses are submitted.`
+            `🎉 <b>Success!</b> Your form <i>${escapeHtml(form.title || "Untitled")}</i> is now successfully connected to this Telegram chat.\n\nYou will receive real-time notifications here when new responses are submitted.`
           );
         } else {
           await sendTelegramMessage(
             String(chat.id),
-            `❌ *Error:* Could not link form. Form with ID \`${formId}\` was not found.`
+            `❌ <b>Error:</b> Could not link form. Form with ID <code>${escapeHtml(formId)}</code> was not found.`
           );
         }
       } catch (err) {
         console.error("Telegram webhook error:", err);
         await sendTelegramMessage(
           String(chat.id),
-          `❌ *Error:* An error occurred while attempting to connect your form. Please try again.`
+          `❌ <b>Error:</b> An error occurred while attempting to connect your form. Please try again.`
         );
       }
     } else {
       await sendTelegramMessage(
         String(chat.id),
-        `👋 *Hello!* To link a form to this chat, please use the "Connect" link inside your Formu.AI Form Settings panel.`
+        `👋 <b>Hello!</b> To link a form to this chat, please use the "Connect" link inside your Formu.AI Form Settings panel.`
       );
     }
   }

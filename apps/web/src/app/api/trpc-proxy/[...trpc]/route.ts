@@ -7,14 +7,14 @@ async function handleProxy(req: NextRequest) {
   const session = await auth();
   const url = new URL(req.url);
   const path = url.pathname.replace(/^\/api\/trpc-proxy/, "");
-  
+
   const targetUrl = `${API_TRPC_URL}${path}${url.search}`;
-  
+
   const headers = new Headers();
-  
+
   // Forward critical headers
   req.headers.forEach((val, key) => {
-    if (key !== "host" && key !== "connection" && key !== "content-length") {
+    if (key !== "host" && key !== "connection" && key !== "content-length" && key !== "accept-encoding") {
       headers.set(key, val);
     }
   });
@@ -44,7 +44,7 @@ async function handleProxy(req: NextRequest) {
 
     const responseHeaders = new Headers();
     res.headers.forEach((val, key) => {
-      if (key !== "content-encoding" && key !== "transfer-encoding") {
+      if (key !== "content-encoding" && key !== "content-length" && key !== "transfer-encoding") {
         responseHeaders.set(key, val);
       }
     });

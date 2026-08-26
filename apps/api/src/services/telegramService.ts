@@ -1,14 +1,16 @@
 /**
- * Escapes Markdown special characters for Telegram legacy Markdown parse_mode.
- * In legacy Markdown, we escape '_', '*', and '['.
+ * Escapes HTML special characters for Telegram HTML parse_mode.
  */
-export function escapeMarkdown(text: string): string {
-  return text.replace(/([_*\[])/g, "\\$1");
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 /**
  * Delivers a message to a Telegram chat ID using the bot token.
- * Falls back to unformatted text if Telegram rejects the Markdown formatting.
+ * Uses HTML parse_mode. Falls back to plain text if Telegram rejects the formatting.
  */
 export async function sendTelegramMessage(chatId: string, text: string) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -20,22 +22,22 @@ export async function sendTelegramMessage(chatId: string, text: string) {
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
   try {
-    const escaped = escapeMarkdown(text);
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: chatId,
-        text: escaped,
-        parse_mode: "Markdown",
+        text: text,
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
-      console.warn(`[TelegramService] Telegram send failed with Markdown: ${errText}. Retrying as plain text...`);
+      console.warn(`[TelegramService] Telegram send failed with HTML: ${errText}. Retrying as plain text...`);
 
-      // Fallback: Send message in plain text (no Markdown formatting, no escaping)
+      // Fallback: Send message in plain text (no HTML parse mode)
       const fallbackResponse = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -73,19 +75,22 @@ export async function checkAndSendTelegramNotification(form: any, answers: Recor
   const formTitle = form.title || "Untitled Form";
   const fields = schema.fields || [];
 
-  let message = `*New Submission for:* ${formTitle}\n`;
-  message += `-----------------------------------------\n\n`;
+  const escapedTitle = escapeHtml(formTitle);
+  let message = `<b>🎉 New Submission for:</b> <i>${escapedTitle}</i>\n`;
+  message += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
   for (const field of fields) {
     const val = answers[field.id];
     if (val !== undefined && val !== null) {
       const displayValue = Array.isArray(val) ? val.join(", ") : String(val);
-      message += `*${field.label}*\n${displayValue}\n\n`;
+      const escapedLabel = escapeHtml(field.label);
+      const escapedValue = escapeHtml(displayValue);
+      message += `<b>👉 ${escapedLabel}</b>\n<code>${escapedValue}</code>\n\n`;
     }
   }
 
-  message += `-----------------------------------------\n`;
-  message += `_Sent via Formu.AI_`;
+  message += `━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  message += `<i>Sent via <a href="https://formu.ai">Formu.AI</a></i>`;
 
   // Asynchronously dispatch the notification without blocking execution
   sendTelegramMessage(chatId, message).catch((err) =>
