@@ -9,24 +9,38 @@ import { ArrowRight } from "lucide-react";
 import { HighlightedWord, OrganicBlob } from "./HandDrawn";
 import { useTranslations } from "next-intl";
 
+import { saveLocalForm } from "@/utils/localForms";
+
 export function LandingCTA() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [isLoggingIn, setIsLoggingIn] = React.useState(false);
   const t = useTranslations("Landing");
 
-  const handleDemoLogin = async () => {
-    setIsLoggingIn(true);
-    try {
-      await signIn("credentials", { 
-        email: "demo@demo.com", 
-        password: "demo123", 
-        callbackUrl: "/dashboard" 
-      });
-    } catch (e) {
-      console.error(e);
-      setIsLoggingIn(false);
-    }
+  const handleStartBuilding = () => {
+    const id = crypto.randomUUID();
+    const localForm = {
+      id,
+      title: "Untitled Form",
+      description: "",
+      slug: `form-${Math.random().toString(36).substring(2, 8)}`,
+      visibility: "draft" as const,
+      schemaJson: {
+        fields: [
+          {
+            id: crypto.randomUUID(),
+            type: "text" as const,
+            label: "Untitled Question",
+            required: false,
+            placeholder: "Type your answer here...",
+          },
+        ],
+      },
+      userId: session?.user?.id || "local-user",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    saveLocalForm(localForm);
+    router.push(`/dashboard/my-forms/${id}/edit`);
   };
 
   return (
@@ -59,11 +73,10 @@ export function LandingCTA() {
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                onClick={handleDemoLogin}
-                disabled={isLoggingIn}
-                className="inline-flex h-12 items-center gap-2.5 rounded-xl bg-primary px-8 text-[15px] font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors disabled:opacity-60"
+                onClick={handleStartBuilding}
+                className="inline-flex h-12 items-center gap-2.5 rounded-xl bg-primary px-8 text-[15px] font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
               >
-                {isLoggingIn ? t("loggingIn") : "Get started free"}
+                Create form free
                 <ArrowRight className="h-4 w-4" />
               </motion.button>
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>

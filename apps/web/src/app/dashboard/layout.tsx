@@ -21,8 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const createFormMutation = trpc.forms.create.useMutation();
 
   const handleCreateForm = async (title: string, description: string) => {
-    const isDemo = session?.user?.email === "demo@demo.com";
-    if (isDemo) {
+    if (!session?.user) {
       const id = crypto.randomUUID();
       const localForm = {
         id,
@@ -37,11 +36,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               type: "text" as const,
               label: "Untitled Question",
               required: false,
-              placeholder: "",
+              placeholder: "Type your answer here...",
             },
           ],
         },
-        userId: "demo-user-id",
+        userId: "local-user",
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -56,17 +55,31 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     router.push(`/dashboard/builder/${form.id}`);
   };
 
-  // Redirect only when explicitly unauthenticated — never block render on "loading"
+  // Redirect unauthenticated users only when trying to access protected dashboard pages (not builder/edit pages)
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/login?redirect=/dashboard");
+      const isBuilderOrEdit = pathname.includes("/edit") || pathname.includes("/builder/");
+      if (!isBuilderOrEdit) {
+        router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      }
     }
-  }, [status, router]);
+  }, [status, router, pathname]);
 
   // Optimistic shell: render the layout immediately.
   // While auth is loading we show a placeholder sidebar + spinner in content.
   const isAuthChecking = status === "loading";
   const user = session?.user ?? {};
+  const isBuilderPage = pathname.includes("/edit") || pathname.includes("/builder/");
+
+  if (isBuilderPage) {
+    return (
+      <div className="h-screen w-screen overflow-hidden bg-background text-foreground flex flex-col transition-all duration-300">
+        <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-transparent">
+          {children}
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-background text-foreground flex flex-col md:flex-row transition-all duration-300">

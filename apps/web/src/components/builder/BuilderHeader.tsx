@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { 
   ArrowLeft, 
   RefreshCw, 
@@ -13,7 +14,8 @@ import {
   EyeOff, 
   Lock,
   Keyboard,
-  Upload
+  Upload,
+  LogIn
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -45,6 +47,7 @@ export function BuilderHeader({
   handlePublish,
   isPublishing,
 }: BuilderHeaderProps) {
+  const { data: session } = useSession();
   const t = useTranslations("Builder");
   const showShortcutsHelp = useGlobalShortcutHelp();
   const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
@@ -57,15 +60,17 @@ export function BuilderHeader({
     }
   };
 
+  const backHref = session?.user ? "/dashboard" : "/";
+
   return (
     <header className="h-16 border-b border-border bg-sidebar px-6 shrink-0 flex items-center justify-between gap-4 transition-colors duration-200">
       <div className="flex items-center gap-3 min-w-0">
-        <Link href="/dashboard" passHref>
+        <Link href={backHref} passHref>
           <Button 
             variant="outline" 
             size="icon"
-            className="h-8 w-8 rounded-xl p-1.5 border border-border bg-card text-muted-foreground shrink-0"
-            title={t("backToDashboard")}
+            className="h-8 w-8 rounded-xl p-1.5 border border-border bg-card text-muted-foreground shrink-0 hover:text-foreground hover:bg-accent"
+            title={session?.user ? t("backToDashboard") : "Back to Home"}
             asChild
           >
             <ArrowLeft className="h-4 w-4" />
@@ -202,6 +207,19 @@ export function BuilderHeader({
           </TooltipTrigger>
           <TooltipContent>Publish changes to live form</TooltipContent>
         </Tooltip>
+
+        {!session?.user && (
+          <Link href={`/login?redirect=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname : "")}`} passHref>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-bold text-foreground transition-colors hover:bg-accent"
+            >
+              <LogIn className="h-3.5 w-3.5 text-primary" />
+              <span>Log In</span>
+            </Button>
+          </Link>
+        )}
       </div>
     </header>
   );

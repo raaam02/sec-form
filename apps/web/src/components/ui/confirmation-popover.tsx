@@ -36,18 +36,18 @@ export function ConfirmationPopover({
       <PopoverContent
         className="w-72 p-4 rounded-xl border border-border shadow-lg"
         side="top"
-        align="center"
+        align="end"
         onClick={(e) => e.stopPropagation()}
       >
         <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 4 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.14 }}
+          // initial={{ opacity: 0, scale: 0.96, y: 2 }}
+          // animate={{ opacity: 1, scale: 1, y: 0 }}
+          // transition={{ type: "tween" as const, ease: "linear" as const, duration: 0.14 }}
         >
           <div className="flex gap-3">
-            <div className="flex-shrink-0 mt-0.5">
+            {/*<div className="flex-shrink-0 mt-0.5">
               <AlertCircle className="h-5 w-5 text-destructive" />
-            </div>
+            </div>*/}
             <div className="flex-1 space-y-1">
               <h4 className="font-semibold text-sm leading-none">{title}</h4>
               <p className="text-xs text-muted-foreground">{description}</p>
@@ -58,7 +58,7 @@ export function ConfirmationPopover({
               // whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
               whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
             >
-              <Button variant="outline" size="sm" onClick={() => setOpen(false)} className="h-8 px-3 text-xs">
+              <Button variant="outline" size="xs" onClick={() => setOpen(false)}>
                 {cancelText}
               </Button>
             </motion.div>
@@ -66,7 +66,7 @@ export function ConfirmationPopover({
               // whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
               whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
             >
-              <Button variant="destructive" size="sm" onClick={handleConfirm} className="h-8 px-3 text-xs">
+              <Button variant="destructive" size="xs" onClick={handleConfirm} className="border border-border">
                 {confirmText}
               </Button>
             </motion.div>

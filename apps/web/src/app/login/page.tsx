@@ -261,7 +261,7 @@ function LoginForm() {
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setFocusedField("email")}
                     onBlur={() => setFocusedField("none")}
-                    placeholder="demo@demo.com"
+                    placeholder="you@example.com"
                     className="w-full h-11 px-3 pl-10 rounded-xl border border-border bg-background text-foreground text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                     required
                   />
@@ -283,7 +283,7 @@ function LoginForm() {
                     onBlur={() => setFocusedField("none")}
                     onKeyDown={checkCapsLock}
                     onKeyUp={checkCapsLock}
-                    placeholder="demo123"
+                    placeholder="••••••••"
                     className="w-full h-11 px-3 pl-10 pr-20 rounded-xl border border-border bg-background text-foreground text-sm transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/40"
                     required
                   />
@@ -365,22 +365,6 @@ function LoginForm() {
             </motion.div>
           </Card>
 
-          {/* Demo credentials hint */}
-          <motion.div
-            custom={7}
-            variants={fadeUp}
-            initial="hidden"
-            animate="visible"
-            className="text-center mt-5"
-          >
-            {/* <div className="inline-flex items-center gap-2 rounded-xl border border-primary/15 bg-primary/5 px-4 py-2.5"> */}
-              {/* <Sparkles className="h-3.5 w-3.5 text-primary" /> */}
-              <div className="text-center">
-                {/* <span className="block text-[11px] text-muted-foreground/30 mt-0.5">{t("demoTitle")}</span> */}
-                <span className="block text-[10px] text-muted-foreground/30 mt-0.5">{t("demoCredentials")}</span>
-              </div>
-            {/* </div> */}
-          </motion.div>
 
           {/* Mobile-only nav links */}
           <div className="lg:hidden mt-8 flex flex-wrap gap-4 justify-center text-xs font-semibold text-muted-foreground">

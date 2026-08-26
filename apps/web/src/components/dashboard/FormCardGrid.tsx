@@ -151,21 +151,20 @@ export function FormCardGrid({
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: "tween", ease: "linear", duration: 0.2 }}
               variants={cardVariants}
-            whileHover={{
-              y: -3,
-              boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
-              transition: { type: "tween" as const, ease: "linear" as const, duration: 0.15 }
-            }}
-            whileTap={{ scale: 0.99, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-            onClick={() => setSelectedFormForDrawer(form)}
-            className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:border-border/80 transition-colors flex flex-col justify-between relative group cursor-pointer text-card-foreground"
+              whileHover={{
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05)",
+                transition: { type: "tween" as const, ease: "linear" as const, duration: 0.15 }
+              }}
+              // whileTap={{ scale: 0.99, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+              onClick={() => setSelectedFormForDrawer(form)}
+              className="rounded-2xl border border-border bg-card p-6 shadow-sm hover:border-border/80 transition-colors flex flex-col justify-between relative group cursor-pointer text-card-foreground"
           >
             <div>
               <div className="flex items-center justify-between">
                 <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold border ${getVisibilityClass(form.visibility)}`}>
                   {form.visibility}
                 </span>
-                
+
                 {!hideDelete && (
                   <ConfirmationPopover
                     title={t("cardConfirmDelete")}
@@ -174,7 +173,7 @@ export function FormCardGrid({
                     onConfirm={() => handleDeleteForm(form.id)}
                   >
                     <motion.div
-                      whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
+                      // whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
                       whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                       onPointerDown={(e) => {
                         e.stopPropagation();
@@ -193,7 +192,7 @@ export function FormCardGrid({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-full w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-0"
+                        className="h-full w-full text-muted-foreground hover:text-destructive hover:bg-destructive/5 p-0"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

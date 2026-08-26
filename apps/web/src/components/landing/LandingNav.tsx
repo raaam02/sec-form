@@ -10,24 +10,38 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
 
+import { saveLocalForm } from "@/utils/localForms";
+
 export function LandingNav() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [isLoggingIn, setIsLoggingIn] = React.useState(false);
   const t = useTranslations("Landing");
 
-  const handleDemoLogin = async () => {
-    setIsLoggingIn(true);
-    try {
-      await signIn("credentials", { 
-        email: "demo@demo.com", 
-        password: "demo123", 
-        callbackUrl: "/dashboard" 
-      });
-    } catch (e) {
-      console.error(e);
-      setIsLoggingIn(false);
-    }
+  const handleStartBuilding = () => {
+    const id = crypto.randomUUID();
+    const localForm = {
+      id,
+      title: "Untitled Form",
+      description: "",
+      slug: `form-${Math.random().toString(36).substring(2, 8)}`,
+      visibility: "draft" as const,
+      schemaJson: {
+        fields: [
+          {
+            id: crypto.randomUUID(),
+            type: "text" as const,
+            label: "Untitled Question",
+            required: false,
+            placeholder: "Type your answer here...",
+          },
+        ],
+      },
+      userId: session?.user?.id || "local-user",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    saveLocalForm(localForm);
+    router.push(`/dashboard/my-forms/${id}/edit`);
   };
 
   const NAV_LINKS = [
@@ -110,11 +124,10 @@ export function LandingNav() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={handleDemoLogin}
-                  disabled={isLoggingIn}
-                  className="hidden sm:inline-flex h-8 items-center rounded-lg bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground px-4 text-[13px] font-semibold transition-colors disabled:opacity-60"
+                  onClick={handleStartBuilding}
+                  className="hidden sm:inline-flex h-8 items-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-4 text-[13px] font-semibold transition-colors"
                 >
-                  {isLoggingIn ? t("loggingIn") : t("tryDemo")}
+                  Create Form
                 </motion.button>
               </>
             )}

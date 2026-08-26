@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "@/utils/trpc";
 import { useSession } from "next-auth/react";
-import { getLocalForm, saveLocalForm, LocalForm, getLocalSubmissions, getLocalForms } from "@/utils/localForms";
+import { getLocalForm, saveLocalForm, deleteLocalForm, LocalForm, getLocalSubmissions, getLocalForms } from "@/utils/localForms";
 import { ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
 import { AlertCircle, Plus, Palette, Settings, Smartphone, Code } from "lucide-react";
@@ -16,6 +16,7 @@ import { BuilderSidebarLeft } from "@/components/builder/BuilderSidebarLeft";
 import { BuilderCanvas } from "@/components/builder/BuilderCanvas";
 import { BuilderSidebarRight } from "@/components/builder/BuilderSidebarRight";
 import { ShareModal } from "@/components/builder/ShareModal";
+import { PublishAuthModal } from "@/components/builder/PublishAuthModal";
 import { NoiseBackground } from "@/components/builder/NoiseBackground";
 import { useGlobalShortcut } from "@/components/providers/GlobalShortcutProvider";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
@@ -31,6 +32,7 @@ const trpcAny = trpc as any;
 const PUBLIC_FORM_LIMIT = 5;
 
 export default function BuilderPage() {
+  const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
   const id = params.id as string;
@@ -38,15 +40,17 @@ export default function BuilderPage() {
   const utils = trpcAny.useUtils();
 
   const { data: session } = useSession();
-  const isDemo = session?.user?.email === "demo@demo.com";
+  const [localForm, setLocalForm] = useState<LocalForm | null>(null);
+  const isDemo = !session?.user || !!localForm;
+  const [isPublishAuthModalOpen, setIsPublishAuthModalOpen] = useState(false);
 
   // Sub-tabs states for the three panels
   const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">("form");
   const [rightTab, setRightTab] = useState<"preview" | "embed">("preview");
   const [showRightSidebar, setShowRightSidebar] = useState(true);
 
-  const [localForm, setLocalForm] = useState<LocalForm | null>(null);
   const [hasLoadedLocal, setHasLoadedLocal] = useState(false);
+  const migrationStartedRef = useRef(false);
   const [isSyncingTelegram, setIsSyncingTelegram] = useState(false);
   const telegramSyncTimeoutRef = useRef<any>(null);
 
@@ -72,7 +76,7 @@ export default function BuilderPage() {
   const { data: form, isLoading: isFormLoading, error: formError, isFetching } = trpcAny.forms.get.useQuery(
     { id },
     {
-      enabled: !isDemo || (!hasLoadedLocal ? false : !localForm),
+      enabled: false,
       refetchInterval: (data: any) => {
         const telegram = (data?.schemaJson as any)?.telegram;
         return (isSyncingTelegram && telegram?.enabled && !telegram?.chatId) ? 3000 : false;
@@ -84,11 +88,11 @@ export default function BuilderPage() {
 
   const { data: analytics, isLoading: isAnalyticsLoading } = trpcAny.analytics.getFormAnalytics.useQuery(
     { formId: id },
-    { enabled: middleTab === "analytics" && (!isDemo || !localForm) }
+    { enabled: middleTab === "analytics" && hasLoadedLocal && !localForm && !!session?.user }
   );
   const { data: responses, isLoading: isResponsesLoading } = trpcAny.submissions.list.useQuery(
     { formId: id },
-    { enabled: middleTab === "responses" && (!isDemo || !localForm) }
+    { enabled: middleTab === "responses" && hasLoadedLocal && !localForm && !!session?.user }
   );
 
   const activeResponses = isDemo && localForm ? getLocalSubmissions(id) : responses;
@@ -101,6 +105,7 @@ export default function BuilderPage() {
   const activeIsFormLoading = isDemo ? !hasLoadedLocal || (activeForm ? false : isFormLoading) : isFormLoading;
 
   // Mutations
+  const createFormMutation = trpcAny.forms.create.useMutation();
   const updateFormMutation = trpcAny.forms.update.useMutation();
   const generateInsightsMutation = trpcAny.ai.generateInsights.useMutation();
   const exportCSVMutation = trpcAny.submissions.exportCSV.useMutation();
@@ -163,8 +168,8 @@ export default function BuilderPage() {
     }
   }, [middleTab]);
 
-  const { data: formsList } = trpcAny.forms.list.useQuery();
-  const { data: plansList } = trpcAny.admin.getPlans.useQuery();
+  const { data: formsList } = trpcAny.forms.list.useQuery(undefined, { enabled: !!session?.user && !localForm });
+  const { data: plansList } = trpcAny.admin.getPlans.useQuery(undefined, { enabled: !!session?.user });
 
   // Share state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -283,6 +288,18 @@ export default function BuilderPage() {
       setHasInitialized(true);
     }
   }, [activeForm, hasInitialized]);
+
+  // Auto-migrate local form to database when user returns logged-in
+  useEffect(() => {
+    if (session?.user && localForm && hasInitialized) {
+      if (migrationStartedRef.current) return;
+      migrationStartedRef.current = true;
+
+      const autoPublish = searchParams.get("publish") === "true";
+      const targetVisibility = autoPublish ? "public" : "unlisted";
+      handleUpdateVisibility(targetVisibility);
+    }
+  }, [session?.user, localForm, hasInitialized, searchParams]);
 
   // Sync Telegram status from activeForm in the background
   useEffect(() => {
@@ -621,60 +638,74 @@ export default function BuilderPage() {
     setVisibility(newVisibility);
     setSaveStatus("saving");
 
-    if (isDemo) {
+    if (!session?.user) {
+      const updatedLocal: LocalForm = {
+        id,
+        title,
+        description,
+        slug,
+        visibility: newVisibility,
+        schemaJson: {
+          fields,
+          layout: { mode: layoutMode }
+        },
+        themeJson: activeTheme || null,
+        userId: "local-user",
+        createdAt: activeForm?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        totalViews: activeForm?.totalViews || 0,
+        totalResponses: activeForm?.totalResponses || 0,
+      };
+      saveLocalForm(updatedLocal);
+      setLocalForm(updatedLocal);
+      setSaveStatus("saved");
+
+      if (newVisibility === "public") {
+        setIsPublishAuthModalOpen(true);
+      }
+      return;
+    }
+
+    if (localForm) {
       try {
-        const localForms = getLocalForms();
-        const conflictLocal = localForms.some(f => f.slug === slug && f.id !== id);
-        if (conflictLocal) {
-          setSaveStatus("error");
-          toast.error("This custom slug is already taken. Please choose another.");
-          return;
-        }
-
-        try {
-          const dbForm = await utils.forms.getBySlug.fetch({ slug });
-          if (dbForm && dbForm.id !== id) {
-            setSaveStatus("error");
-            toast.error("This custom slug is already taken. Please choose another.");
-            return;
-          }
-        } catch (err: any) {
-          const isNotFound = err.message?.toLowerCase().includes("not found");
-          if (!isNotFound) {
-            setSaveStatus("error");
-            toast.error("This custom slug is already taken. Please choose another.");
-            return;
-          }
-        }
-
-        const updatedLocal: LocalForm = {
-          id,
-          title,
-          description,
-          slug,
+        setSaveStatus("saving");
+        const createdDbForm = await createFormMutation.mutateAsync({
+          title: title || "Untitled Form",
+          description: description || "",
+        });
+        await updateFormMutation.mutateAsync({
+          id: createdDbForm.id,
+          title: title || "Untitled Form",
+          description: description || "",
+          slug: slug || createdDbForm.slug,
           visibility: newVisibility,
           schemaJson: {
             fields,
-            layout: { mode: layoutMode }
+            layout: { mode: layoutMode },
+            telegram: {
+              enabled: telegramEnabled,
+              chatId: telegramChatId || undefined,
+              chatName: telegramChatName || undefined,
+            },
+            allowedDomains
           },
-          themeJson: activeTheme || null,
-          userId: "demo-user-id",
-          createdAt: activeForm?.createdAt || new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          totalViews: activeForm?.totalViews || 0,
-          totalResponses: activeForm?.totalResponses || 0,
-        };
-        saveLocalForm(updatedLocal);
-        setLocalForm(updatedLocal);
+          themeJson: activeTheme || undefined,
+        });
+        if (newVisibility === "public" || newVisibility === "unlisted") {
+          await publishFormMutation.mutateAsync({ id: createdDbForm.id });
+        }
+        deleteLocalForm(id);
+        setLocalForm(null);
+        utils.forms.list.invalidate();
         setSaveStatus("saved");
-        setTimeout(() => setSaveStatus("idle"), 2500);
-
+        toast.success("🎉 Form published to your account!");
         if (newVisibility === "public") {
           setIsShareModalOpen(true);
         }
+        router.push(`/dashboard/builder/${createdDbForm.id}`);
       } catch (err: any) {
         setSaveStatus("error");
-        setSaveErrorMessage(err.message || "Failed to update visibility");
+        toast.error(err.message || "Failed to publish form");
       }
       return;
     }
@@ -1191,6 +1222,13 @@ export default function BuilderPage() {
         isOpen={isShareModalOpen}
         setIsOpen={setIsShareModalOpen}
         publicFormUrl={publicFormUrl}
+      />
+
+      {/* PUBLISH AUTH MODAL */}
+      <PublishAuthModal
+        isOpen={isPublishAuthModalOpen}
+        setIsOpen={setIsPublishAuthModalOpen}
+        formId={id}
       />
 
       {/* LIMIT MODAL */}

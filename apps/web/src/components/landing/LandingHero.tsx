@@ -83,26 +83,40 @@ const Annotation = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
+import { saveLocalForm } from "@/utils/localForms";
+
 // ─── Main Hero ───────────────────────────────────────────────────────────────
 
 export function LandingHero() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [isLoggingIn, setIsLoggingIn] = React.useState(false);
   const t = useTranslations("Landing");
 
-  const handleDemoLogin = async () => {
-    setIsLoggingIn(true);
-    try {
-      await signIn("credentials", {
-        email: "demo@demo.com",
-        password: "demo123",
-        callbackUrl: "/dashboard",
-      });
-    } catch (e) {
-      console.error(e);
-      setIsLoggingIn(false);
-    }
+  const handleStartBuilding = () => {
+    const id = crypto.randomUUID();
+    const localForm = {
+      id,
+      title: "Untitled Form",
+      description: "",
+      slug: `form-${Math.random().toString(36).substring(2, 8)}`,
+      visibility: "draft" as const,
+      schemaJson: {
+        fields: [
+          {
+            id: crypto.randomUUID(),
+            type: "text" as const,
+            label: "Untitled Question",
+            required: false,
+            placeholder: "Type your answer here...",
+          },
+        ],
+      },
+      userId: session?.user?.id || "local-user",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    saveLocalForm(localForm);
+    router.push(`/dashboard/my-forms/${id}/edit`);
   };
 
   return (
@@ -161,14 +175,10 @@ export function LandingHero() {
             {/* CTAs */}
             <motion.div variants={fadeUp} className="mt-9 flex flex-wrap gap-3 items-center justify-center">
               <Button
-                onClick={handleDemoLogin}
-                disabled={isLoggingIn}
-                className={cn("group h-12 px-7 text-[14px] font-bold shadow-lg",
-                  "shadow-primary/20 hover:bg-primary/90 transition-colors",
-                  "rounded-b-[4px] rounded-t-3xl hover:rounded-b-3xl transition-all duration-500",
-                )}
+                onClick={handleStartBuilding}
+                className="group h-12 px-8 text-[15px] font-bold bg-primary text-primary-foreground hover:bg-primary/95 transition-all rounded-full shadow-lg shadow-primary/15"
               >
-                {isLoggingIn ? t("loggingIn") : t("ctaStart")}
+                {t("ctaStart")}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
 

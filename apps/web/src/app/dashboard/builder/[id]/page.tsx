@@ -37,14 +37,14 @@ export default function BuilderPage() {
   const utils = trpcAny.useUtils();
 
   const { data: session } = useSession();
-  const isDemo = session?.user?.email === "demo@demo.com";
+  const [localForm, setLocalForm] = useState<LocalForm | null>(null);
+  const isDemo = !session?.user || !!localForm;
 
   // Sub-tabs states for the three panels
   const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">("form");
   const [rightTab, setRightTab] = useState<"preview" | "embed">("preview");
   const [showRightSidebar, setShowRightSidebar] = useState(true);
 
-  const [localForm, setLocalForm] = useState<LocalForm | null>(null);
   const [hasLoadedLocal, setHasLoadedLocal] = useState(false);
   const [isSyncingTelegram, setIsSyncingTelegram] = useState(false);
   const telegramSyncTimeoutRef = useRef<any>(null);
@@ -71,7 +71,7 @@ export default function BuilderPage() {
   const { data: form, isLoading: isFormLoading, error: formError, isFetching } = trpcAny.forms.get.useQuery(
     { id },
     {
-      enabled: !isDemo || (!hasLoadedLocal ? false : !localForm),
+      enabled: hasLoadedLocal && !localForm && !!session?.user,
       refetchInterval: (data: any) => {
         const telegram = (data?.schemaJson as any)?.telegram;
         return (isSyncingTelegram && telegram?.enabled && !telegram?.chatId) ? 3000 : false;
@@ -83,11 +83,11 @@ export default function BuilderPage() {
 
   const { data: analytics, isLoading: isAnalyticsLoading } = trpcAny.analytics.getFormAnalytics.useQuery(
     { formId: id },
-    { enabled: middleTab === "analytics" && (!isDemo || !localForm) }
+    { enabled: middleTab === "analytics" && hasLoadedLocal && !localForm && !!session?.user }
   );
   const { data: responses, isLoading: isResponsesLoading } = trpcAny.submissions.list.useQuery(
     { formId: id },
-    { enabled: middleTab === "responses" && (!isDemo || !localForm) }
+    { enabled: middleTab === "responses" && hasLoadedLocal && !localForm && !!session?.user }
   );
 
   const activeResponses = isDemo && localForm ? getLocalSubmissions(id) : responses;
@@ -162,8 +162,8 @@ export default function BuilderPage() {
     }
   }, [middleTab]);
 
-  const { data: formsList } = trpcAny.forms.list.useQuery();
-  const { data: plansList } = trpcAny.admin.getPlans.useQuery();
+  const { data: formsList } = trpcAny.forms.list.useQuery(undefined, { enabled: !!session?.user && !localForm });
+  const { data: plansList } = trpcAny.admin.getPlans.useQuery(undefined, { enabled: !!session?.user });
 
   // Share state
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);

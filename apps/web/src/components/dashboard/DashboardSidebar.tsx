@@ -49,7 +49,7 @@ export function DashboardSidebar({
     }
   }, "Navigation");
   useGlobalShortcut("nav-feedback", "alt+6", "Go to Feedback", () => router.push("/dashboard/feedback"), "Navigation");
-  
+
   useGlobalShortcut("user-settings", "alt+u", "User Settings", () => setIsUserPopoverOpen(prev => !prev), "Settings");
 
   const navItems = [
@@ -124,7 +124,6 @@ export function DashboardSidebar({
                 <Tooltip key={item.href} delayDuration={0}>
                   <TooltipTrigger asChild>
                     <motion.div
-                      whileHover={{ scale: 1.05, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
                       whileTap={{ scale: 0.95, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                     >
                       <Link
@@ -158,7 +157,6 @@ export function DashboardSidebar({
               <Tooltip key={idx} delayDuration={0}>
                 <TooltipTrigger asChild>
                   <motion.div
-                    whileHover={{ scale: 1.05, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
                     whileTap={{ scale: 0.95, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                   >
                     <Button
@@ -220,16 +218,14 @@ export function DashboardSidebar({
                 <span>Language</span>
                 <LocaleSwitcher />
               </div>
-              {user.email !== "demo@demo.com" && (
-                <Button
-                  variant="ghost"
-                  onClick={() => setIsChangePasswordModalOpen(true)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-accent hover:text-accent-foreground transition-colors text-left justify-start h-auto text-foreground"
-                >
-                  <Lock className="h-4 w-4 text-muted-foreground" />
-                  <span>Change Password</span>
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                onClick={() => setIsChangePasswordModalOpen(true)}
+                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:bg-accent hover:text-accent-foreground transition-colors text-left justify-start h-auto text-foreground"
+              >
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                <span>Change Password</span>
+              </Button>
               <Button
                 variant="ghost"
                 onClick={onSignOut}
