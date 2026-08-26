@@ -106,9 +106,9 @@ export function LandingNav() {
                 >
                   Dashboard
                 </Link>
-                <button
+                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="inline-flex h-8 items-center rounded-lg bg-primary px-4 text-[13px] font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
+                  className="inline-flex h-8 items-center rounded-lg bg-zinc-950 text-zinc-50 hover:bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-100 px-4 text-[13px] font-bold transition-colors"
                 >
                   Log Out
                 </button>
@@ -125,7 +125,7 @@ export function LandingNav() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={handleStartBuilding}
-                  className="hidden sm:inline-flex h-8 items-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-4 text-[13px] font-semibold transition-colors"
+                  className="hidden sm:inline-flex h-8 items-center rounded-lg bg-zinc-950 text-zinc-50 hover:bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-100 px-4 text-[13px] font-bold transition-colors"
                 >
                   Create Form
                 </motion.button>

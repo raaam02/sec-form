@@ -148,7 +148,7 @@ export function LandingHero() {
               target="_blank"
               rel="noopener noreferrer"
               variants={fadeUp}
-              className="inline-flex items-center gap-2.5 rounded-full border border-primary/20 bg-primary/5 hover:bg-primary/10 px-4 py-1.5 text-[11px] font-semibold text-primary tracking-wide transition-all mb-8 shadow-sm cursor-pointer group"
+              className="inline-flex items-center gap-2.5 rounded-full border border-border bg-muted/40 hover:bg-muted/60 px-4 py-1.5 text-[11px] font-semibold text-muted-foreground tracking-wide transition-all mb-8 shadow-sm cursor-pointer group"
             >
               <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span>100% Open Source AI Form Builder</span>
@@ -176,7 +176,7 @@ export function LandingHero() {
             <motion.div variants={fadeUp} className="mt-9 flex flex-wrap gap-3 items-center justify-center">
               <Button
                 onClick={handleStartBuilding}
-                className="group h-12 px-8 text-[15px] font-bold bg-primary text-primary-foreground hover:bg-primary/95 transition-all rounded-full shadow-lg shadow-primary/15"
+                className="group h-12 px-8 text-[15px] font-bold bg-zinc-950 text-zinc-50 hover:bg-zinc-900 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-100 transition-all rounded-full shadow-lg shadow-zinc-950/10 border border-zinc-800 dark:border-zinc-200"
               >
                 {t("ctaStart")}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
