@@ -65,8 +65,8 @@ const StickyNote = ({ text, bg, text: textColor }: { text: string; bg: string; }
 export function LandingHowItWorks() {
   return (
     <section className="py-28 relative overflow-hidden bg-background">
-      <OrganicBlob className="top-10 left-[-60px] w-72 h-72 text-[#a78bfa]/5 rotate-12 pointer-events-none" />
-      <OrganicBlob className="bottom-0 right-[-40px] w-56 h-56 text-[#34d399]/5 -rotate-12 pointer-events-none" />
+      {/* <OrganicBlob className="top-10 left-[-60px] w-72 h-72 text-primary/4 rotate-12 pointer-events-none" />
+      <OrganicBlob className="bottom-0 right-[-40px] w-56 h-56 text-primary/3 -rotate-12 pointer-events-none" /> */}
 
       <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
         {/* Header */}

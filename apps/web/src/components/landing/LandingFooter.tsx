@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Github, Twitter, Code, Lock } from "lucide-react";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { ColorThemeSwitcher } from "@/components/ColorThemeSwitcher";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
 
@@ -66,27 +67,32 @@ export function LandingFooter() {
               The intelligent form builder powered by Gemini AI. Create, style, and analyze forms in minutes.
             </p>
 
-            {/* Social links */}
-            <div className="flex items-center gap-2">
-              {[
-                { icon: Github, label: "GitHub", href: "https://github.com/raaam02/sec-form" },
-                { icon: Twitter, label: "Twitter", href: "https://twitter.com" },
-                { icon: Code, label: "API", href: "http://localhost:4000/docs" },
-              ].map(({ icon: Icon, label, href }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  className="h-8 w-8 rounded-lg border border-border backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                </a>
-              ))}
-            </div>
+            <div className="flex md:flex-col gap-5 justify-between pr-8">
+              {/* Social links */}
+              <div className="flex items-center gap-2">
+                {[
+                  { icon: Github, label: "GitHub", href: "https://github.com/raaam02/sec-form" },
+                  { icon: Twitter, label: "Twitter", href: "https://twitter.com" },
+                  { icon: Code, label: "API", href: apiDocsUrl },
+                ].map(({ icon: Icon, label, href }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="h-8 w-8 rounded-lg border border-border backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                  </a>
+                ))}
+              </div>
 
-            <LocaleSwitcher />
+              <div className="flex flex-wrap items-center gap-2 pt-2">
+                <LocaleSwitcher />
+                <ColorThemeSwitcher />
+              </div>
+            </div>
           </div>
 
           {/* Nav columns */}

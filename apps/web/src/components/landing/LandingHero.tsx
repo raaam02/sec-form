@@ -115,7 +115,7 @@ export function LandingHero() {
         <div
           className="absolute inset-0 opacity-[0.028]"
           style={{
-            backgroundImage: `radial-gradient(circle, hsl(333 71% 51%) 1px, transparent 1px)`,
+            backgroundImage: `radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)`,
             backgroundSize: "28px 28px",
             maskImage: "radial-gradient(ellipse 75% 75% at center, white, transparent)",
             WebkitMaskImage: "radial-gradient(ellipse 75% 75% at center, white, transparent)",

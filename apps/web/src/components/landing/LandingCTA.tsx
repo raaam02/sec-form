@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
 import { motion } from "motion/react";
-import { Globe2, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { HighlightedWord, OrganicBlob } from "./HandDrawn";
 import { useTranslations } from "next-intl";
 
@@ -31,8 +31,8 @@ export function LandingCTA() {
 
   return (
     <section className="py-32 relative overflow-hidden">
-      <OrganicBlob className="bottom-[-60px] right-[-60px] w-72 h-72 text-primary/60 pointer-events-none" />
-      <OrganicBlob className="top-[-40px] left-[-50px] w-60 h-60 text-[#a78bfa]/60 rotate-90 pointer-events-none" />
+      {/* <OrganicBlob className="bottom-[-60px] right-[-60px] w-72 h-72 text-primary/60 pointer-events-none" />
+      <OrganicBlob className="top-[-40px] left-[-50px] w-60 h-60 text-[#a78bfa]/60 rotate-90 pointer-events-none" /> */}
 
       <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
         <motion.div
@@ -46,12 +46,6 @@ export function LandingCTA() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
 
           <div className="relative z-10 flex flex-col items-center">
-            <motion.div
-              whileHover={{ rotate: 8, scale: 1.1 }}
-              className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary mb-7 shadow-lg shadow-primary/20 cursor-pointer"
-            >
-              <Globe2 className="h-7 w-7 text-primary-foreground" />
-            </motion.div>
 
             <h2 className="font-outfit text-4xl sm:text-5xl font-black text-foreground tracking-tight mb-3">
               Build your first form{" "}

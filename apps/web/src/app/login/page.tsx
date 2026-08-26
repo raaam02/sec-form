@@ -97,12 +97,12 @@ function LoginForm() {
     <div className="min-h-screen bg-background text-foreground flex relative overflow-hidden transition-colors duration-200">
       {/* ── Background decorations ── */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
-        <OrganicBlob className="top-[-10%] right-[-4%] w-[540px] h-[540px] text-primary/6" />
-        <OrganicBlob className="bottom-[-12%] left-[-8%] w-[440px] h-[440px] text-[#a78bfa]/7 rotate-45" />
+        {/* <OrganicBlob className="top-[-10%] right-[-4%] w-[540px] h-[540px] text-primary/6" />
+        <OrganicBlob className="bottom-[-12%] left-[-8%] w-[440px] h-[440px] text-[#a78bfa]/7 rotate-45" /> */}
         <div
           className="absolute inset-0 opacity-[0.028]"
           style={{
-            backgroundImage: `radial-gradient(circle, hsl(333 71% 51%) 1px, transparent 1px)`,
+            backgroundImage: `radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)`,
             backgroundSize: "28px 28px",
             maskImage: "radial-gradient(ellipse 75% 75% at center, white, transparent)",
             WebkitMaskImage: "radial-gradient(ellipse 75% 75% at center, white, transparent)",
@@ -138,15 +138,15 @@ function LoginForm() {
 
           {/* Interactive Mascot + Welcome Text */}
           <div className="flex flex-col items-center justify-center w-full">
-            {/* Interactive mascot */}
-            <LoginMascot
+            {/* Interactive mascot commented out for professional look */}
+            {/* <LoginMascot
               focusedField={focusedField}
               emailLength={email.length}
               showPassword={showPassword}
-            />
+            /> */}
 
             <motion.div
-              className="text-center mt-4 max-w-sm"
+              className="text-center mt-6 max-w-md"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.4, ease: "easeOut" }}
@@ -154,7 +154,7 @@ function LoginForm() {
               <h1 className="font-outfit text-3xl xl:text-4xl font-extrabold tracking-tight text-foreground">
                 {t("title")}
               </h1>
-              <p className="mt-3 text-[15px] text-muted-foreground leading-relaxed">
+              <p className="mt-4 text-[15px] text-muted-foreground leading-relaxed">
                 {t("subtitle")}
               </p>
             </motion.div>
@@ -210,17 +210,17 @@ function LoginForm() {
           </div>
         </div>
 
-        {/* Mobile mascot (smaller) */}
-        <div className="w-full max-w-md lg:hidden">
+        {/* Mobile mascot (smaller) commented out for professional look */}
+        {/* <div className="w-full max-w-md lg:hidden">
           <LoginMascot
             focusedField={focusedField}
             emailLength={email.length}
             showPassword={showPassword}
           />
-        </div>
+        </div> */}
 
         {/* Mobile title */}
-        <div className="lg:hidden text-center mb-6 -mt-4">
+        <div className="lg:hidden text-center mb-6 mt-6">
           <h1 className="font-outfit text-2xl font-extrabold tracking-tight text-foreground">
             {t("title")}
           </h1>
