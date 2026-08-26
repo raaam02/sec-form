@@ -35,6 +35,7 @@ export function LandingNav() {
     };
   }, []);
   const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations("Landing");
 
   const handleStartBuilding = () => {
