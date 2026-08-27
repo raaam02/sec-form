@@ -34,6 +34,11 @@ export default function BuilderPage() {
   const searchParams = useSearchParams();
   const id = params.id as string;
 
+  const tabParam = searchParams.get("tab");
+  const initialTab = (tabParam && ["form", "theme", "responses", "analytics", "settings", "embed"].includes(tabParam))
+    ? (tabParam as any)
+    : "form";
+
   const utils = trpcAny.useUtils();
 
   const { data: session } = useSession();
@@ -41,7 +46,7 @@ export default function BuilderPage() {
   const isDemo = !session?.user || !!localForm;
 
   // Sub-tabs states for the three panels
-  const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">("form");
+  const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">(initialTab);
   const [rightTab, setRightTab] = useState<"preview" | "embed">("preview");
   const [showRightSidebar, setShowRightSidebar] = useState(true);
 

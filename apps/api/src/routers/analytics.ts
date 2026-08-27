@@ -20,27 +20,65 @@ export const analyticsRouter = router({
         totalViews: 0,
         totalSubmissions: 0,
         averageConversionRate: 0,
+        timeline: [],
+        topForms: [],
       };
     }
 
-    // 2. Fetch total views and submissions across all forms
+    // 2. Fetch views and submissions across all forms with timeline aggregation
     let totalViewsCount = 0;
     let totalSubmissionsCount = 0;
+    const topForms = [];
 
-    for (const fId of formIds) {
-      const formViewsCount = await ctx.db
-        .select({ count: count() })
-        .from(formViews)
-        .where(eq(formViews.formId, fId));
-      totalViewsCount += Number(formViewsCount[0]?.count || 0);
+    const dailyTimeline: Record<string, { date: string; submissions: number; views: number }> = {};
+    const datesList = [];
 
-      const formSubmissionsCount = await ctx.db
-        .select({ count: count() })
-        .from(submissions)
-        .where(eq(submissions.formId, fId));
-      totalSubmissionsCount += Number(formSubmissionsCount[0]?.count || 0);
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split("T")[0]; // YYYY-MM-DD
+      datesList.push(dateStr);
+      dailyTimeline[dateStr] = { date: dateStr, submissions: 0, views: 0 };
     }
 
+    for (const form of userForms) {
+      const viewsList = await ctx.db.query.formViews.findMany({
+        where: eq(formViews.formId, form.id),
+      });
+      const submissionsList = await ctx.db.query.submissions.findMany({
+        where: eq(submissions.formId, form.id),
+      });
+
+      const viewsCount = viewsList.length;
+      const submissionsCount = submissionsList.length;
+
+      totalViewsCount += viewsCount;
+      totalSubmissionsCount += submissionsCount;
+
+      topForms.push({
+        id: form.id,
+        title: form.title,
+        views: viewsCount,
+        submissions: submissionsCount,
+      });
+
+      for (const view of viewsList) {
+        const dateStr = view.createdAt.toISOString().split("T")[0];
+        if (dailyTimeline[dateStr]) {
+          dailyTimeline[dateStr].views += 1;
+        }
+      }
+
+      for (const sub of submissionsList) {
+        const dateStr = sub.createdAt.toISOString().split("T")[0];
+        if (dailyTimeline[dateStr]) {
+          dailyTimeline[dateStr].submissions += 1;
+        }
+      }
+    }
+
+    const timelineData = datesList.map((d) => dailyTimeline[d]);
+    const sortedTopForms = topForms.sort((a, b) => b.submissions - a.submissions).slice(0, 5);
     const conversionRate = totalViewsCount > 0 ? (totalSubmissionsCount / totalViewsCount) * 100 : 0;
 
     return {
@@ -48,6 +86,8 @@ export const analyticsRouter = router({
       totalViews: totalViewsCount,
       totalSubmissions: totalSubmissionsCount,
       averageConversionRate: Math.round(conversionRate * 10) / 10,
+      timeline: timelineData,
+      topForms: sortedTopForms,
     };
   }),
 

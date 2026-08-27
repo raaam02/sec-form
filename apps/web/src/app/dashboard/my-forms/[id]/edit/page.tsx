@@ -37,6 +37,11 @@ export default function BuilderPage() {
   const searchParams = useSearchParams();
   const id = params.id as string;
 
+  const tabParam = searchParams.get("tab");
+  const initialTab = (tabParam && ["form", "theme", "responses", "analytics", "settings", "embed"].includes(tabParam))
+    ? (tabParam as any)
+    : "form";
+
   const utils = trpcAny.useUtils();
 
   const { data: session } = useSession();
@@ -45,7 +50,7 @@ export default function BuilderPage() {
   const [isPublishAuthModalOpen, setIsPublishAuthModalOpen] = useState(false);
 
   // Sub-tabs states for the three panels
-  const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">("form");
+  const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">(initialTab);
   const [rightTab, setRightTab] = useState<"preview" | "embed">("preview");
   const [showRightSidebar, setShowRightSidebar] = useState(true);
 
@@ -76,7 +81,7 @@ export default function BuilderPage() {
   const { data: form, isLoading: isFormLoading, error: formError, isFetching } = trpcAny.forms.get.useQuery(
     { id },
     {
-      enabled: false,
+      enabled: hasLoadedLocal && !localForm && !!session?.user,
       refetchInterval: (data: any) => {
         const telegram = (data?.schemaJson as any)?.telegram;
         return (isSyncingTelegram && telegram?.enabled && !telegram?.chatId) ? 3000 : false;
@@ -695,7 +700,6 @@ export default function BuilderPage() {
           await publishFormMutation.mutateAsync({ id: createdDbForm.id });
         }
         deleteLocalForm(id);
-        setLocalForm(null);
         utils.forms.list.invalidate();
         setSaveStatus("saved");
         toast.success("🎉 Form published to your account!");

@@ -30,7 +30,7 @@ export default function DashboardPage() {
   const t = useTranslations("Dashboard");
 
   const utils = trpc.useUtils();
-  
+
   const { data: session } = useSession();
   const isDemo = session?.user?.email === "demo@demo.com";
 
@@ -43,7 +43,7 @@ export default function DashboardPage() {
   const combinedForms = React.useMemo(() => {
     if (!formsList) return [];
     if (!isDemo) return formsList;
-    
+
     const localForms = getLocalForms();
     const deletedSeededIds = getDeletedSeededFormIds();
     const localFormIds = new Set(localForms.map(f => f.id));
@@ -51,7 +51,7 @@ export default function DashboardPage() {
 
     const dbFormsFiltered = formsList.filter(f => !localFormIds.has(f.id) && !deletedSeededIdsSet.has(f.id));
 
-    return [...localForms, ...dbFormsFiltered].sort((a, b) => 
+    return [...localForms, ...dbFormsFiltered].sort((a, b) =>
       new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
   }, [formsList, isDemo, localUpdateTrigger]);
@@ -69,13 +69,13 @@ export default function DashboardPage() {
   const [selectedFormForDrawer, setSelectedFormForDrawer] = useState<any | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
-  
+
   // Filters state
   const [searchQuery, setSearchQuery] = useState("");
   const [visibilityFilter, setVisibilityFilter] = useState<"all" | "public" | "unlisted">("all");
 
   const filteredForms = combinedForms?.filter((form) => {
-    const matchesSearch = form.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (form.description?.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesVisibility = visibilityFilter === "all" || form.visibility === visibilityFilter;
     return matchesSearch && matchesVisibility;
@@ -84,7 +84,7 @@ export default function DashboardPage() {
   useGlobalShortcut("new-form", "n", "Create New Form", () => {
     setIsCreateModalOpen(true);
   }, "Global Actions");
-  
+
   useGlobalShortcut("ai-form", "g", "Generate AI Form", () => {
     setIsAIModalOpen(true);
   }, "Global Actions");
@@ -347,6 +347,7 @@ export default function DashboardPage() {
                 isSidebarOpen={!!selectedFormForDrawer}
                 isDemo={isDemo}
                 aiCredits={aiCredits}
+                showGrowthChart={true}
               />
             </div>
           </div>

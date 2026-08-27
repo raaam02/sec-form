@@ -5,10 +5,11 @@ import Link from "next/link";
 import { trpc } from "../utils/trpc";
 import { useSession } from "next-auth/react";
 import { getLocalForm, getLocalSubmissions } from "../utils/localForms";
-import { X, Eye, ArrowUpRight, FileText, BarChart3, Sparkles, BrainCircuit, Check, Calendar, HelpCircle } from "lucide-react";
+import { X, Eye, ArrowUpRight, FileText, BarChart3, Sparkles, BrainCircuit, Check, Calendar, HelpCircle, ExternalLink } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 interface FormDrawerProps {
   form: {
@@ -117,12 +118,20 @@ export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerP
               {form.description || "No description provided."}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors shrink-0"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Link href={`/dashboard/my-forms/${form.id}`}>
+              <Button variant="outline" size="sm" className="h-8 items-center gap-1 rounded-xl border border-border text-[11px] font-bold text-muted-foreground hover:bg-accent hover:text-foreground">
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Full Details</span>
+              </Button>
+            </Link>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation Tabs */}

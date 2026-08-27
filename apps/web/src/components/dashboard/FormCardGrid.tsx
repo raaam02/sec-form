@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { FileText, Eye, BarChart2, Sparkles, Trash2, ArrowRight, Pencil, Inbox } from "lucide-react";
+import { FileText, Eye, BarChart2, Sparkles, Trash2, ArrowRight, Pencil, Inbox, ExternalLink } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,28 @@ import { useTranslations } from "next-intl";
 import { ConfirmationPopover } from "@/components/ui/confirmation-popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion, AnimatePresence } from "motion/react";
+import { ResponsiveContainer, AreaChart, Area } from "recharts";
+
+const generateSparklineData = (formId: string, views: number, subs: number) => {
+  const data = [];
+  let seed = 0;
+  for (let i = 0; i < formId.length; i++) {
+    seed += formId.charCodeAt(i);
+  }
+
+  for (let i = 0; i < 7; i++) {
+    const factor = i / 6; // 0 to 1
+    const wave = Math.sin(seed + i) * 0.2 + 0.8; // wave between 0.6 and 1.0
+    const viewValue = Math.round(views * factor * wave);
+    const subValue = Math.round(subs * factor * wave);
+    data.push({
+      day: i,
+      views: viewValue,
+      submissions: subValue,
+    });
+  }
+  return data;
+};
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -53,6 +75,7 @@ interface FormCardGridProps {
   isSidebarOpen?: boolean;
   isDemo?: boolean;
   aiCredits?: number;
+  showGrowthChart?: boolean;
 }
 
 export function FormCardGrid({
@@ -65,6 +88,7 @@ export function FormCardGrid({
   isSidebarOpen = false,
   isDemo = false,
   aiCredits = 2,
+  showGrowthChart = false,
 }: FormCardGridProps) {
   const t = useTranslations("Dashboard");
 
@@ -204,6 +228,32 @@ export function FormCardGrid({
               <h3 className="mt-4 font-outfit text-lg font-bold text-foreground truncate">{form.title}</h3>
               <p className="mt-1.5 text-muted-foreground text-sm line-clamp-2 min-h-[40px]">{form.description || "No description."}</p>
 
+              {showGrowthChart && ((form.totalViews || 0) > 0 || (form.totalResponses || 0) > 0) && (
+                <div className="h-10 w-full mt-3 relative overflow-hidden pointer-events-none select-none">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={generateSparklineData(form.id, form.totalViews || 0, form.totalResponses || 0)}
+                      margin={{ top: 2, right: 2, left: 2, bottom: 2 }}
+                    >
+                      <defs>
+                        <linearGradient id={`sparklineGrad-${form.id}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15}/>
+                          <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <Area
+                        type="monotone"
+                        dataKey="submissions"
+                        stroke="hsl(var(--primary))"
+                        strokeWidth={1.5}
+                        fillOpacity={1}
+                        fill={`url(#sparklineGrad-${form.id})`}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+
               <div className="mt-4 flex items-center gap-4 text-xs font-medium text-muted-foreground">
                 <div className="flex items-center gap-1.5" title="Views">
                   <Eye className="h-4 w-4 text-emerald-500/70" />
@@ -217,78 +267,76 @@ export function FormCardGrid({
             </div>
 
             <div className="mt-6 pt-4 border-t border-border flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:opacity-80 transition-opacity">
-                {t("cardOpen")} <ArrowRight className="h-3.5 w-3.5" />
-              </span>
+              <Link
+                href={`/dashboard/my-forms/${form.id}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                    e.nativeEvent.stopPropagation();
+                  }
+                }}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:opacity-85 hover:underline transition-all shrink-0"
+              >
+                <span>Submissions & Stats</span> <ArrowRight className="h-3 w-3" />
+              </Link>
 
-              <div className="flex gap-2">
-                {/* Edit Button with Tooltip */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <motion.div
-                      whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
-                      whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-                      onPointerDown={(e) => {
-                        e.stopPropagation();
-                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
-                          e.nativeEvent.stopPropagation();
-                        }
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
-                          e.nativeEvent.stopPropagation();
-                        }
-                      }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        asChild
-                      >
-                        <Link href={`/dashboard/my-forms/${form.id}/edit`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </motion.div>
-                  </TooltipTrigger>
-                  <TooltipContent>Edit Form</TooltipContent>
-                </Tooltip>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {/* Edit Form Button */}
+                <motion.div
+                  whileTap={{ scale: 0.95 }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                      e.nativeEvent.stopPropagation();
+                    }
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                      e.nativeEvent.stopPropagation();
+                    }
+                  }}
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 px-2.5 gap-1 text-muted-foreground hover:text-foreground rounded-lg border border-border"
+                    asChild
+                  >
+                    <Link href={`/dashboard/my-forms/${form.id}/edit`}>
+                      <Pencil className="h-3 w-3" />
+                    </Link>
+                  </Button>
+                </motion.div>
 
-                {/* View Public Button with Tooltip */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <motion.div
-                      whileHover={{ scale: 1.08, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
-                      whileTap={{ scale: 0.92, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-                      onPointerDown={(e) => {
-                        e.stopPropagation();
-                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
-                          e.nativeEvent.stopPropagation();
-                        }
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (e.nativeEvent && e.nativeEvent.stopPropagation) {
-                          e.nativeEvent.stopPropagation();
-                        }
-                      }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        asChild
-                      >
-                        <Link href={`/f/${form.slug}`} target="_blank">
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </motion.div>
-                  </TooltipTrigger>
-                  <TooltipContent>{t("cardPublicLink")}</TooltipContent>
-                </Tooltip>
+                {/* View Live Form Button */}
+                <motion.div
+                  whileTap={{ scale: 0.95 }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                      e.nativeEvent.stopPropagation();
+                    }
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (e.nativeEvent && e.nativeEvent.stopPropagation) {
+                      e.nativeEvent.stopPropagation();
+                    }
+                  }}
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 px-2.5 gap-1 text-xs font-semibold text-muted-foreground hover:text-foreground rounded-lg border border-border"
+                    asChild
+                  >
+                    <Link href={`/f/${form.slug}`} target="_blank">
+                      <ExternalLink className="h-3 w-3" />
+                      <span>Live</span>
+                    </Link>
+                  </Button>
+                </motion.div>
               </div>
             </div>
           </motion.div>

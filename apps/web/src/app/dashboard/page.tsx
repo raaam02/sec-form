@@ -11,6 +11,7 @@ import { FormDrawer } from "../../components/FormDrawer";
 import { toast } from "sonner";
 
 import { StatsCardGrid } from "@/components/dashboard/StatsCardGrid";
+import { DashboardCharts } from "@/components/dashboard/DashboardCharts";
 import { FormCardGrid } from "@/components/dashboard/FormCardGrid";
 import { CreateFormModal } from "@/components/dashboard/CreateFormModal";
 import { AIFormModal } from "@/components/dashboard/AIFormModal";
@@ -294,6 +295,9 @@ export default function DashboardPage() {
           <div className="max-w-6xl mx-auto space-y-8">
             {/* STATS OVERVIEW CARDS */}
             <StatsCardGrid stats={stats} isStatsLoading={isStatsLoading} />
+
+            {/* INTERACTIVE GRAPHS & PERFORMANCE */}
+            <DashboardCharts stats={stats} isLoading={isStatsLoading} />
 
             {/* FORMS LIST SECTION */}
             <div>
