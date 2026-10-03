@@ -80,9 +80,8 @@ export default function BuilderPage() {
     { id },
     {
       enabled: hasLoadedLocal && !localForm && isAuthed,
-      refetchInterval: (data: any) => {
-        const telegram = (data?.schemaJson as any)?.telegram;
-        return (isSyncingTelegram && telegram?.enabled && !telegram?.chatId) ? 3000 : false;
+      refetchInterval: () => {
+        return isSyncingTelegram ? 2000 : false;
       }
     }
   );
@@ -299,25 +298,30 @@ export default function BuilderPage() {
   // Sync Telegram status from activeForm in the background
   useEffect(() => {
     if (activeForm) {
-      const telegram = (activeForm.schemaJson as any).telegram || {};
-      setTelegramChatId((prevId) => {
-        const newId = telegram.chatId || "";
-        if (newId !== prevId) {
-          setTelegramChatName(telegram.chatName || "");
-          setTelegramEnabled(telegram.enabled || false);
-          if (newId) {
-            setIsSyncingTelegram(false);
-            if (telegramSyncTimeoutRef.current) {
-              clearTimeout(telegramSyncTimeoutRef.current);
-              telegramSyncTimeoutRef.current = null;
+      const telegram = (activeForm.schemaJson as any)?.telegram || (activeForm.publishedSchemaJson as any)?.telegram || {};
+      const newId = telegram.chatId || "";
+      if (newId) {
+        setTelegramChatId((prevId) => {
+          if (newId !== prevId) {
+            setTelegramChatName(telegram.chatName || "");
+            setTelegramEnabled(true);
+            if (isSyncingTelegram) {
+              setIsSyncingTelegram(false);
+              toast.success("🎉 Telegram bot successfully connected!");
+              if (telegramSyncTimeoutRef.current) {
+                clearTimeout(telegramSyncTimeoutRef.current);
+                telegramSyncTimeoutRef.current = null;
+              }
             }
+            return newId;
           }
-          return newId;
-        }
-        return prevId;
-      });
+          return prevId;
+        });
+      } else if (telegram.enabled !== undefined && !isSyncingTelegram) {
+        setTelegramEnabled(telegram.enabled);
+      }
     }
-  }, [activeForm]);
+  }, [activeForm, isSyncingTelegram]);
 
   // Track tab parameter changes from deep links
   useEffect(() => {
@@ -904,6 +908,8 @@ export default function BuilderPage() {
       clearTimeout(telegramSyncTimeoutRef.current);
     }
     setIsSyncingTelegram(true);
+    setTelegramEnabled(true);
+    utils.forms.get.invalidate({ id });
     telegramSyncTimeoutRef.current = setTimeout(() => {
       setIsSyncingTelegram((currentlySyncing) => {
         if (currentlySyncing) {
@@ -913,6 +919,24 @@ export default function BuilderPage() {
         return currentlySyncing;
       });
     }, 60000);
+  };
+
+  const handleCheckTelegramStatus = async () => {
+    try {
+      const res = await utils.forms.get.fetch({ id });
+      const telegram = (res?.schemaJson as any)?.telegram || (res?.publishedSchemaJson as any)?.telegram;
+      if (telegram?.chatId) {
+        setTelegramChatId(telegram.chatId);
+        setTelegramChatName(telegram.chatName || "");
+        setTelegramEnabled(true);
+        setIsSyncingTelegram(false);
+        toast.success("Telegram chat is connected!");
+      } else {
+        toast.info("Waiting for Telegram bot confirmation. Have you clicked /start in the Telegram bot?");
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to check Telegram status");
+    }
   };
 
   return (
@@ -1004,6 +1028,7 @@ export default function BuilderPage() {
             isTelegramSyncing={isSyncingTelegram}
             isTelegramFetching={isFetching}
             onStartTelegramSync={handleStartTelegramSync}
+            onCheckTelegramStatus={handleCheckTelegramStatus}
           />
         </div>
 
@@ -1129,6 +1154,7 @@ export default function BuilderPage() {
                 isTelegramSyncing={isSyncingTelegram}
                 isTelegramFetching={isFetching}
                 onStartTelegramSync={handleStartTelegramSync}
+                onCheckTelegramStatus={handleCheckTelegramStatus}
               />
             </div>
           )}

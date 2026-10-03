@@ -203,10 +203,40 @@ export const formsRouter = router({
         }
       }
 
+      // Preserve existing telegram configuration if the update did not provide one
+      let schemaJsonToSave = updates.schemaJson;
+      if (schemaJsonToSave) {
+        const existingTelegram = (form.schemaJson as any)?.telegram || (form.publishedSchemaJson as any)?.telegram;
+        if (existingTelegram?.chatId) {
+          const incomingTelegram = schemaJsonToSave.telegram;
+          const isExplicitDisconnect = incomingTelegram?.enabled === false && !incomingTelegram?.chatId;
+          if (!isExplicitDisconnect && !incomingTelegram?.chatId) {
+            schemaJsonToSave = {
+              ...schemaJsonToSave,
+              telegram: {
+                enabled: incomingTelegram?.enabled ?? existingTelegram.enabled ?? true,
+                chatId: existingTelegram.chatId,
+                chatName: incomingTelegram?.chatName || existingTelegram.chatName,
+              },
+            };
+          }
+        }
+      }
+
+      const extraUpdates: any = {};
+      if (form.isPublished && form.publishedSchemaJson && schemaJsonToSave?.telegram) {
+        extraUpdates.publishedSchemaJson = {
+          ...(form.publishedSchemaJson as any),
+          telegram: schemaJsonToSave.telegram,
+        };
+      }
+
       const [updatedForm] = await ctx.db
         .update(forms)
         .set({
           ...updates,
+          ...(schemaJsonToSave ? { schemaJson: schemaJsonToSave } : {}),
+          ...extraUpdates,
           isPublished,
           updatedAt: new Date(),
         })

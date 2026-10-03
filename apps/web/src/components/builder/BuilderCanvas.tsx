@@ -71,6 +71,7 @@ interface BuilderCanvasProps {
   isTelegramSyncing?: boolean;
   isTelegramFetching?: boolean;
   onStartTelegramSync?: () => void;
+  onCheckTelegramStatus?: () => void;
 }
 
 export function BuilderCanvas({
@@ -115,6 +116,7 @@ export function BuilderCanvas({
   isTelegramSyncing,
   isTelegramFetching,
   onStartTelegramSync,
+  onCheckTelegramStatus,
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
 
@@ -233,6 +235,7 @@ export function BuilderCanvas({
               isTelegramSyncing={isTelegramSyncing}
               isTelegramFetching={isTelegramFetching}
               onStartTelegramSync={onStartTelegramSync}
+              onCheckTelegramStatus={onCheckTelegramStatus}
             />
           </div>
         )}

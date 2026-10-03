@@ -19,38 +19,47 @@ export async function sendTelegramMessage(chatId: string, text: string) {
     return;
   }
 
+  const cleanChatId = String(chatId).trim();
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
+
+  console.log(`[TelegramService] Sending message to Telegram chatId: "${cleanChatId}"`);
 
   try {
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        chat_id: chatId,
+        chat_id: cleanChatId,
         text: text,
         parse_mode: "HTML",
         disable_web_page_preview: true,
       }),
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.warn(`[TelegramService] Telegram send failed with HTML: ${errText}. Retrying as plain text...`);
+    const resJson: any = await response.json().catch(() => null);
 
-      // Fallback: Send message in plain text (no HTML parse mode)
+    if (!response.ok || !resJson?.ok) {
+      console.warn(`[TelegramService] Telegram send failed with HTML parse_mode:`, resJson, `. Retrying in plain text...`);
+
+      // Strip HTML tags for clean plain-text delivery
+      const plainText = text.replace(/<[^>]*>/g, "");
       const fallbackResponse = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          chat_id: chatId,
-          text: text,
+          chat_id: cleanChatId,
+          text: plainText,
         }),
       });
 
-      if (!fallbackResponse.ok) {
-        const fallbackErr = await fallbackResponse.text();
-        console.error(`[TelegramService] Telegram send failed in plain text: ${fallbackErr}`);
+      const fallbackJson: any = await fallbackResponse.json().catch(() => null);
+      if (!fallbackResponse.ok || !fallbackJson?.ok) {
+        console.error(`[TelegramService] Telegram plain text send also failed:`, fallbackJson);
+      } else {
+        console.log(`[TelegramService] Telegram message successfully sent (plain text fallback) to ${cleanChatId}`);
       }
+    } else {
+      console.log(`[TelegramService] Telegram message successfully delivered (HTML) to ${cleanChatId}`);
     }
   } catch (err) {
     console.error("[TelegramService] Exception during message send:", err);
@@ -62,30 +71,71 @@ export async function sendTelegramMessage(chatId: string, text: string) {
  * the responder's submission answers, and sends the notification.
  */
 export async function checkAndSendTelegramNotification(form: any, answers: Record<string, any>) {
-  if (!form || !form.schemaJson) return;
-
-  const schema = form.schemaJson as any;
-  const telegram = schema.telegram;
-
-  if (!telegram || !telegram.enabled || !telegram.chatId) {
+  if (!form) {
+    console.warn("[TelegramService] checkAndSendTelegramNotification called with null/empty form");
     return;
   }
 
-  const chatId = telegram.chatId;
-  const formTitle = form.title || "Untitled Form";
-  const fields = schema.fields || [];
+  const schema = (form.schemaJson as any) || {};
+  const publishedSchema = (form.publishedSchemaJson as any) || {};
+
+  // Check both schemaJson and publishedSchemaJson for telegram settings
+  const telegram =
+    (schema.telegram?.chatId ? schema.telegram : null) ||
+    (publishedSchema.telegram?.chatId ? publishedSchema.telegram : null) ||
+    schema.telegram ||
+    publishedSchema.telegram ||
+    form.telegram;
+
+  console.log(`[TelegramService] Checking form "${form.title}" (${form.id}) for Telegram notifications:`, {
+    foundTelegramConfig: !!telegram,
+    enabled: telegram?.enabled,
+    chatId: telegram?.chatId,
+    chatName: telegram?.chatName,
+    answersCount: Object.keys(answers || {}).length,
+  });
+
+  if (!telegram || !telegram.enabled || !telegram.chatId) {
+    console.log(`[TelegramService] Telegram notifications not enabled or chatId missing for form "${form.title}" (${form.id}). Skipping.`);
+    return;
+  }
+
+  const chatId = String(telegram.chatId).trim();
+  const formTitle = form.title || form.publishedTitle || "Untitled Form";
+
+  // Use published fields if available, otherwise draft fields
+  const fields: any[] =
+    (Array.isArray(publishedSchema.fields) && publishedSchema.fields.length > 0)
+      ? publishedSchema.fields
+      : (Array.isArray(schema.fields) ? schema.fields : []);
 
   const escapedTitle = escapeHtml(formTitle);
   let message = `<b>🎉 New Submission for:</b> <i>${escapedTitle}</i>\n`;
   message += `━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
+  const processedFieldIds = new Set<string>();
+
   for (const field of fields) {
-    const val = answers[field.id];
-    if (val !== undefined && val !== null) {
+    if (!field || !field.id) continue;
+    processedFieldIds.add(field.id);
+    const val = answers ? answers[field.id] : undefined;
+    if (val !== undefined && val !== null && val !== "") {
       const displayValue = Array.isArray(val) ? val.join(", ") : String(val);
-      const escapedLabel = escapeHtml(field.label);
+      const escapedLabel = escapeHtml(field.label || "Question");
       const escapedValue = escapeHtml(displayValue);
       message += `<b>👉 ${escapedLabel}</b>\n<code>${escapedValue}</code>\n\n`;
+    }
+  }
+
+  // Also include any answers whose keys were not in fields
+  if (answers && typeof answers === "object") {
+    for (const [key, val] of Object.entries(answers)) {
+      if (!processedFieldIds.has(key) && val !== undefined && val !== null && val !== "") {
+        const displayValue = Array.isArray(val) ? val.join(", ") : String(val);
+        const escapedLabel = escapeHtml(key);
+        const escapedValue = escapeHtml(displayValue);
+        message += `<b>👉 ${escapedLabel}</b>\n<code>${escapedValue}</code>\n\n`;
+      }
     }
   }
 

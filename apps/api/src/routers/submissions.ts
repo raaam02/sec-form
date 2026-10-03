@@ -170,22 +170,16 @@ export const submissionsRouter = router({
     .mutation(async ({ input }) => {
       const { chatId, formTitle, fields, answers } = input;
       
-      let message = `*New Submission for:* ${formTitle}\n`;
-      message += `-----------------------------------------\n\n`;
-      
-      for (const field of fields) {
-        const val = answers[field.id];
-        if (val !== undefined && val !== null) {
-          const displayValue = Array.isArray(val) ? val.join(", ") : String(val);
-          message += `*${field.label}*\n${displayValue}\n\n`;
-        }
-      }
-      
-      message += `-----------------------------------------\n`;
-      message += `_Sent via Formu.AI (Local Sandbox)_`;
-      
-      const { sendTelegramMessage } = await import("../services/telegramService");
-      await sendTelegramMessage(chatId, message);
+      await checkAndSendTelegramNotification(
+        {
+          title: formTitle,
+          schemaJson: {
+            fields,
+            telegram: { enabled: true, chatId }
+          }
+        },
+        answers
+      );
       
       return { success: true };
     })

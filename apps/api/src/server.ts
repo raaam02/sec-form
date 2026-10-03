@@ -200,18 +200,27 @@ app.post("/api/telegram-webhook", async (req, res) => {
 
         if (form) {
           const schema = (form.schemaJson as any) || {};
+          const telegramConfig = {
+            enabled: true,
+            chatId: String(chat.id),
+            chatName: chat.first_name || chat.title || "Private Chat",
+          };
           const updatedSchema = {
             ...schema,
-            telegram: {
-              enabled: true,
-              chatId: String(chat.id),
-              chatName: chat.first_name || chat.title || "Private Chat",
-            },
+            telegram: telegramConfig,
           };
+
+          const updatePayload: any = { schemaJson: updatedSchema };
+          if (form.publishedSchemaJson) {
+            updatePayload.publishedSchemaJson = {
+              ...(form.publishedSchemaJson as any),
+              telegram: telegramConfig,
+            };
+          }
 
           await db
             .update(forms)
-            .set({ schemaJson: updatedSchema })
+            .set(updatePayload)
             .where(eq(forms.id, formId));
 
           await sendTelegramMessage(

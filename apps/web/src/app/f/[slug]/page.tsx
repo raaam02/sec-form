@@ -38,14 +38,14 @@ export default function PublicFormPage() {
     }
   }, [slug]);
 
-  // Query form metadata
+  // Query form metadata from API
   const { data: formFromQuery, isLoading: isQueryLoading, error: queryError } = trpc.forms.getBySlug.useQuery(
     { slug },
-    { enabled: !localFormFound }
+    { retry: false }
   );
 
-  const form = localFormFound || formFromQuery;
-  const isLoading = localFormFound ? false : isQueryLoading;
+  const form = formFromQuery || localFormFound;
+  const isLoading = !localFormFound && isQueryLoading;
   const error = localFormFound ? null : queryError;
 
   // Mutation
@@ -65,8 +65,9 @@ export default function PublicFormPage() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
   
-  const fields: FormField[] = form?.schemaJson ? (form.schemaJson as any).fields || [] : [];
-  const layoutMode = form?.schemaJson ? (form.schemaJson as any).layout?.mode || "standard" : "standard";
+  const activeSchema: any = (form as any)?.publishedSchemaJson || form?.schemaJson || {};
+  const fields: FormField[] = activeSchema.fields || [];
+  const layoutMode = activeSchema.layout?.mode || "standard";
 
   // Pre-process steps
   const pages: FormField[][] = React.useMemo(() => {
@@ -200,6 +201,35 @@ export default function PublicFormPage() {
     }
 
     // Process submission...
+    if (formFromQuery) {
+      try {
+        await submitMutation.mutateAsync({
+          formId: formFromQuery.id,
+          answersJson: result.data,
+        });
+
+        // Also track locally if present
+        if (localFormFound) {
+          saveLocalSubmission({
+            id: `sub-${Math.random().toString(36).substring(2, 10)}`,
+            formId: localFormFound.id,
+            answersJson: result.data,
+            createdAt: new Date().toISOString(),
+          });
+        }
+
+        setIsSubmitted(true);
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      } catch (err: any) {
+        setSubmitError(err.message || "Failed to submit form");
+      }
+      return;
+    }
+
     if (localFormFound) {
       try {
         const mockSubmission = {
@@ -233,20 +263,22 @@ export default function PublicFormPage() {
       return;
     }
 
-    try {
-      await submitMutation.mutateAsync({
-        formId: form.id,
-        answersJson: result.data,
-      });
+    if (form) {
+      try {
+        await submitMutation.mutateAsync({
+          formId: form.id,
+          answersJson: result.data,
+        });
 
-      setIsSubmitted(true);
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-      });
-    } catch (err: any) {
-      setSubmitError(err.message || "Failed to submit form");
+        setIsSubmitted(true);
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+      } catch (err: any) {
+        setSubmitError(err.message || "Failed to submit form");
+      }
     }
   };
 

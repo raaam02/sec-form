@@ -1,5 +1,5 @@
 import React from "react";
-import { CheckCircle2, Send, Copy, Check, Loader2, Plus, Trash2 } from "lucide-react";
+import { CheckCircle2, Send, Copy, Check, Loader2, Plus, Trash2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -30,6 +30,7 @@ interface SettingsCanvasTabProps {
   isTelegramSyncing?: boolean;
   isTelegramFetching?: boolean;
   onStartTelegramSync?: () => void;
+  onCheckTelegramStatus?: () => void;
 }
 
 export function SettingsCanvasTab({
@@ -54,6 +55,7 @@ export function SettingsCanvasTab({
   isTelegramSyncing,
   isTelegramFetching,
   onStartTelegramSync,
+  onCheckTelegramStatus,
 }: SettingsCanvasTabProps) {
   const t = useTranslations("Builder");
   const tCommon = useTranslations("Common");
@@ -347,35 +349,54 @@ export function SettingsCanvasTab({
                       Click the button below to open our Telegram Bot, then press <strong>Start</strong> to link this form.
                     </p>
                   </div>
-                  <Button
-                    type="button"
-                    onClick={() => {
-                      const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || "FormuAIBot";
-                      window.open(`https://t.me/${botName}?start=${formId}`, "_blank");
-                      onStartTelegramSync?.();
-                    }}
-                    disabled={isTelegramSyncing}
-                    className="h-8 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 min-w-[170px]"
-                  >
-                    {isTelegramSyncing ? (
-                      isTelegramFetching ? (
-                        <>
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />
-                          Checking...
-                        </>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        onSaveTelegram({
+                          enabled: true,
+                          chatId: telegramChatId || undefined,
+                          chatName: telegramChatName || undefined
+                        });
+                        const botName = process.env.NEXT_PUBLIC_TELEGRAM_BOT_NAME || "FormuAi_bot";
+                        window.open(`https://t.me/${botName}?start=${formId}`, "_blank");
+                        onStartTelegramSync?.();
+                      }}
+                      disabled={isTelegramSyncing}
+                      className="h-8 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 min-w-[170px]"
+                    >
+                      {isTelegramSyncing ? (
+                        isTelegramFetching ? (
+                          <>
+                            <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />
+                            Checking...
+                          </>
+                        ) : (
+                          <>
+                            <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping shrink-0" />
+                            Connecting...
+                          </>
+                        )
                       ) : (
                         <>
-                          <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping shrink-0" />
-                          Connecting...
+                          <Send className="h-3.5 w-3.5" />
+                          Connect Telegram Bot
                         </>
-                      )
-                    ) : (
-                      <>
-                        <Send className="h-3.5 w-3.5" />
-                        Connect Telegram Bot
-                      </>
+                      )}
+                    </Button>
+
+                    {isTelegramSyncing && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => onCheckTelegramStatus?.()}
+                        className="h-8 px-3 font-bold text-xs rounded-xl flex items-center gap-1.5 border-border hover:bg-muted"
+                      >
+                        <RefreshCw className="h-3.5 w-3.5" />
+                        Check Status
+                      </Button>
                     )}
-                  </Button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -400,7 +421,7 @@ export function SettingsCanvasTab({
                       onClick={() => {
                         if (manualChatIdInput.trim()) {
                           onSaveTelegram({
-                            enabled: telegramEnabled,
+                            enabled: true,
                             chatId: manualChatIdInput.trim(),
                             chatName: undefined
                           });
