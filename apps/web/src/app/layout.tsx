@@ -59,6 +59,16 @@ export const metadata: Metadata = {
     description: "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
     images: ["/icon.png"],
   },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+  },
   robots: {
     index: true,
     follow: true,
