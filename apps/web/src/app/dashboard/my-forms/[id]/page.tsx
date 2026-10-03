@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { trpc } from "../../../../utils/trpc";
 import { useSession } from "next-auth/react";
+import { getLocalForm, getLocalSubmissions, deleteLocalForm } from "@/utils/localForms";
 import { 
   ArrowLeft, 
   Pencil, 
@@ -43,21 +44,49 @@ export default function FormDetailViewPage() {
   const [isInsightsGenerating, setIsInsightsGenerating] = useState(false);
   const [insightsError, setInsightsError] = useState("");
 
+  const [localForm, setLocalForm] = useState<any | null>(null);
+  const [hasLoadedLocal, setHasLoadedLocal] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const found = getLocalForm(id);
+      if (found) {
+        setLocalForm(found);
+      }
+      setHasLoadedLocal(true);
+    }
+  }, [id]);
+
+  const isAuthed = status === "authenticated";
+
   // Queries
-  const { data: form, isLoading: isFormLoading, error: formError } = trpc.forms.get.useQuery(
+  const { data: form, isLoading: isFormLoading, error: formError, isFetching } = trpc.forms.get.useQuery(
     { id },
-    { enabled: !!session?.user }
+    { enabled: hasLoadedLocal && !localForm && isAuthed }
   );
+
+  const activeForm = localForm || form;
+
+  const localSubmissions = localForm ? getLocalSubmissions(id) : [];
+  const localAnalytics = localForm ? {
+    totalViews: localForm.totalViews || 0,
+    totalResponses: localSubmissions.length,
+    conversionRate: localForm.totalViews ? Math.round((localSubmissions.length / localForm.totalViews) * 100) : 0,
+    timeline: []
+  } : null;
 
   const { data: analytics, isLoading: isAnalyticsLoading } = trpc.analytics.getFormAnalytics.useQuery(
     { formId: id },
-    { enabled: !!session?.user }
+    { enabled: hasLoadedLocal && !localForm && isAuthed }
   );
 
   const { data: submissions, isLoading: isSubmissionsLoading } = trpc.submissions.list.useQuery(
     { formId: id },
-    { enabled: !!session?.user && activeTab === "responses" }
+    { enabled: hasLoadedLocal && !localForm && isAuthed && activeTab === "responses" }
   );
+
+  const activeAnalytics = localForm ? localAnalytics : analytics;
+  const activeSubmissions = localForm ? localSubmissions : submissions;
 
   // Mutations
   const deleteFormMutation = trpc.forms.delete.useMutation();
@@ -103,6 +132,12 @@ export default function FormDetailViewPage() {
     if (!window.confirm("Are you sure you want to delete this form? This action cannot be undone.")) {
       return;
     }
+    if (localForm) {
+      deleteLocalForm(id);
+      toast.success("Form deleted successfully");
+      router.push("/dashboard/my-forms");
+      return;
+    }
     try {
       await deleteFormMutation.mutateAsync({ id });
       utils.forms.list.invalidate();
@@ -113,14 +148,16 @@ export default function FormDetailViewPage() {
     }
   };
 
-  // Redirect if unauthenticated
+  // Redirect if unauthenticated and not a local form
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (hasLoadedLocal && !localForm && status === "unauthenticated") {
       router.push(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
     }
-  }, [status, router]);
+  }, [hasLoadedLocal, localForm, status, router]);
 
-  if (isFormLoading || status === "loading") {
+  const isPageLoading = !hasLoadedLocal || (status === "loading" && !localForm) || (!localForm && isAuthed && isFetching && !form && !formError);
+
+  if (isPageLoading) {
     return (
       <div className="flex-1 p-6 sm:p-8 space-y-6 max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2">
@@ -140,7 +177,7 @@ export default function FormDetailViewPage() {
     );
   }
 
-  if (formError || !form) {
+  if ((formError && !localForm) || (!isPageLoading && !activeForm)) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
         <Layers className="h-10 w-10 text-muted-foreground mb-3" />
@@ -155,9 +192,9 @@ export default function FormDetailViewPage() {
     );
   }
 
-  const fields = (form.schemaJson as any)?.fields || [];
+  const fields = (activeForm.schemaJson as any)?.fields || [];
   const hostOrigin = typeof window !== "undefined" ? window.location.origin : "http://localhost:3000";
-  const publicFormUrl = `${hostOrigin}/f/${form.slug}`;
+  const publicFormUrl = `${hostOrigin}/f/${activeForm.slug}`;
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0 bg-transparent">
@@ -171,28 +208,28 @@ export default function FormDetailViewPage() {
           </Link>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-outfit text-lg font-black text-foreground tracking-tight leading-none truncate max-w-[280px] sm:max-w-md" title={form.title}>
-                {form.title}
+              <h1 className="font-outfit text-lg font-black text-foreground tracking-tight leading-none truncate max-w-[280px] sm:max-w-md" title={activeForm.title}>
+                {activeForm.title}
               </h1>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                form.visibility === "public" 
+                activeForm.visibility === "public" 
                   ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
-                  : form.visibility === "unlisted"
+                  : activeForm.visibility === "unlisted"
                   ? "bg-amber-500/10 border-amber-500/20 text-amber-500"
                   : "bg-muted border-border/80 text-muted-foreground"
               }`}>
-                {form.visibility.toUpperCase()}
+                {activeForm.visibility.toUpperCase()}
               </span>
             </div>
-            {form.description && (
-              <p className="text-[11px] text-muted-foreground mt-0.5 max-w-sm truncate">{form.description}</p>
+            {activeForm.description && (
+              <p className="text-[11px] text-muted-foreground mt-0.5 max-w-sm truncate">{activeForm.description}</p>
             )}
           </div>
         </div>
 
         {/* Toolbar CTA Actions */}
         <div className="flex items-center gap-2">
-          {form.visibility !== "draft" && (
+          {activeForm.visibility !== "draft" && (
             <a href={publicFormUrl} target="_blank" rel="noopener noreferrer">
               <Button size="sm" variant="outline" className="h-9 items-center gap-1 rounded-xl border border-border text-xs font-bold text-muted-foreground hover:bg-accent hover:text-foreground">
                 <Globe className="h-3.5 w-3.5" />
@@ -201,7 +238,7 @@ export default function FormDetailViewPage() {
               </Button>
             </a>
           )}
-          <Link href={`/dashboard/builder/${form.id}`}>
+          <Link href={`/dashboard/my-forms/${activeForm.id}/edit`}>
             <Button size="sm" className="h-9 items-center gap-1.5 rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-bold shadow-sm">
               <Pencil className="h-3.5 w-3.5" />
               <span>Edit Form</span>
@@ -221,7 +258,7 @@ export default function FormDetailViewPage() {
           <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm flex items-center justify-between text-card-foreground">
             <div className="text-left">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Total Views</span>
-              <span className="mt-2 text-2xl font-bold font-outfit text-foreground block">{analytics?.totalViews ?? 0}</span>
+              <span className="mt-2 text-2xl font-bold font-outfit text-foreground block">{activeAnalytics?.totalViews ?? 0}</span>
             </div>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10 text-primary shrink-0">
               <Eye className="h-5 w-5" />
@@ -231,7 +268,7 @@ export default function FormDetailViewPage() {
           <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm flex items-center justify-between text-card-foreground">
             <div className="text-left">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Total Submissions</span>
-              <span className="mt-2 text-2xl font-bold font-outfit text-foreground block">{analytics?.totalResponses ?? 0}</span>
+              <span className="mt-2 text-2xl font-bold font-outfit text-foreground block">{activeAnalytics?.totalResponses ?? 0}</span>
             </div>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-emerald-500/10 text-emerald-500 shrink-0">
               <Inbox className="h-5 w-5" />
@@ -242,7 +279,7 @@ export default function FormDetailViewPage() {
             <div className="text-left">
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Conversion Rate</span>
               <span className="mt-2 text-2xl font-bold font-outfit text-foreground block">
-                {analytics?.conversionRate ?? 0}%
+                {activeAnalytics?.conversionRate ?? 0}%
               </span>
             </div>
             <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-amber-500/10 text-amber-500 shrink-0">
@@ -267,7 +304,7 @@ export default function FormDetailViewPage() {
             }`}
             onClick={() => setActiveTab("responses")}
           >
-            Submissions List ({analytics?.totalResponses ?? 0})
+            Submissions List ({activeAnalytics?.totalResponses ?? 0})
           </button>
           <button
             className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
@@ -289,7 +326,7 @@ export default function FormDetailViewPage() {
                   <h3 className="font-outfit font-bold text-foreground text-sm">30-Day Activity Trend</h3>
                   <p className="text-[11px] text-muted-foreground mt-0.5">Views and submissions mapped daily over time</p>
                 </div>
-                {analytics?.timeline && analytics.timeline.length > 0 && (
+                {activeAnalytics?.timeline && activeAnalytics.timeline.length > 0 && (
                   <div className="flex items-center gap-4 text-xs font-semibold">
                     <div className="flex items-center gap-1.5">
                       <span className="h-2.5 w-2.5 rounded-full bg-primary" />
@@ -304,11 +341,11 @@ export default function FormDetailViewPage() {
               </div>
 
               <div className="flex-1 min-h-[240px] w-full relative">
-                {isAnalyticsLoading ? (
+                {(isAnalyticsLoading && !localForm) ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <LoadingSpinner className="w-8 h-8" />
                   </div>
-                ) : !analytics?.timeline || analytics.timeline.length === 0 ? (
+                ) : !activeAnalytics?.timeline || activeAnalytics.timeline.length === 0 ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 border border-dashed border-border/60 rounded-xl bg-muted/5">
                     <Layers className="h-10 w-10 text-muted-foreground/30 mb-2" />
                     <h4 className="font-outfit text-xs font-bold text-muted-foreground">No trend activity yet</h4>
@@ -372,7 +409,7 @@ export default function FormDetailViewPage() {
                   <h3 className="font-outfit font-bold text-foreground text-sm">All Form Submissions</h3>
                   <p className="text-[11px] text-muted-foreground mt-0.5">List of raw answer sheets received from participants</p>
                 </div>
-                {submissions && submissions.length > 0 && (
+                {activeSubmissions && activeSubmissions.length > 0 && (
                   <Button
                     onClick={handleExportCSV}
                     variant="outline"
@@ -384,11 +421,11 @@ export default function FormDetailViewPage() {
                 )}
               </div>
 
-              {isSubmissionsLoading ? (
+              {(isSubmissionsLoading && !localForm) ? (
                 <div className="flex-1 flex items-center justify-center">
                   <LoadingSpinner className="w-8 h-8" />
                 </div>
-              ) : !submissions || submissions.length === 0 ? (
+              ) : !activeSubmissions || activeSubmissions.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center p-6 border border-dashed border-border/60 rounded-xl bg-muted/5">
                   <Layers className="h-10 w-10 text-muted-foreground/30 mb-2" />
                   <h4 className="font-outfit text-xs font-bold text-muted-foreground">No submissions yet</h4>
@@ -396,12 +433,12 @@ export default function FormDetailViewPage() {
                 </div>
               ) : (
                 <div className="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
-                  {submissions.map((sub: any, idx) => {
+                  {activeSubmissions.map((sub: any, idx) => {
                     const answers = sub.answersJson as Record<string, any>;
                     return (
                       <Card key={sub.id} className="p-4 bg-muted/10 hover:bg-muted/20 border border-border/60 space-y-3 shadow-none text-xs transition-colors rounded-xl">
                         <div className="flex items-center justify-between border-b border-border/50 pb-2">
-                          <span className="font-bold text-foreground">Response #{submissions.length - idx}</span>
+                          <span className="font-bold text-foreground">Response #{activeSubmissions.length - idx}</span>
                           <span className="text-[10px] text-muted-foreground font-medium shrink-0 flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             {new Date(sub.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}

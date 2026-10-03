@@ -31,7 +31,7 @@ export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerP
   const [aiInsights, setAiInsights] = useState<string | null>(null);
 
   const { data: session } = useSession();
-  const isDemo = session?.user?.email === "demo@demo.com";
+  const isDemo = !session?.user || session?.user?.email === "demo@demo.com";
   const localFormFound = isDemo ? getLocalForm(form.id) : null;
   const isLocal = isDemo && !!localFormFound;
 

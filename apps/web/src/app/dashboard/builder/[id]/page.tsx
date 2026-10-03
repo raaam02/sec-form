@@ -41,9 +41,9 @@ export default function BuilderPage() {
 
   const utils = trpcAny.useUtils();
 
-  const { data: session } = useSession();
+  const { data: session, status: authStatus } = useSession();
   const [localForm, setLocalForm] = useState<LocalForm | null>(null);
-  const isDemo = !session?.user || !!localForm;
+  const isDemo = !session?.user || !!localForm || session?.user?.email === "demo@demo.com";
 
   // Sub-tabs states for the three panels
   const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">(initialTab);
@@ -72,11 +72,14 @@ export default function BuilderPage() {
     }
   }, [id]);
 
+  const isAuthLoading = authStatus === "loading";
+  const isAuthed = authStatus === "authenticated";
+
   // Queries
   const { data: form, isLoading: isFormLoading, error: formError, isFetching } = trpcAny.forms.get.useQuery(
     { id },
     {
-      enabled: hasLoadedLocal && !localForm && !!session?.user,
+      enabled: hasLoadedLocal && !localForm && isAuthed,
       refetchInterval: (data: any) => {
         const telegram = (data?.schemaJson as any)?.telegram;
         return (isSyncingTelegram && telegram?.enabled && !telegram?.chatId) ? 3000 : false;
@@ -84,25 +87,30 @@ export default function BuilderPage() {
     }
   );
 
-  const activeForm = isDemo && localForm ? localForm : form;
+  const activeForm = localForm || form;
 
   const { data: analytics, isLoading: isAnalyticsLoading } = trpcAny.analytics.getFormAnalytics.useQuery(
     { formId: id },
-    { enabled: middleTab === "analytics" && hasLoadedLocal && !localForm && !!session?.user }
+    { enabled: middleTab === "analytics" && hasLoadedLocal && !localForm && isAuthed }
   );
   const { data: responses, isLoading: isResponsesLoading } = trpcAny.submissions.list.useQuery(
     { formId: id },
-    { enabled: middleTab === "responses" && hasLoadedLocal && !localForm && !!session?.user }
+    { enabled: middleTab === "responses" && hasLoadedLocal && !localForm && isAuthed }
   );
 
-  const activeResponses = isDemo && localForm ? getLocalSubmissions(id) : responses;
-  const activeAnalytics = isDemo && localForm ? {
+  const activeResponses = localForm ? getLocalSubmissions(id) : responses;
+  const activeAnalytics = localForm ? {
     totalViews: localForm.totalViews || 0,
     totalResponses: activeResponses?.length || 0,
     conversionRate: localForm.totalViews ? Math.round((activeResponses?.length || 0) / localForm.totalViews * 100) : 0,
     timeline: [],
   } : analytics;
-  const activeIsFormLoading = isDemo ? !hasLoadedLocal || (activeForm ? false : isFormLoading) : isFormLoading;
+
+  const activeIsFormLoading = !hasLoadedLocal
+    ? true
+    : localForm
+      ? false
+      : isAuthLoading || (isAuthed && isFetching && !form && !formError);
 
   // Mutations
   const updateFormMutation = trpcAny.forms.update.useMutation();

@@ -52,7 +52,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       title,
       description,
     });
-    router.push(`/dashboard/builder/${form.id}`);
+    router.push(`/dashboard/my-forms/${form.id}/edit`);
   };
 
   // Redirect unauthenticated users only when trying to access protected dashboard pages (not builder/edit pages)

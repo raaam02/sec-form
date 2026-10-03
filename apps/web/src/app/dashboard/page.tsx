@@ -31,7 +31,7 @@ export default function DashboardPage() {
   const utils = trpc.useUtils();
   
   const { data: session } = useSession();
-  const isDemo = session?.user?.email === "demo@demo.com";
+  const isDemo = !session?.user || session?.user?.email === "demo@demo.com";
 
   // Queries
   const { data: formsList, isLoading: isFormsLoading } = trpc.forms.list.useQuery();
@@ -40,10 +40,16 @@ export default function DashboardPage() {
   const [localUpdateTrigger, setLocalUpdateTrigger] = useState(0);
 
   const combinedForms = React.useMemo(() => {
-    if (!formsList) return [];
-    if (!isDemo) return formsList;
+    if (!isDemo && formsList) return formsList;
+    if (!isDemo && !formsList) return [];
     
     const localForms = getLocalForms();
+    if (!formsList) {
+      return localForms.sort((a, b) => 
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      );
+    }
+
     const deletedSeededIds = getDeletedSeededFormIds();
     const localFormIds = new Set(localForms.map(f => f.id));
     const deletedSeededIdsSet = new Set(deletedSeededIds);

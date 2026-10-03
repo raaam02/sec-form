@@ -44,9 +44,9 @@ export default function BuilderPage() {
 
   const utils = trpcAny.useUtils();
 
-  const { data: session } = useSession();
+  const { data: session, status: authStatus } = useSession();
   const [localForm, setLocalForm] = useState<LocalForm | null>(null);
-  const isDemo = !session?.user || !!localForm;
+  const isDemo = !session?.user || !!localForm || session?.user?.email === "demo@demo.com";
   const [isPublishAuthModalOpen, setIsPublishAuthModalOpen] = useState(false);
 
   // Sub-tabs states for the three panels
@@ -77,11 +77,14 @@ export default function BuilderPage() {
     }
   }, [id]);
 
+  const isAuthLoading = authStatus === "loading";
+  const isAuthed = authStatus === "authenticated";
+
   // Queries
   const { data: form, isLoading: isFormLoading, error: formError, isFetching } = trpcAny.forms.get.useQuery(
     { id },
     {
-      enabled: hasLoadedLocal && !localForm && !!session?.user,
+      enabled: hasLoadedLocal && !localForm && isAuthed,
       refetchInterval: (data: any) => {
         const telegram = (data?.schemaJson as any)?.telegram;
         return (isSyncingTelegram && telegram?.enabled && !telegram?.chatId) ? 3000 : false;
@@ -89,25 +92,30 @@ export default function BuilderPage() {
     }
   );
 
-  const activeForm = isDemo && localForm ? localForm : form;
+  const activeForm = localForm || form;
 
   const { data: analytics, isLoading: isAnalyticsLoading } = trpcAny.analytics.getFormAnalytics.useQuery(
     { formId: id },
-    { enabled: middleTab === "analytics" && hasLoadedLocal && !localForm && !!session?.user }
+    { enabled: middleTab === "analytics" && hasLoadedLocal && !localForm && isAuthed }
   );
   const { data: responses, isLoading: isResponsesLoading } = trpcAny.submissions.list.useQuery(
     { formId: id },
-    { enabled: middleTab === "responses" && hasLoadedLocal && !localForm && !!session?.user }
+    { enabled: middleTab === "responses" && hasLoadedLocal && !localForm && isAuthed }
   );
 
-  const activeResponses = isDemo && localForm ? getLocalSubmissions(id) : responses;
-  const activeAnalytics = isDemo && localForm ? {
+  const activeResponses = localForm ? getLocalSubmissions(id) : responses;
+  const activeAnalytics = localForm ? {
     totalViews: localForm.totalViews || 0,
     totalResponses: activeResponses?.length || 0,
     conversionRate: localForm.totalViews ? Math.round((activeResponses?.length || 0) / localForm.totalViews * 100) : 0,
     timeline: [],
   } : analytics;
-  const activeIsFormLoading = isDemo ? !hasLoadedLocal || (activeForm ? false : isFormLoading) : isFormLoading;
+
+  const activeIsFormLoading = !hasLoadedLocal
+    ? true
+    : localForm
+      ? false
+      : isAuthLoading || (isAuthed && isFetching && !form && !formError);
 
   // Mutations
   const createFormMutation = trpcAny.forms.create.useMutation();
@@ -294,15 +302,14 @@ export default function BuilderPage() {
     }
   }, [activeForm, hasInitialized]);
 
-  // Auto-migrate local form to database when user returns logged-in
+  // Auto-migrate local form to database when user returns logged-in specifically to publish (?publish=true)
   useEffect(() => {
-    if (session?.user && localForm && hasInitialized) {
+    const autoPublish = searchParams.get("publish") === "true";
+    if (session?.user && localForm && hasInitialized && autoPublish) {
       if (migrationStartedRef.current) return;
       migrationStartedRef.current = true;
 
-      const autoPublish = searchParams.get("publish") === "true";
-      const targetVisibility = autoPublish ? "public" : "unlisted";
-      handleUpdateVisibility(targetVisibility);
+      handleUpdateVisibility("public");
     }
   }, [session?.user, localForm, hasInitialized, searchParams]);
 
@@ -706,7 +713,7 @@ export default function BuilderPage() {
         if (newVisibility === "public") {
           setIsShareModalOpen(true);
         }
-        router.push(`/dashboard/builder/${createdDbForm.id}`);
+        router.push(`/dashboard/my-forms/${createdDbForm.id}/edit`);
       } catch (err: any) {
         setSaveStatus("error");
         toast.error(err.message || "Failed to publish form");
