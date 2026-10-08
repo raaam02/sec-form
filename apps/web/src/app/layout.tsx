@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "../components/Providers";
@@ -7,47 +7,59 @@ import { NextIntlClientProvider } from "next-intl";
 import { Toaster } from "@/components/ui/sonner";
 import { Suspense } from "react";
 import { NavigationProgress } from "@/components/NavigationProgress";
+import {
+  SITE_URL,
+  SITE_NAME,
+  DEFAULT_TITLE,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_KEYWORDS,
+  softwareApplicationJsonLd,
+  organizationJsonLd,
+} from "@/lib/seo";
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-plus-jakarta",
 });
 
-export const metadata: Metadata = {
-  title: "Formu.AI | Premium AI-Powered Form Builder",
-  description: "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
-  keywords: [
-    "form builder",
-    "AI form generator",
-    "online forms",
-    "create survey",
-    "contact forms",
-    "embedded forms",
-    "sentiment analysis",
-    "feedback analysis",
-    "Next.js form builder",
-    "Shadcn form builder",
-    "Formu.AI",
-    "custom color form builder",
-    "fully customizable forms",
-    "brand form builder",
-    "custom theme forms"
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#030712" },
   ],
-  metadataBase: new URL("https://form.emoicons.com"),
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+};
+
+export const metadata: Metadata = {
+  title: {
+    default: DEFAULT_TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: DEFAULT_DESCRIPTION,
+  keywords: DEFAULT_KEYWORDS,
+  metadataBase: new URL(SITE_URL),
   alternates: {
     canonical: "/",
   },
+  applicationName: SITE_NAME,
+  authors: [{ name: "Formu.AI Team", url: SITE_URL }],
+  creator: "Formu.AI",
+  publisher: "Formu.AI",
+  category: "technology",
+  manifest: "/manifest.webmanifest",
   openGraph: {
-    title: "Formu.AI | Premium AI-Powered Form Builder",
-    description: "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
-    url: "https://form.emoicons.com",
-    siteName: "Formu.AI",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     images: [
       {
-        url: "/icon.png",
-        width: 512,
-        height: 512,
-        alt: "Formu.AI Logo",
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} - Premium AI-Powered Form Builder`,
       },
     ],
     locale: "en_US",
@@ -55,9 +67,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Formu.AI | Premium AI-Powered Form Builder",
-    description: "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
-    images: ["/icon.png"],
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    images: ["/opengraph-image"],
+    creator: "@FormuAI",
   },
   icons: {
     icon: [
@@ -90,34 +103,14 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Formu.AI",
-    "operatingSystem": "All",
-    "applicationCategory": "BusinessApplication",
-    "description": "Create, fully customize theme colors, embed, and analyze forms instantly utilizing next-gen AI insights. Build beautiful tailored forms for high conversion.",
-    "offers": {
-      "@type": "Offer",
-      "price": "0.00",
-      "priceCurrency": "USD",
-      "category": "Free/Freemium"
-    },
-    "featureList": [
-      "AI-Powered Form Generation",
-      "Full Theme & Color Customization",
-      "Seamless Form Embedding",
-      "Advanced AI Response Summaries",
-      "Multi-step Forms"
-    ]
-  };
-
   return (
     <html lang={locale} className={`${plusJakarta.variable} h-full`} suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([softwareApplicationJsonLd, organizationJsonLd]),
+          }}
         />
       </head>
       <body className="antialiased font-sans h-full bg-background text-foreground transition-colors duration-200">

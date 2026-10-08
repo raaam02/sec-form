@@ -8,7 +8,18 @@ import { Logo } from "@/components/Logo";
 
 const apiDocsUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`;
 
-const NAV_COLUMNS = [
+interface FooterLink {
+  label: string;
+  href: string;
+  external?: boolean;
+}
+
+interface FooterColumn {
+  title: string;
+  links: FooterLink[];
+}
+
+const NAV_COLUMNS: FooterColumn[] = [
   {
     title: "Product",
     links: [
@@ -22,8 +33,8 @@ const NAV_COLUMNS = [
     title: "Developers",
     links: [
       { label: "API Docs", href: apiDocsUrl, external: true },
+      { label: "LLMs.txt", href: "/llms.txt", external: true },
       { label: "REST API", href: apiDocsUrl, external: true },
-      { label: "Webhooks", href: "/docs/webhooks" },
       { label: "Open Source", href: "https://github.com/raaam02/sec-form", external: true },
     ],
   },
@@ -138,7 +149,7 @@ export function LandingFooter() {
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
             <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/sitemap" className="hover:text-foreground transition-colors">Sitemap</Link>
+            <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Sitemap</a>
           </div>
         </div>
       </div>
