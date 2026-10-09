@@ -6,15 +6,16 @@ import { useRouter, usePathname } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { motion } from "motion/react";
 import { Code, Github } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
+import { useAuthModal } from "@/components/auth/AuthModalContext";
 
 import { saveLocalForm } from "@/utils/localForms";
 let isFirstMount = true;
 
 export function LandingNav() {
   const { data: session } = useSession();
+  const { openAuthModal } = useAuthModal();
   const [shouldAnimate] = React.useState(isFirstMount);
 
   const [isScrolled, setIsScrolled] = React.useState(false);
@@ -139,7 +140,6 @@ export function LandingNav() {
             >
               <Github className="h-5 w-5" />
             </a>
-            <ThemeToggle />
             {session ? (
               <div className="flex items-center gap-2">
                 <Link
@@ -157,12 +157,13 @@ export function LandingNav() {
               </div>
             ) : (
               <>
-                <Link
-                  href="/login"
+                <button
+                  type="button"
+                  onClick={() => openAuthModal("login")}
                   className="inline-flex h-8 items-center rounded-lg px-3 text-[13px] font-semibold text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
                 >
                   {t("login")}
-                </Link>
+                </button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}

@@ -71,10 +71,22 @@ export function NavigationProgress() {
       if (target.hasAttribute("download")) return;
 
       // Ignore modified clicks (Ctrl, Cmd, Shift, right-click, etc.)
-      if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+      // Ignore if event was already prevented
+      if (e.defaultPrevented) return;
 
       const href = target.getAttribute("href");
       if (!href) return;
+
+      // Ignore auth modal triggers
+      if (
+        href === "/login" ||
+        href === "/signup" ||
+        href.startsWith("/login?") ||
+        href.startsWith("/signup?") ||
+        target.hasAttribute("data-no-progress")
+      ) {
+        return;
+      }
 
       // Only trigger for internal same-origin navigation
       if (href.startsWith("/") || href.startsWith(window.location.origin)) {

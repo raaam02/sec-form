@@ -6,8 +6,6 @@ import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BUILTIN_THEMES } from "@sec-form/shared";
 import { Palette, Sparkles, Code } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
 
 export default function ThemesPage() {

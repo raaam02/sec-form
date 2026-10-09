@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Github, Twitter, Code, Lock } from "lucide-react";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { ColorThemeSwitcher } from "@/components/ColorThemeSwitcher";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
@@ -91,6 +92,7 @@ export function LandingFooter() {
 
               <div className="flex flex-wrap items-center gap-2 pt-2">
                 <LocaleSwitcher />
+                <ThemeToggle />
                 <ColorThemeSwitcher />
               </div>
             </div>

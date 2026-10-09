@@ -11,9 +11,8 @@ import {
   Mail, UserCheck, TrendingUp, Presentation, 
   Calendar, Briefcase, Bug, Wrench, LucideIcon 
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
+import { useAuthModal } from "@/components/auth/AuthModalContext";
 
 interface CategoryStyle {
   colorClass: string;
@@ -198,9 +197,11 @@ export default function ExplorePage() {
     ? interleavedTemplates
     : FORM_TEMPLATES.filter((t) => t.category === selectedCategory);
 
+  const { openAuthModal } = useAuthModal();
+
   const handleUseTemplate = async (templateId: string) => {
     if (!session) {
-      router.push(`/login?redirect=${encodeURIComponent(`/dashboard?createTemplate=${templateId}`)}`);
+      openAuthModal("login", `/dashboard?createTemplate=${templateId}`);
       return;
     }
     router.push(`/dashboard?createTemplate=${templateId}`);
