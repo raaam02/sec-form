@@ -6,8 +6,8 @@ import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { BUILTIN_THEMES } from "@sec-form/shared";
 import { Palette, Sparkles, Code } from "lucide-react";
-import { ThemeToggle } from "../../components/ThemeToggle";
-import { LocaleSwitcher } from "../../components/LocaleSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
 
 export default function ThemesPage() {
@@ -39,9 +39,8 @@ export default function ThemesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col justify-between transition-colors duration-200">
-      <main className="flex-1 py-16 pt-28 container mx-auto px-4 sm:px-6 max-w-5xl">
-        <div className="text-center max-w-2xl mx-auto">
+    <div className="py-12 pb-24 container mx-auto px-4 sm:px-6 max-w-5xl">
+      <div className="text-center max-w-2xl mx-auto">
           <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             {tThemes("title")}
           </h1>
@@ -148,7 +147,6 @@ export default function ThemesPage() {
             </div>
           ))}
         </div>
-      </main>
-    </div>
-  );
+      </div>
+    );
 }

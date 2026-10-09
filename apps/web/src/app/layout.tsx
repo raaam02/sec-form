@@ -15,6 +15,7 @@ import {
   DEFAULT_KEYWORDS,
   softwareApplicationJsonLd,
   organizationJsonLd,
+  homepageFaqJsonLd,
 } from "@/lib/seo";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -109,7 +110,11 @@ export default async function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify([softwareApplicationJsonLd, organizationJsonLd]),
+            __html: JSON.stringify([
+              softwareApplicationJsonLd,
+              organizationJsonLd,
+              homepageFaqJsonLd,
+            ]),
           }}
         />
       </head>

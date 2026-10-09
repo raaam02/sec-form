@@ -159,3 +159,74 @@ export function buildBreadcrumbJsonLd(
     })),
   };
 }
+
+export const homepageFaqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "How does Formu.AI generate forms using Gemini AI?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Simply describe what you need in plain English. Google Gemini Pro instantly detects optimal input types, configures validation constraints, writes intelligent copy, and outputs a complete, ready-to-publish form schema.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How is Formu.AI different from Google Forms or Typeform?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Unlike Google Forms, Formu.AI allows deep real-time theme customization including exact hex colors, border radiuses, and dark mode styling. Unlike Typeform, you get built-in AI prompt generation, automated sentiment analysis summaries on responses, and an instant zero-friction sandbox mode at a fraction of the cost.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can I customize brand colors, card backgrounds, and corner radiuses?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes! You have granular control over your form aesthetics including primary accent colors, card background tones, root canvas colors, and border radiuses from 0px to 24px, plus instant pre-built themes from the Theme Gallery.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "How do I embed a form onto my website (WordPress, Webflow, Shopify, React)?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Publish your form and copy the 1-line lightweight embed script: <script src=\"https://form.emoicons.com/embed.js\" data-form-id=\"YOUR_FORM_ID\"></script>. Paste this snippet into any website or CMS to render the form responsively with custom themes.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is AI Response Sentiment Analysis and how does it help?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "When users submit long-form feedback or text answers, Gemini AI processes the submissions in real-time to score customer sentiment (positive, neutral, negative) and provides an automated bullet-point executive summary.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can I try Formu.AI for free without creating an account?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes! You can test all builder features immediately using our instant demo sandbox credentials (demo@demo.com / demo123) with browser local storage persistence.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Are form submissions secure and GDPR compliant?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes. All form data in transit is protected via TLS 1.3 encryption, and database records are safeguarded with AES-256 encryption at rest, along with client and server validation and Redis rate limiting.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "Can I export response submissions to CSV or connect to Webhooks?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "Yes. Pro and Enterprise accounts can export submission data to CSV files anytime and configure webhooks for instant JSON notifications.",
+      },
+    },
+  ],
+};
