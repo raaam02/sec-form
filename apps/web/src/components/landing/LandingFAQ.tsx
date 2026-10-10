@@ -93,10 +93,10 @@ export function LandingFAQ() {
             return (
               <div
                 key={item.id}
-                className={`rounded-3xl border transition-all duration-200 overflow-hidden ${
+                className={`rounded-3xl border transition-all duration-200 overflow-hidden shadow-xs dark:shadow-md dark:shadow-black/20 ${
                   isOpen
                     ? "border-primary/40 bg-card shadow-sm ring-1 ring-primary/10"
-                    : "border-border/70 bg-card/40 hover:border-border hover:bg-card/70"
+                    : "border-border/80 bg-card/90 dark:bg-card/90 hover:border-border hover:bg-card"
                 }`}
               >
                 <button

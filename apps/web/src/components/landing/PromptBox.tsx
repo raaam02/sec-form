@@ -35,10 +35,10 @@ export function PromptBox({
       <form
         onSubmit={submit}
         className={cn(
-          "relative flex flex-col rounded-3xl border bg-card/90 text-card-foreground p-3 sm:p-4 shadow-xl backdrop-blur-xl transition-all duration-300",
+          "relative flex flex-col rounded-3xl border bg-card dark:bg-card/95 text-card-foreground p-3 sm:p-4 shadow-xl backdrop-blur-xl transition-all duration-300",
           isFocused
             ? "border-primary/60 ring-2 ring-primary/20 shadow-2xl"
-            : "border-border/80 hover:border-border shadow-black/5 dark:shadow-black/25"
+            : "border-border/80 hover:border-border shadow-black/5 dark:shadow-black/30"
         )}
       >
         {/* Textarea Area */}
