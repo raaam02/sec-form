@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FORM_TEMPLATES, FormTemplate, FormFieldTemplate, BUILTIN_THEMES } from "@sec-form/shared";
 import {
-  Sparkles, Search, ArrowRight, Eye, Check, X, Star,
+  Sparkles, Search, ArrowRight, Eye, Check, X, Star, ChevronUp,
   HeartHandshake, Utensils, Smile, GraduationCap,
   Mail, UserCheck, TrendingUp, Presentation,
   Calendar, Briefcase, Bug, Wrench, LucideIcon
@@ -14,6 +14,8 @@ import {
 import { useTranslations } from "next-intl";
 import { useAuthModal } from "@/components/auth/AuthModalContext";
 import { useTheme } from "@/components/ThemeProvider";
+import { motion, AnimatePresence } from "motion/react";
+import { PopoverFormCutOutTopIcon, useClickOutside } from "@/components/ui/popover-form";
 
 const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   "customer-feedback": HeartHandshake,
@@ -134,6 +136,8 @@ export default function ExplorePage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [previewTemplate, setPreviewTemplate] = useState<FormTemplate | null>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useClickOutside(modalRef, () => setPreviewTemplate(null));
 
   const tExplore = useTranslations("Explore");
   const tCommon = useTranslations("Common");
@@ -307,14 +311,15 @@ export default function ExplorePage() {
 
                 {/* Subtle Both Preview & Use Action Buttons */}
                 <div className="mt-5 pt-3.5 border-t border-border/30 flex items-center gap-2">
-                  <button
+                  <motion.button
+                    layoutId={`template-preview-${template.id}`}
                     type="button"
                     onClick={() => setPreviewTemplate(template)}
                     className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/60 bg-muted/30 hover:bg-muted text-foreground py-2.5 text-xs font-semibold transition-colors"
                   >
                     <Eye className="h-3.5 w-3.5 text-muted-foreground" />
                     <span>Preview</span>
-                  </button>
+                  </motion.button>
 
                   <button
                     type="button"
@@ -331,87 +336,136 @@ export default function ExplorePage() {
         </div>
       )}
 
-      {/* Full Live Interactive Form Modal Preview */}
-      {previewTemplate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl rounded-[28px] pb-6 bg-card border border-border/60 shadow-2xl max-h-[90vh] flex flex-col justify-between overflow-hidden">
-            {/* Live Form Canvas Inside Modal with custom-scrollbar */}
-            <div className="rounded-[28px] p-6 sm:p-8 border border-border/30 shadow-sm space-y-5 transition-all overflow-y-auto flex-1 custom-scrollbar"
-              style={{
-                backgroundColor: previewTheme.backgroundColor,
-                color: previewTheme.textColor,
+      {/* Full Live Interactive Form Modal Preview with Spring Motion */}
+      <AnimatePresence>
+        {previewTemplate && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setPreviewTemplate(null)}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm"
+            />
+
+            {/* Modal Dialog with Spring Popover Animation */}
+            <motion.div
+              layoutId={`template-preview-${previewTemplate.id}`}
+              ref={modalRef}
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16, filter: "blur(4px)" }}
+              transition={{
+                type: "spring",
+                duration: 0.4,
+                bounce: 0,
               }}
+              className="relative z-10 w-full max-w-2xl rounded-[28px] pb-6 bg-card border border-border/60 shadow-2xl max-h-[90vh] flex flex-col justify-between overflow-hidden outline-none"
             >
+              {/* Cult UI Cutout Top Tab with ChevronUp Close Button */}
+              <div className="absolute -top-[5px] left-1/2 z-30 flex h-[26px] w-[12px] -translate-x-1/2 transform items-center justify-center pointer-events-auto">
+                <button
+                  type="button"
+                  onClick={() => setPreviewTemplate(null)}
+                  className="text-muted-foreground hover:text-foreground absolute z-20 -mt-1 flex h-[14px] w-[18px] items-center justify-center rounded-full focus:outline-none transition-colors"
+                  aria-label="Close"
+                >
+                  <ChevronUp className="h-3 w-3 text-muted-foreground/80 hover:text-foreground" />
+                </button>
+                <PopoverFormCutOutTopIcon />
+              </div>
+
+              {/* Live Form Canvas Inside Modal with custom-scrollbar */}
               <div
-                className="rounded-3xl p-5 sm:p-7 space-y-5 border border-border dark:border-border/40"
+                className="rounded-[28px] p-6 sm:p-8 border border-border/30 shadow-sm space-y-5 transition-all overflow-y-auto flex-1 custom-scrollbar"
                 style={{
-                  backgroundColor: previewTheme.cardColor,
+                  backgroundColor: previewTheme.backgroundColor,
                   color: previewTheme.textColor,
                 }}
               >
-                <div className="border-b border-black/10 dark:border-white/10 pb-3">
-                  <h3 className="font-bold text-base sm:text-lg tracking-tight">
-                    {previewTemplate.title}
-                  </h3>
-                  <p className="text-xs opacity-75 mt-0.5">
-                    {previewTemplate.description}
-                  </p>
-                </div>
-
-                {/* Render every field as an actual form input */}
-                <div className="space-y-4">
-                  {previewTemplate.fields.map((field) => (
-                    <div key={field.id} className="space-y-1.5">
-                      {field.type !== "checkbox" && (
-                        <label className="text-xs font-semibold opacity-90 block">
-                          {field.label} {field.required && <span className="text-rose-500">*</span>}
-                        </label>
-                      )}
-                      {field.description && (
-                        <p className="text-[11px] opacity-70">{field.description}</p>
-                      )}
-                      {renderLiveField(field, previewTheme.primaryColor)}
+                <div
+                  className="rounded-3xl p-5 sm:p-7 space-y-5 border border-border dark:border-border/40"
+                  style={{
+                    backgroundColor: previewTheme.cardColor,
+                    color: previewTheme.textColor,
+                  }}
+                >
+                  <div className="border-b border-black/10 dark:border-white/10 pb-3 flex items-start justify-between gap-4">
+                    <div>
+                      <h3 className="font-bold text-base sm:text-lg tracking-tight">
+                        {previewTemplate.title}
+                      </h3>
+                      <p className="text-xs opacity-75 mt-0.5">
+                        {previewTemplate.description}
+                      </p>
                     </div>
-                  ))}
+                    <button
+                      type="button"
+                      onClick={() => setPreviewTemplate(null)}
+                      className="p-1 rounded-lg text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Close"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
 
-                  {/* Simulated submit button */}
-                  <div
-                    className="w-full h-10 rounded-xl text-xs font-semibold text-white flex items-center justify-center shadow-md mt-6 select-none"
-                    style={{
-                      backgroundColor: previewTheme.primaryColor,
-                    }}
-                  >
-                    {tCommon("submit")}
+                  {/* Render every field as an actual form input */}
+                  <div className="space-y-4">
+                    {previewTemplate.fields.map((field) => (
+                      <div key={field.id} className="space-y-1.5">
+                        {field.type !== "checkbox" && (
+                          <label className="text-xs font-semibold opacity-90 block">
+                            {field.label} {field.required && <span className="text-rose-500">*</span>}
+                          </label>
+                        )}
+                        {field.description && (
+                          <p className="text-[11px] opacity-70">{field.description}</p>
+                        )}
+                        {renderLiveField(field, previewTheme.primaryColor)}
+                      </div>
+                    ))}
+
+                    {/* Simulated submit button */}
+                    <div
+                      className="w-full h-10 rounded-xl text-xs font-semibold text-white flex items-center justify-center shadow-md mt-6 select-none"
+                      style={{
+                        backgroundColor: previewTheme.primaryColor,
+                      }}
+                    >
+                      {tCommon("submit")}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Modal Footer */}
-            <div className="pt-4 flex items-center justify-end gap-3 px-6">
-              <button
-                type="button"
-                onClick={() => setPreviewTemplate(null)}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const id = previewTemplate.id;
-                  setPreviewTemplate(null);
-                  handleUseTemplate(id);
-                }}
-                className="group/button inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
-              >
-                <span>Use template</span>
-                <ArrowRight className="h-3.5 w-3.5  transition-transform duration-200 group-hover/button:translate-x-1" />
-              </button>
-            </div>
+              {/* Modal Footer */}
+              <div className="pt-4 flex items-center justify-end gap-3 px-6">
+                <button
+                  type="button"
+                  onClick={() => setPreviewTemplate(null)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const id = previewTemplate.id;
+                    setPreviewTemplate(null);
+                    handleUseTemplate(id);
+                  }}
+                  className="group/button inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
+                >
+                  <span>Use template</span>
+                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/button:translate-x-1" />
+                </button>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 }
