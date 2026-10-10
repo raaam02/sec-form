@@ -575,7 +575,7 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
   const publicFormUrl = slug ? `${hostOrigin}/f/${slug}` : "";
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-background select-none">
+    <div className="flex flex-col h-full w-full overflow-hidden bg-background select-none">
       {/* Top Header */}
       <div className="relative z-30 shrink-0">
         <BuilderHeader
@@ -589,17 +589,8 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
           hasUnpublishedChanges={hasUnpublishedChanges}
           handlePublish={handlePublish}
           isPublishing={isPublishing}
+          onExit={onExit}
         />
-        {onExit && (
-          <button
-            type="button"
-            onClick={onExit}
-            className="absolute left-3 top-3 h-8 w-8 flex items-center justify-center rounded-lg bg-secondary/80 border border-border text-muted-foreground hover:text-foreground hover:bg-secondary z-50 transition-all cursor-pointer shadow-sm"
-            title="Exit builder"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
       </div>
 
       {/* Main Workspace: Left Palette + WYSIWYG Live Canvas */}

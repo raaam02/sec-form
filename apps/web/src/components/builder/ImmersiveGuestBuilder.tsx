@@ -72,8 +72,8 @@ export function ImmersiveGuestBuilder({
       layoutId={layoutId}
       expanded={isExpanded}
       onExpandChange={setIsExpanded}
-      triggerRadius="16px"
-      contentRadius="0px"
+      triggerRadius="14px"
+      contentRadius="28px"
       animationDuration={0.35}
     >
       <ExpandableScreenTrigger className={triggerClassName}>
@@ -90,7 +90,7 @@ export function ImmersiveGuestBuilder({
       </ExpandableScreenTrigger>
 
       <ExpandableScreenContent
-        className="w-screen h-screen p-0 border-none bg-background rounded-none shadow-none overflow-hidden"
+        className="w-full max-w-7xl h-[92vh] max-h-[960px] my-auto mx-auto rounded-[28px] border border-border/80 bg-background/95 backdrop-blur-2xl shadow-2xl overflow-hidden flex flex-col ring-1 ring-white/[0.08]"
         showCloseButton={false}
       >
         {formId ? (

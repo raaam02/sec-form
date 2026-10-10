@@ -15,7 +15,8 @@ import {
   Lock,
   Keyboard,
   Upload,
-  LogIn
+  LogIn,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -33,6 +34,7 @@ interface BuilderHeaderProps {
   hasUnpublishedChanges: boolean;
   handlePublish: () => void;
   isPublishing: boolean;
+  onExit?: () => void;
 }
 
 export function BuilderHeader({
@@ -46,6 +48,7 @@ export function BuilderHeader({
   hasUnpublishedChanges,
   handlePublish,
   isPublishing,
+  onExit,
 }: BuilderHeaderProps) {
   const { data: session } = useSession();
   const t = useTranslations("Builder");
@@ -63,19 +66,31 @@ export function BuilderHeader({
   const backHref = session?.user ? "/dashboard" : "/";
 
   return (
-    <header className="h-16 border-b border-border bg-sidebar px-6 shrink-0 flex items-center justify-between gap-4 transition-colors duration-200">
+    <header className="h-16 border-b border-border bg-sidebar/80 backdrop-blur-md px-6 shrink-0 flex items-center justify-between gap-4 transition-colors duration-200">
       <div className="flex items-center gap-3 min-w-0">
-        <Link href={backHref} passHref>
+        {onExit ? (
           <Button 
             variant="outline" 
             size="icon"
-            className="h-8 w-8 rounded-xl p-1.5 border border-border bg-card text-muted-foreground shrink-0 hover:text-foreground hover:bg-accent"
-            title={session?.user ? t("backToDashboard") : "Back to Home"}
-            asChild
+            onClick={onExit}
+            className="h-8 w-8 rounded-xl p-1.5 border border-border bg-card text-muted-foreground shrink-0 hover:text-foreground hover:bg-accent cursor-pointer"
+            title="Exit builder"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-        </Link>
+        ) : (
+          <Link href={backHref} passHref>
+            <Button 
+              variant="outline" 
+              size="icon"
+              className="h-8 w-8 rounded-xl p-1.5 border border-border bg-card text-muted-foreground shrink-0 hover:text-foreground hover:bg-accent"
+              title={session?.user ? t("backToDashboard") : "Back to Home"}
+              asChild
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+        )}
         <div className="min-w-0">
           <h1 className="font-outfit text-base font-bold text-foreground truncate max-w-[180px] sm:max-w-xs md:max-w-md">{title || t("canvasTitlePlaceholder")}</h1>
         </div>
@@ -219,6 +234,23 @@ export function BuilderHeader({
               <span>Log In</span>
             </Button>
           </Link>
+        )}
+
+        {onExit && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onExit}
+                className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors ml-1 cursor-pointer"
+                title="Exit Builder"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Exit Builder</TooltipContent>
+          </Tooltip>
         )}
       </div>
     </header>

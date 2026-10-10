@@ -10,6 +10,7 @@ import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
 import { useAuthModal } from "@/components/auth/AuthModalContext";
 import { saveLocalForm } from "@/utils/localForms";
+import { ImmersiveGuestBuilder } from "@/components/builder/ImmersiveGuestBuilder";
 
 let isFirstMount = true;
 
@@ -167,14 +168,15 @@ export function LandingNav() {
                     {t("login") || "Log in"}
                   </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleStartBuilding}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-foreground px-3.5 sm:px-4 text-xs font-semibold text-background shadow-sm transition hover:opacity-90 active:scale-[0.98]"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>Create Form</span>
-                </button>
+                <ImmersiveGuestBuilder layoutId="landing-nav-create-form">
+                  <button
+                    type="button"
+                    className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-foreground px-3.5 sm:px-4 text-xs font-semibold text-background shadow-sm transition hover:opacity-90 active:scale-[0.98] cursor-pointer"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>Create Form</span>
+                  </button>
+                </ImmersiveGuestBuilder>
               </div>
             )}
           </div>
