@@ -19,7 +19,7 @@ export const FAQ_ITEMS: FAQItem[] = [
     id: "ai-generation",
     question: "How does Formu.AI generate forms?",
     answer:
-      "Describe what you need in plain English. Gemini AI detects optimal input types, sets validation rules, writes copy, and outputs a ready-to-publish form schema.",
+      "Describe what you need in plain English. Formu AI detects optimal input types, sets validation rules, writes copy, and outputs a ready-to-publish form schema.",
   },
   {
     id: "alternatives",
@@ -43,7 +43,7 @@ export const FAQ_ITEMS: FAQItem[] = [
     id: "sentiment-analysis",
     question: "What is AI Response Sentiment Analysis?",
     answer:
-      "Gemini AI processes submissions in real time, scoring sentiment and providing an automated summary of recurring feedback.",
+      "Our AI engine processes submissions in real time, scoring sentiment and providing an automated summary of recurring feedback.",
   },
   {
     id: "free-demo",

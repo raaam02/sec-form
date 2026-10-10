@@ -34,6 +34,8 @@ function BentoCard({
   href,
   linkText,
   external,
+  iconColor = "text-primary",
+  iconBg = "bg-primary/10 border-primary/20",
   className,
   children,
 }: {
@@ -44,6 +46,8 @@ function BentoCard({
   href?: string;
   linkText?: string;
   external?: boolean;
+  iconColor?: string;
+  iconBg?: string;
   className?: string;
   children?: React.ReactNode;
 }) {
@@ -57,7 +61,13 @@ function BentoCard({
     >
       <div>
         <div className="flex items-center justify-between mb-3.5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+          <span
+            className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 shadow-sm",
+              iconBg,
+              iconColor
+            )}
+          >
             <Icon className="h-4.5 w-4.5" aria-hidden />
           </span>
           {badge && (
@@ -400,7 +410,9 @@ export function LandingFeatures() {
           <BentoCard
             className="md:col-span-7"
             icon={Sparkles}
-            badge="Gemini Pro"
+            iconColor="text-violet-600 dark:text-violet-400"
+            iconBg="bg-violet-500/10 border-violet-500/20 dark:bg-violet-500/20 dark:border-violet-500/30"
+            badge="AI Engine"
             title="AI Form Generation"
             description="Describe what you need in plain English. Get fields, validation, and copy ready to publish."
             href="#prompt"
@@ -413,6 +425,8 @@ export function LandingFeatures() {
           <BentoCard
             className="md:col-span-5"
             icon={Palette}
+            iconColor="text-rose-600 dark:text-rose-400"
+            iconBg="bg-rose-500/10 border-rose-500/20 dark:bg-rose-500/20 dark:border-rose-500/30"
             badge="Theming"
             title="Branded Styling"
             description="50+ presets or custom hex colors, radius, and fonts. Try an accent below."
@@ -426,6 +440,8 @@ export function LandingFeatures() {
           <BentoCard
             className="md:col-span-5"
             icon={FileText}
+            iconColor="text-amber-600 dark:text-amber-400"
+            iconBg="bg-amber-500/10 border-amber-500/20 dark:bg-amber-500/20 dark:border-amber-500/30"
             badge="Templates"
             title="Curated Templates"
             description="Jumpstart your workflow with tested templates for surveys, RSVPs, hiring, and lead generation."
@@ -439,6 +455,8 @@ export function LandingFeatures() {
           <BentoCard
             className="md:col-span-7"
             icon={Send}
+            iconColor="text-[#0088cc] dark:text-[#29b6f6]"
+            iconBg="bg-[#0088cc]/10 border-[#0088cc]/20 dark:bg-[#0088cc]/20 dark:border-[#0088cc]/30"
             badge="Instant Sync"
             title="Instant Telegram Connect"
             description="Receive live form responses straight in your Telegram chat or team channel under 100ms. No complex API keys required."
@@ -453,6 +471,8 @@ export function LandingFeatures() {
           <BentoCard
             className="md:col-span-5"
             icon={LayoutGrid}
+            iconColor="text-indigo-600 dark:text-indigo-400"
+            iconBg="bg-indigo-500/10 border-indigo-500/20 dark:bg-indigo-500/20 dark:border-indigo-500/30"
             badge="Builder"
             title="Visual Canvas"
             description="Drag, drop, and reorder fields with live instant preview."
@@ -466,6 +486,8 @@ export function LandingFeatures() {
           <BentoCard
             className="md:col-span-7"
             icon={BarChart3}
+            iconColor="text-blue-600 dark:text-blue-400"
+            iconBg="bg-blue-500/10 border-blue-500/20 dark:bg-blue-500/20 dark:border-blue-500/30"
             badge="Analytics"
             title="Submissions & AI Insights"
             description="Track views, conversion rates, and automated sentiment summaries on responses."
@@ -479,6 +501,8 @@ export function LandingFeatures() {
           <BentoCard
             className="md:col-span-7"
             icon={Rocket}
+            iconColor="text-orange-600 dark:text-orange-400"
+            iconBg="bg-orange-500/10 border-orange-500/20 dark:bg-orange-500/20 dark:border-orange-500/30"
             badge="Embed"
             title="Publish Anywhere"
             description="Share a standalone link, QR code, or paste our lightweight 1-line script."
@@ -492,6 +516,8 @@ export function LandingFeatures() {
           <BentoCard
             className="md:col-span-5"
             icon={ShieldCheck}
+            iconColor="text-emerald-600 dark:text-emerald-400"
+            iconBg="bg-emerald-500/10 border-emerald-500/20 dark:bg-emerald-500/20 dark:border-emerald-500/30"
             badge="Security"
             title="Safe by Default"
             description="Sensible rate limits, allowed domains, and full control if you self-host."

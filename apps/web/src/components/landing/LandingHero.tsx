@@ -175,6 +175,7 @@ function GeneratedFormDemo() {
   const [typedChars, setTypedChars] = useState(0);
   const [visibleFieldsCount, setVisibleFieldsCount] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const scenario = DEMOS[index];
   const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -186,7 +187,17 @@ function GeneratedFormDemo() {
 
   const switchScenario = (newIndex: number) => {
     clearAllTimers();
+    setIsSubmitted(false);
     setIndex(newIndex);
+  };
+
+  const handleSubmit = () => {
+    if (visibleFieldsCount < scenario.fields.length || isSubmitted) return;
+    setIsSubmitted(true);
+    setTimeout(() => {
+      setIsSubmitted(false);
+      switchScenario((index + 1) % DEMOS.length);
+    }, 1200);
   };
 
   useEffect(() => {
@@ -341,7 +352,9 @@ function GeneratedFormDemo() {
           </div>
 
           <div className="mt-6 pt-3 border-t border-border/40 flex items-center justify-between text-[11px] text-muted-foreground">
-            <span>Powered by Gemini</span>
+            <span className="flex items-center gap-1 font-medium">
+              <Sparkles className="h-3 w-3 text-primary" /> AI Schema Engine
+            </span>
             <button
               type="button"
               onClick={() => switchScenario((index + 1) % DEMOS.length)}
@@ -383,29 +396,28 @@ function GeneratedFormDemo() {
               </div>
             </div>
 
-            {/* Bottom Form Actions (Always anchored to bottom) */}
-            <div className="pt-3.5 border-t border-border/40 flex items-center justify-between mt-auto">
-              <span
-                className={`text-[11px] flex items-center gap-1 transition-opacity duration-300 ${
-                  isComplete ? "text-muted-foreground opacity-100" : "text-muted-foreground/40 opacity-50"
-                }`}
-              >
-                <CheckCircle2
-                  className={`h-3.5 w-3.5 transition-colors ${
-                    isComplete ? "text-emerald-500" : "text-muted-foreground/30"
-                  }`}
-                />
-                Validated
-              </span>
+            {/* Bottom Form Submit Button */}
+            <div className="pt-3.5 border-t border-border/50 mt-auto">
               <button
                 type="button"
-                className={`inline-flex items-center justify-center h-8.5 px-4 rounded-lg text-xs font-semibold shadow-sm transition-all duration-200 ${
-                  isComplete
-                    ? "bg-foreground text-background hover:opacity-90 active:scale-[0.98] cursor-pointer"
+                onClick={handleSubmit}
+                disabled={!isComplete || isSubmitted}
+                className={`w-full h-10 rounded-lg text-xs font-semibold shadow-sm transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                  isSubmitted
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
+                    : isComplete
+                    ? "bg-foreground text-background hover:opacity-90 active:scale-[0.99] cursor-pointer"
                     : "bg-muted text-muted-foreground/50 cursor-not-allowed opacity-60"
                 }`}
               >
-                Submit
+                {isSubmitted ? (
+                  <>
+                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    <span>Submitted!</span>
+                  </>
+                ) : (
+                  <span>Submit</span>
+                )}
               </button>
             </div>
           </div>

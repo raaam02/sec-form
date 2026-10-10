@@ -10,18 +10,24 @@ const STEPS = [
   {
     step: "01",
     icon: MousePointerClick,
+    iconColor: "text-violet-600 dark:text-violet-400",
+    iconBg: "bg-violet-500/10 border-violet-500/20 dark:bg-violet-500/20 dark:border-violet-500/30",
     title: "Describe or drag",
     description: "Type what you need in plain English, or drag fields directly from the palette.",
   },
   {
     step: "02",
     icon: Palette,
+    iconColor: "text-rose-600 dark:text-rose-400",
+    iconBg: "bg-rose-500/10 border-rose-500/20 dark:bg-rose-500/20 dark:border-rose-500/30",
     title: "Style to your brand",
     description: "Pick from 50+ themes or customize colors, fonts, and corner radius.",
   },
   {
     step: "03",
     icon: BarChart3,
+    iconColor: "text-blue-600 dark:text-blue-400",
+    iconBg: "bg-blue-500/10 border-blue-500/20 dark:bg-blue-500/20 dark:border-blue-500/30",
     title: "Publish and analyze",
     description: "Embed with 1 line of code and let AI summarize responses in real time.",
   },
@@ -45,7 +51,7 @@ export function LandingHowItWorks() {
             viewport={{ once: true, margin: "-40px" }}
             className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6"
           >
-            {STEPS.map(({ step, icon: Icon, title, description }) => (
+            {STEPS.map(({ step, icon: Icon, iconColor, iconBg, title, description }) => (
               <motion.div
                 key={step}
                 variants={fadeUp}
@@ -53,7 +59,9 @@ export function LandingHowItWorks() {
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+                    <span
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 shadow-sm ${iconBg} ${iconColor}`}
+                    >
                       <Icon className="h-5 w-5" aria-hidden />
                     </span>
                     <span className="font-outfit text-xl font-bold text-muted-foreground/40 font-mono">

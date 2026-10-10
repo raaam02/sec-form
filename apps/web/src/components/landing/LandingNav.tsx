@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { motion, AnimatePresence } from "motion/react";
-import { ArrowRight, Plus, Github, Menu, X } from "lucide-react";
+import { motion } from "motion/react";
+import { Plus, Github } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
 import { useAuthModal } from "@/components/auth/AuthModalContext";
@@ -18,7 +18,6 @@ export function LandingNav() {
   const { openAuthModal } = useAuthModal();
   const [shouldAnimate] = useState(isFirstMount);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -38,10 +37,6 @@ export function LandingNav() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
 
   const handleStartBuilding = () => {
     const id = crypto.randomUUID();
@@ -74,11 +69,6 @@ export function LandingNav() {
     { href: "/explore", label: t("navExplore") || "Explore", target: "_self" },
     { href: "/themes", label: t("navThemes") || "Themes", target: "_self" },
     { href: "/pricing", label: t("navPricing") || "Pricing", target: "_self" },
-    // {
-    //   href: `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/docs`,
-    //   label: t("navApiDocs") || "API",
-    //   target: "_blank",
-    // },
   ];
 
   return (
@@ -156,84 +146,22 @@ export function LandingNav() {
                 <button
                   type="button"
                   onClick={() => openAuthModal("login")}
-                  className="inline-flex h-8.5 items-center rounded-lg px-3 text-xs font-medium text-muted-foreground transition hover:text-foreground"
+                  className="inline-flex h-8.5 items-center rounded-lg px-2.5 sm:px-3 text-xs font-medium text-muted-foreground transition hover:text-foreground"
                 >
                   {t("login") || "Log in"}
                 </button>
                 <button
                   type="button"
                   onClick={handleStartBuilding}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-4 text-xs font-semibold text-background shadow-sm transition hover:opacity-90 active:scale-[0.98]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-3.5 sm:px-4 text-xs font-semibold text-background shadow-sm transition hover:opacity-90 active:scale-[0.98]"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Create Form</span>
                 </button>
               </div>
             )}
-
-            {/* Mobile Menu Toggle */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex md:hidden h-8.5 w-8.5 items-center justify-center rounded-lg border border-border/70 text-muted-foreground transition hover:bg-card hover:text-foreground"
-              aria-label="Toggle navigation menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </button>
           </div>
         </div>
-
-        {/* Mobile Navigation Drawer */}
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="overflow-hidden border-t border-border/60 bg-background/95 px-5 py-4 md:hidden backdrop-blur-2xl rounded-b-2xl"
-            >
-              <nav className="flex flex-col gap-3 py-1">
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    target={link.target}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center justify-between text-sm font-medium text-muted-foreground hover:text-foreground py-1"
-                  >
-                    <span>{link.label}</span>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground/40" />
-                  </Link>
-                ))}
-                <div className="pt-3 mt-1 border-t border-border/50 flex items-center justify-between">
-                  <a
-                    href="https://github.com/raaam02/sec-form"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground"
-                  >
-                    <Github className="h-4 w-4" />
-                    <span>GitHub</span>
-                  </a>
-                  {!session && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        openAuthModal("signup");
-                      }}
-                      className="text-xs font-semibold text-foreground"
-                    >
-                      Sign up
-                    </button>
-                  )}
-                </div>
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
     </motion.header>
   );

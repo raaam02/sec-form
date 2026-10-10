@@ -65,7 +65,7 @@ export function LandingFooter() {
                 <Logo size="md" />
               </Link>
               <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed max-w-xs">
-                The intelligent AI form builder powered by Gemini.
+                The modern, open source AI form builder.
               </p>
             </div>
 
