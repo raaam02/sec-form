@@ -7,7 +7,7 @@ import { Sparkles, Copy, Check, ArrowRight, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function ThemesPage() {
-  // Default to matching website theme (Dark Mode by default if dark, or Modern SaaS)
+  // Default to Dark Mode theme matching the website
   const defaultTheme = BUILTIN_THEMES.find((t) => t.id === "dark") || BUILTIN_THEMES[0];
   const [selectedTheme, setSelectedTheme] = useState<ThemeConfig>(defaultTheme);
   const [activeRating, setActiveRating] = useState<number>(4);
@@ -46,20 +46,23 @@ export default function ThemesPage() {
         </p>
       </div>
 
-      {/* Main Studio: Form on Left Side, Theme Presets on Right Side */}
-      <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-        {/* LEFT COLUMN: Live Form Preview Window */}
-        <div className="lg:col-span-7 flex flex-col justify-between space-y-4 order-1">
-          <div className="flex items-center justify-between px-1 h-6">
-            <span className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Live interactive form preview
-            </span>
-            <div className="flex items-center gap-2">
+      {/* Immersive Single Container Divided into 2 Parts */}
+      <div className="mt-12 rounded-3xl border border-border/40 bg-card/40 backdrop-blur-sm overflow-hidden shadow-2xl">
+        <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch divide-y lg:divide-y-0 lg:divide-x divide-border/30">
+
+          {/* PART 1: Left Side — Live Form Preview & Actions */}
+          <div className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-6">
+            {/* Top Toolbar */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                Live interactive form preview
+              </span>
               <button
                 type="button"
                 onClick={() => copyConfig(selectedTheme)}
-                className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/50 bg-background/60 hover:bg-muted text-xs font-medium text-foreground transition-all active:scale-95 shadow-2xs"
+                title="Copy Theme JSON"
               >
                 {copiedId === selectedTheme.id ? (
                   <>
@@ -68,148 +71,148 @@ export default function ThemesPage() {
                   </>
                 ) : (
                   <>
-                    <Copy className="h-3.5 w-3.5" />
-                    <span>Copy JSON</span>
+                    <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>Theme JSON</span>
                   </>
                 )}
               </button>
             </div>
-          </div>
 
-          {/* Form Browser Canvas */}
-          <div
-            className="flex-1 rounded-3xl p-6 sm:p-10 border border-border/40 transition-all duration-300 shadow-xl flex items-center justify-center min-h-[500px]"
-            style={{
-              backgroundColor: selectedTheme.backgroundColor,
-              color: selectedTheme.textColor,
-            }}
-          >
+            {/* Inner Live Form Canvas */}
             <div
-              className="w-full max-w-md p-6 sm:p-8 shadow-2xl transition-all duration-300 space-y-5 rounded-2xl"
+              className="rounded-2xl p-6 sm:p-8 border border-border/30 shadow-md flex items-center justify-center min-h-[460px] transition-all duration-300"
               style={{
-                backgroundColor: selectedTheme.cardColor,
-                borderRadius: selectedTheme.borderRadius || "1rem",
+                backgroundColor: selectedTheme.backgroundColor,
                 color: selectedTheme.textColor,
               }}
             >
+              <div
+                className="w-full max-w-sm p-6 sm:p-7 shadow-xl space-y-4.5 rounded-2xl transition-all duration-300"
+                style={{
+                  backgroundColor: selectedTheme.cardColor,
+                  borderRadius: selectedTheme.borderRadius || "1rem",
+                  color: selectedTheme.textColor,
+                }}
+              >
+                <div>
+                  <h3 className="font-bold text-base sm:text-lg tracking-tight" style={{ color: selectedTheme.textColor }}>
+                    Product Feedback & NPS
+                  </h3>
+                  <p className="text-xs opacity-75 mt-0.5">
+                    Tell us how your latest experience was with Formu.
+                  </p>
+                </div>
+
+                <div className="space-y-3.5 text-xs">
+                  {/* Name Input */}
+                  <div className="space-y-1">
+                    <label className="font-medium opacity-85 block text-[11px]">
+                      Your Name
+                    </label>
+                    <input
+                      type="text"
+                      defaultValue="Alex Chen"
+                      className="w-full h-9.5 px-3.5 text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 outline-none transition-colors rounded-xl"
+                      style={{ borderRadius: `min(${selectedTheme.borderRadius || "1rem"}, 0.75rem)` }}
+                    />
+                  </div>
+
+                  {/* Rating Stars */}
+                  <div className="space-y-1">
+                    <label className="font-medium opacity-85 block text-[11px]">
+                      Rating Experience
+                    </label>
+                    <div className="flex gap-1.5 items-center py-0.5">
+                      {[1, 2, 3, 4, 5].map((star) => {
+                        const isFilled = star <= activeRating;
+                        return (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setActiveRating(star)}
+                            className="p-1 rounded-lg transition-transform hover:scale-110 active:scale-95 focus:outline-none"
+                            aria-label={`Rate ${star} out of 5 stars`}
+                          >
+                            <Star
+                              className="h-5 w-5 transition-colors duration-200"
+                              style={{
+                                fill: isFilled ? selectedTheme.primaryColor : "transparent",
+                                color: isFilled ? selectedTheme.primaryColor : selectedTheme.textColor,
+                                opacity: isFilled ? 1 : 0.25,
+                              }}
+                            />
+                          </button>
+                        );
+                      })}
+                      <span className="ml-2 text-xs opacity-60">
+                        {activeRating} / 5
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Feedback Textarea */}
+                  <div className="space-y-1">
+                    <label className="font-medium opacity-85 block text-[11px]">
+                      Comments or Suggestions
+                    </label>
+                    <textarea
+                      rows={2}
+                      defaultValue="The new form styling engine feels super fast and clean!"
+                      className="w-full p-2.5 text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 outline-none resize-none rounded-xl"
+                      style={{ borderRadius: `min(${selectedTheme.borderRadius || "1rem"}, 0.75rem)` }}
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="button"
+                    className="w-full h-10 font-semibold text-white shadow-sm transition-all active:scale-98 flex items-center justify-center text-xs rounded-xl"
+                    style={{
+                      backgroundColor: selectedTheme.primaryColor,
+                      color: selectedTheme.primaryColor === "#ffffff" ? "#0f172a" : "#ffffff",
+                      borderRadius: `min(${selectedTheme.borderRadius || "1rem"}, 0.75rem)`,
+                    }}
+                  >
+                    Submit Response
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Form Action Bar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-border/30">
               <div>
-                <h3 className="font-bold text-base sm:text-lg tracking-tight" style={{ color: selectedTheme.textColor }}>
-                  Product Feedback & NPS
-                </h3>
-                <p className="text-xs opacity-75 mt-1">
-                  Tell us how your latest experience was with Formu.
+                <p className="text-xs font-semibold text-foreground">
+                  Apply &ldquo;{selectedTheme.name}&rdquo; to your forms
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  All themes can be customized further in the visual builder.
                 </p>
               </div>
-
-              <div className="space-y-4 text-xs">
-                {/* Text Field */}
-                <div className="space-y-1.5">
-                  <label className="font-normal opacity-90 block text-xs">
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    defaultValue="Alex Chen"
-                    className="w-full h-10 px-3.5 text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 outline-none transition-colors rounded-xl"
-                    style={{ borderRadius: `min(${selectedTheme.borderRadius || "1rem"}, 0.75rem)` }}
-                  />
-                </div>
-
-                {/* Star Rating component */}
-                <div className="space-y-1.5">
-                  <label className="font-normal opacity-90 block text-xs">
-                    Rating Experience
-                  </label>
-                  <div className="flex gap-2 items-center py-1">
-                    {[1, 2, 3, 4, 5].map((star) => {
-                      const isFilled = star <= activeRating;
-                      return (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setActiveRating(star)}
-                          className="p-1 rounded-lg transition-transform hover:scale-110 active:scale-95 focus:outline-none"
-                          aria-label={`Rate ${star} out of 5 stars`}
-                        >
-                          <Star
-                            className="h-6 w-6 transition-colors duration-200"
-                            style={{
-                              fill: isFilled ? selectedTheme.primaryColor : "transparent",
-                              color: isFilled ? selectedTheme.primaryColor : selectedTheme.textColor,
-                              opacity: isFilled ? 1 : 0.25,
-                            }}
-                          />
-                        </button>
-                      );
-                    })}
-                    <span className="ml-2 text-xs opacity-60">
-                      {activeRating} / 5
-                    </span>
-                  </div>
-                </div>
-
-                {/* Textarea */}
-                <div className="space-y-1.5">
-                  <label className="font-normal opacity-90 block text-xs">
-                    Comments or Suggestions
-                  </label>
-                  <textarea
-                    rows={2}
-                    defaultValue="The new form styling engine feels super fast and clean!"
-                    className="w-full p-3 text-xs bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 outline-none resize-none rounded-xl"
-                    style={{ borderRadius: `min(${selectedTheme.borderRadius || "1rem"}, 0.75rem)` }}
-                  />
-                </div>
-
-                {/* Submit button */}
-                <button
-                  type="button"
-                  className="w-full h-10 font-semibold text-white shadow-md transition-all active:scale-98 flex items-center justify-center text-xs rounded-xl"
-                  style={{
-                    backgroundColor: selectedTheme.primaryColor,
-                    borderRadius: `min(${selectedTheme.borderRadius || "1rem"}, 0.75rem)`,
-                  }}
-                >
-                  Submit Response
-                </button>
-              </div>
+              <Link
+                href="/dashboard"
+                className="group inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity shrink-0"
+              >
+                <span>Use in Builder</span>
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+              </Link>
             </div>
           </div>
 
-          {/* Action bar below live stage */}
-          <div className="rounded-2xl bg-card border border-border/40 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 h-[72px]">
-            <div>
-              <p className="text-xs font-semibold text-foreground">
-                Apply &ldquo;{selectedTheme.name}&rdquo; to your forms
-              </p>
-              <p className="text-xs text-muted-foreground">
-                All themes can be customized further in the visual builder.
-              </p>
+          {/* PART 2: Right Side — Theme Presets List */}
+          <div className="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between space-y-4 bg-muted/15">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-muted-foreground">
+                Select preset
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {BUILTIN_THEMES.length} themes
+              </span>
             </div>
-            <Link
-              href="/dashboard"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity shrink-0"
-            >
-              <span>Use in Builder</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
 
-        {/* RIGHT COLUMN: Theme Presets Selector */}
-        <div className="lg:col-span-5 flex flex-col justify-between space-y-4 order-2">
-          <div className="flex items-center justify-between px-1 h-6">
-            <span className="text-sm font-medium text-muted-foreground">
-              Select preset
-            </span>
-            <span className="text-xs text-muted-foreground">
-              {BUILTIN_THEMES.length} themes
-            </span>
-          </div>
-
-          {/* Preset list filling the exact matching height */}
-          <div className="flex-1 rounded-3xl border border-border/40 bg-card/40 p-3 flex flex-col justify-between min-h-[500px]">
-            <div className="space-y-2 h-[550px] overflow-y-auto pr-1.5 custom-scrollbar">
+            {/* Scrollable Presets Grid */}
+            <div className="space-y-2 h-[520px] overflow-y-auto pr-1.5 custom-scrollbar">
               {BUILTIN_THEMES.map((theme) => {
                 const isSelected = selectedTheme.id === theme.id;
                 return (
@@ -219,32 +222,32 @@ export default function ThemesPage() {
                     onClick={() => setSelectedTheme(theme)}
                     className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-3 ${
                       isSelected
-                        ? "border-foreground bg-card shadow-sm ring-1 ring-foreground/20"
-                        : "border-border/40 bg-card/40 hover:border-border hover:bg-card/80"
+                        ? "border-primary/60 bg-card shadow-sm ring-1 ring-primary/40"
+                        : "border-border/40 bg-card/40 hover:border-border hover:bg-card/70"
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      {/* Visual Color Palette swatch */}
-                      <div className="flex items-center -space-x-1 shrink-0">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      {/* Visual Color Palette Swatch Dots */}
+                      <div className="flex items-center gap-1.5 shrink-0">
                         <span
-                          className="h-5 w-5 rounded-full ring-2 ring-card shadow-xs"
+                          className="h-4 w-4 rounded-full border border-black/15 dark:border-white/20 shadow-xs"
                           style={{ backgroundColor: theme.primaryColor }}
                           title={`Primary: ${theme.primaryColor}`}
                         />
                         <span
-                          className="h-5 w-5 rounded-full ring-2 ring-card shadow-xs border border-border/30"
+                          className="h-4 w-4 rounded-full border border-black/15 dark:border-white/20 shadow-xs"
                           style={{ backgroundColor: theme.cardColor }}
                           title={`Card: ${theme.cardColor}`}
                         />
                         <span
-                          className="h-5 w-5 rounded-full ring-2 ring-card shadow-xs border border-border/30"
+                          className="h-4 w-4 rounded-full border border-black/15 dark:border-white/20 shadow-xs"
                           style={{ backgroundColor: theme.backgroundColor }}
                           title={`Background: ${theme.backgroundColor}`}
                         />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="font-semibold text-xs sm:text-sm text-foreground truncate">
+                        <p className="font-semibold text-xs text-foreground truncate">
                           {theme.name}
                         </p>
                         <p className="text-[11px] font-mono text-muted-foreground truncate">
@@ -254,20 +257,19 @@ export default function ThemesPage() {
                     </div>
 
                     {isSelected && (
-                      <span className="h-2 w-2 rounded-full bg-foreground shrink-0" />
+                      <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
                     )}
                   </button>
                 );
               })}
             </div>
-          </div>
 
-          {/* Matching height bottom helper container */}
-          <div className="rounded-2xl border border-border/40 bg-card/40 p-4 flex items-center justify-between gap-3 h-[72px]">
-            <div className="text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">Custom theme?</span> Create custom hex tokens and border-radius in builder.
+            {/* Bottom helper tip */}
+            <div className="pt-3 border-t border-border/30 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Custom theme?</span> Create custom hex tokens and radius in builder.
             </div>
           </div>
+
         </div>
       </div>
     </div>

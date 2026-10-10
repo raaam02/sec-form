@@ -77,7 +77,7 @@ export function LandingNav() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: "tween", ease: "easeOut", duration: 0.3 }}
       className={`fixed left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "top-3 sm:top-4 px-3 sm:px-6" : "top-0 px-0"
+        isScrolled ? "top-3 sm:top-4 px-3 sm:px-6" : "top-2 px-0"
       }`}
     >
       <div
@@ -94,7 +94,7 @@ export function LandingNav() {
           </Link>
 
           {/* Center Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 text-[13px] font-medium text-muted-foreground">
+          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-muted-foreground">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href;
               return (

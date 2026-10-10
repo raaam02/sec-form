@@ -319,10 +319,10 @@ export default function ExplorePage() {
                   <button
                     type="button"
                     onClick={() => handleUseTemplate(template.id)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-foreground text-background hover:opacity-90 py-2.5 text-xs font-semibold transition-opacity shadow-xs"
+                    className="group/button flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-foreground text-background hover:opacity-90 py-2.5 text-xs font-semibold transition-opacity shadow-xs"
                   >
                     <span>Use Template</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/button:translate-x-1" />
                   </button>
                 </div>
               </div>
@@ -403,10 +403,10 @@ export default function ExplorePage() {
                   setPreviewTemplate(null);
                   handleUseTemplate(id);
                 }}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
+                className="group/button inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
               >
                 <span>Use template</span>
-                <ArrowRight className="h-3.5 w-3.5" />
+                <ArrowRight className="h-3.5 w-3.5  transition-transform duration-200 group-hover/button:translate-x-1" />
               </button>
             </div>
           </div>

@@ -93,7 +93,7 @@ export function LandingFAQ() {
             return (
               <div
                 key={item.id}
-                className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                className={`rounded-3xl border transition-all duration-200 overflow-hidden ${
                   isOpen
                     ? "border-primary/40 bg-card shadow-sm ring-1 ring-primary/10"
                     : "border-border/70 bg-card/40 hover:border-border hover:bg-card/70"

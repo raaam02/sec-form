@@ -268,7 +268,7 @@ function GeneratedFormDemo() {
         </div>
 
         {/* Form Scenario Switcher (Justified between with slug) */}
-        <div className="flex items-center gap-1 rounded-xl border border-border/60 bg-background/50 p-1">
+        <div className="flex items-center gap-1 rounded-2xl border border-border/60 bg-background/50 p-1">
           {DEMOS.map((d, i) => (
             <button
               key={d.id}
@@ -276,7 +276,7 @@ function GeneratedFormDemo() {
               onClick={() => switchScenario(i)}
               className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${
                 index === i
-                  ? "bg-card text-foreground shadow-sm border border-border/70 font-semibold"
+                  ? "bg-accent text-foreground shadow-sm font-semibold"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -295,7 +295,7 @@ function GeneratedFormDemo() {
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
                 <Sparkles className="h-3 w-3" /> Prompt
               </span>
-              
+
               {/* Live / Generating Tag placed here along with Prompt */}
               <span
                 className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors ${
@@ -459,7 +459,7 @@ export function LandingHero() {
             href="https://github.com/raaam02/sec-form"
             target="_blank"
             rel="noopener noreferrer"
-            className="group mb-6 inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/60 px-3.5 py-1 text-xs font-medium text-muted-foreground backdrop-blur-md transition hover:border-primary/40 hover:text-foreground"
+            className="group mb-6 inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/60 px-3.5 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-md transition hover:border-primary/40 hover:text-foreground"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
             <span>Open Source AI Form Builder</span>
@@ -482,7 +482,7 @@ export function LandingHero() {
           </motion.div>
 
           {/* App Window Demo */}
-          <motion.div variants={fadeUp} className="mt-12 sm:mt-28 w-full max-w-4xl text-left">
+          <motion.div variants={fadeUp} className="mt-12 sm:mt-32 w-full max-w-4xl text-left">
             <GeneratedFormDemo />
           </motion.div>
         </motion.div>
