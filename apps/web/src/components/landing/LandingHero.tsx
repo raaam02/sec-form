@@ -465,7 +465,7 @@ export function LandingHero() {
           </motion.h1>
 
           {/* Command Composer */}
-          <motion.div variants={fadeUp} className="mt-8 w-full max-w-2xl">
+          <motion.div variants={fadeUp} id="prompt" className="mt-8 w-full max-w-2xl scroll-mt-24">
             <PromptBox />
           </motion.div>
 
