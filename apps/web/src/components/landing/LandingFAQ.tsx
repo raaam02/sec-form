@@ -93,7 +93,7 @@ export function LandingFAQ() {
             return (
               <div
                 key={item.id}
-                className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
                   isOpen
                     ? "border-primary/40 bg-card shadow-sm ring-1 ring-primary/10"
                     : "border-border/70 bg-card/40 hover:border-border hover:bg-card/70"
@@ -110,7 +110,7 @@ export function LandingFAQ() {
                   </span>
 
                   <div
-                    className={`h-6 w-6 rounded-lg flex items-center justify-center shrink-0 border transition-all duration-200 ${
+                    className={`h-6 w-6 rounded-xl flex items-center justify-center shrink-0 border transition-all duration-200 ${
                       isOpen
                         ? "rotate-180 bg-primary/10 text-primary border-primary/20"
                         : "border-border/60 text-muted-foreground group-hover:text-foreground"
@@ -140,7 +140,7 @@ export function LandingFAQ() {
         </div>
 
         {/* Support Inquiry Banner */}
-        <div className="mt-10 p-5 rounded-xl border border-border/70 bg-card/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left backdrop-blur-sm">
+        <div className="mt-10 p-5 rounded-2xl border border-border/70 bg-card/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left backdrop-blur-sm">
           <div>
             <h3 className="text-xs sm:text-sm font-bold text-foreground">
               Have questions or custom needs?
@@ -152,7 +152,7 @@ export function LandingFAQ() {
 
           <Link
             href="/contact"
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition-all shadow-sm shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 transition-all shadow-sm shrink-0"
           >
             <MessageSquare className="h-3 w-3" />
             <span>Contact</span>

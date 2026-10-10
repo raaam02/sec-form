@@ -122,7 +122,7 @@ function LiveField({ field }: { field: DemoField }) {
                 key={opt}
                 type="button"
                 onClick={() => setSelectedChoice(i)}
-                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-all shadow-sm ${
+                className={`inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs transition-all shadow-sm ${
                   isSelected
                     ? "border-primary bg-primary/10 text-primary font-semibold ring-1 ring-primary/20"
                     : "border-border/80 bg-background/80 dark:bg-card text-muted-foreground hover:border-border hover:text-foreground font-medium"
@@ -148,7 +148,7 @@ function LiveField({ field }: { field: DemoField }) {
     return (
       <div className="space-y-1.5">
         <label className="text-xs font-semibold text-foreground/90 block">{field.label}</label>
-        <div className="min-h-[64px] rounded-lg border border-border/80 bg-background/80 dark:bg-card px-3.5 py-2 text-xs text-muted-foreground/80 shadow-sm">
+        <div className="min-h-[64px] rounded-xl border border-border/80 bg-background/80 dark:bg-card px-3.5 py-2 text-xs text-muted-foreground/80 shadow-sm">
           {field.placeholder}
         </div>
       </div>
@@ -160,7 +160,7 @@ function LiveField({ field }: { field: DemoField }) {
       <label className="text-xs font-semibold text-foreground/90 block">
         {field.label} {field.required && <span className="text-destructive">*</span>}
       </label>
-      <div className="h-10 rounded-lg border border-border/80 bg-background/80 dark:bg-card px-3.5 flex items-center text-xs text-muted-foreground/80 shadow-sm">
+      <div className="h-10 rounded-xl border border-border/80 bg-background/80 dark:bg-card px-3.5 flex items-center text-xs text-muted-foreground/80 shadow-sm">
         {field.placeholder}
       </div>
     </div>
@@ -247,7 +247,7 @@ function GeneratedFormDemo() {
 
   return (
     <div
-      className="relative rounded-2xl border border-border/80 bg-card/60 shadow-2xl backdrop-blur-xl ring-1 ring-white/[0.05] overflow-hidden"
+      className="relative rounded-3xl border border-border/80 bg-card/60 shadow-2xl backdrop-blur-xl ring-1 ring-white/[0.05] overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       role="region"
@@ -261,20 +261,20 @@ function GeneratedFormDemo() {
             <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
           </div>
-          <div className="hidden sm:flex items-center gap-1.5 rounded-md border border-border/60 bg-background/50 px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
+          <div className="hidden sm:flex items-center gap-1.5 rounded-xl border border-border/60 bg-background/50 px-2.5 py-0.5 text-[11px] font-mono text-muted-foreground">
             <Lock className="h-2.5 w-2.5 text-muted-foreground/60" />
             <span>formu.ai/f/{scenario.slug}</span>
           </div>
         </div>
 
         {/* Form Scenario Switcher (Justified between with slug) */}
-        <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/50 p-1">
+        <div className="flex items-center gap-1 rounded-xl border border-border/60 bg-background/50 p-1">
           {DEMOS.map((d, i) => (
             <button
               key={d.id}
               type="button"
               onClick={() => switchScenario(i)}
-              className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
+              className={`rounded-lg px-3 py-1 text-xs font-medium transition-all ${
                 index === i
                   ? "bg-card text-foreground shadow-sm border border-border/70 font-semibold"
                   : "text-muted-foreground hover:text-foreground"
@@ -313,7 +313,7 @@ function GeneratedFormDemo() {
               </span>
             </div>
 
-            <div className="rounded-xl border border-border/70 bg-background/60 p-3.5 shadow-inner">
+            <div className="rounded-2xl border border-border/70 bg-background/60 p-3.5 shadow-inner">
               <p className="text-sm font-medium leading-snug text-foreground min-h-[44px]">
                 {scenario.prompt.slice(0, typedChars)}
                 <span className="ml-0.5 inline-block h-3.5 w-0.5 translate-y-0.5 animate-pulse bg-primary" />
@@ -367,7 +367,7 @@ function GeneratedFormDemo() {
 
         {/* Right: The Live Rendered Form (7 cols) */}
         <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-center bg-background/50">
-          <div className="mx-auto w-full max-w-sm h-[390px] rounded-xl border border-border/80 bg-card p-5 sm:p-6 shadow-md flex flex-col justify-between">
+          <div className="mx-auto w-full max-w-sm h-[390px] rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-md flex flex-col justify-between">
             <div>
               {/* Form Card Header */}
               <div className="border-b border-border/60 pb-3 mb-4">
@@ -402,7 +402,7 @@ function GeneratedFormDemo() {
                 type="button"
                 onClick={handleSubmit}
                 disabled={!isComplete || isSubmitted}
-                className={`w-full h-10 rounded-lg text-xs font-semibold shadow-sm transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                className={`w-full h-10 rounded-xl text-xs font-semibold shadow-sm transition-all duration-200 flex items-center justify-center gap-1.5 ${
                   isSubmitted
                     ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30"
                     : isComplete

@@ -83,7 +83,7 @@ export function LandingNav() {
       <div
         className={`mx-auto w-full transition-all duration-300 ${
           isScrolled
-            ? "max-w-5xl rounded-2xl border border-border/70 bg-background/80 shadow-md backdrop-blur-xl ring-1 ring-white/[0.05]"
+            ? "max-w-5xl rounded-3xl border border-border/70 bg-background/80 shadow-md backdrop-blur-xl ring-1 ring-white/[0.05]"
             : "max-w-6xl rounded-none border-transparent bg-transparent backdrop-blur-none"
         }`}
       >
@@ -119,7 +119,7 @@ export function LandingNav() {
               href="https://github.com/raaam02/sec-form"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex h-8.5 w-8.5 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+              className="hidden sm:flex h-8.5 w-8.5 items-center justify-center rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
               title="GitHub Repository"
             >
               <Github className="h-4 w-4" />
@@ -129,14 +129,14 @@ export function LandingNav() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard"
-                  className="inline-flex h-8.5 items-center rounded-lg border border-border/80 bg-card/60 px-3.5 text-xs font-semibold text-foreground transition hover:bg-card hover:border-foreground/20"
+                  className="inline-flex h-8.5 items-center rounded-xl border border-border/80 bg-card/60 px-3.5 text-xs font-semibold text-foreground transition hover:bg-card hover:border-foreground/20"
                 >
                   Dashboard
                 </Link>
                 <button
                   type="button"
                   onClick={() => signOut({ callbackUrl: "/" })}
-                  className="inline-flex h-8.5 items-center rounded-lg px-2.5 text-xs font-medium text-muted-foreground transition hover:text-foreground"
+                  className="inline-flex h-8.5 items-center rounded-xl px-2.5 text-xs font-medium text-muted-foreground transition hover:text-foreground"
                 >
                   Log out
                 </button>
@@ -146,14 +146,14 @@ export function LandingNav() {
                 <button
                   type="button"
                   onClick={() => openAuthModal("login")}
-                  className="inline-flex h-8.5 items-center rounded-lg px-2.5 sm:px-3 text-xs font-medium text-muted-foreground transition hover:text-foreground"
+                  className="inline-flex h-8.5 items-center rounded-xl px-2.5 sm:px-3 text-xs font-medium text-muted-foreground transition hover:text-foreground"
                 >
                   {t("login") || "Log in"}
                 </button>
                 <button
                   type="button"
                   onClick={handleStartBuilding}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-foreground px-3.5 sm:px-4 text-xs font-semibold text-background shadow-sm transition hover:opacity-90 active:scale-[0.98]"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-foreground px-3.5 sm:px-4 text-xs font-semibold text-background shadow-sm transition hover:opacity-90 active:scale-[0.98]"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   <span>Create Form</span>

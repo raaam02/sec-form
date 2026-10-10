@@ -35,7 +35,7 @@ export function PromptBox({
       <form
         onSubmit={submit}
         className={cn(
-          "relative flex flex-col rounded-2xl border bg-card/90 text-card-foreground p-3 sm:p-4 shadow-xl backdrop-blur-xl transition-all duration-300",
+          "relative flex flex-col rounded-3xl border bg-card/90 text-card-foreground p-3 sm:p-4 shadow-xl backdrop-blur-xl transition-all duration-300",
           isFocused
             ? "border-primary/60 ring-2 ring-primary/20 shadow-2xl"
             : "border-border/80 hover:border-border shadow-black/5 dark:shadow-black/25"
@@ -75,7 +75,7 @@ export function PromptBox({
             </span>
             <button
               type="submit"
-              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-sm transition-all duration-200 active:scale-[0.98]"
+              className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-sm transition-all duration-200 active:scale-[0.98]"
             >
               <span>Generate</span>
               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />

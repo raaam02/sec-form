@@ -29,9 +29,9 @@ export function LandingCTA() {
               Build your next form in seconds.
             </h2>
 
-            <p className="mx-auto mt-3 max-w-lg text-sm sm:text-base text-muted-foreground">
+            {/*<p className="mx-auto mt-3 max-w-lg text-sm sm:text-base text-muted-foreground">
               Type a prompt or start from blank. Free forever, no credit card required.
-            </p>
+            </p>*/}
 
             {/* Embedded Command Composer */}
             <div className="mx-auto mt-8 max-w-xl">

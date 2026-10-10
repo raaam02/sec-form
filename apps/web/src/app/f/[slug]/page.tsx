@@ -379,7 +379,7 @@ export default function PublicFormPage() {
     "--background-color": theme.backgroundColor || "#f3f4f6",
     "--text-color": theme.textColor || "#1f2937",
     "--card-color": theme.cardColor || "#ffffff",
-    "--border-radius": theme.borderRadius || "0.5rem",
+    "--border-radius": theme.borderRadius || "1rem",
     "--input-bg": theme.inputBgColor || "transparent",
     "--input-border": theme.inputBorderColor || "rgba(128,128,128,0.2)"
   } as React.CSSProperties;
@@ -662,7 +662,7 @@ export default function PublicFormPage() {
                     disabled={submitMutation.isLoading}
                     className="flex-1 h-10 font-semibold text-sm transition-all shadow-sm flex items-center justify-center focus-visible:ring-[var(--primary)]"
                     style={{
-                      borderRadius: "min(var(--border-radius), 12px)",
+                      borderRadius: "min(var(--border-radius), 16px)",
                     }}
                   >
                     Previous
@@ -676,7 +676,7 @@ export default function PublicFormPage() {
                     className="flex-1 h-10 text-white font-semibold text-sm transition-all shadow-sm flex items-center justify-center disabled:opacity-50 focus-visible:ring-[var(--primary)]"
                     style={{
                       backgroundColor: "var(--primary)",
-                      borderRadius: "min(var(--border-radius), 12px)",
+                      borderRadius: "min(var(--border-radius), 16px)",
                     }}
                   >
                     {submitMutation.isLoading ? <LoadingSpinner className="w-5 h-5" color="text-white" /> : t("submitBtn")}
@@ -688,7 +688,7 @@ export default function PublicFormPage() {
                     className="flex-1 h-10 text-white font-semibold text-sm transition-all shadow-sm flex items-center justify-center focus-visible:ring-[var(--primary)]"
                     style={{
                       backgroundColor: "var(--primary)",
-                      borderRadius: "min(var(--border-radius), 12px)",
+                      borderRadius: "min(var(--border-radius), 16px)",
                     }}
                   >
                     Next

@@ -55,12 +55,12 @@ export function LandingHowItWorks() {
               <motion.div
                 key={step}
                 variants={fadeUp}
-                className="group relative flex flex-col justify-between rounded-2xl border border-border/80 bg-card/50 p-6 sm:p-7 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:bg-card/80 hover:shadow-lg hover:shadow-primary/5"
+                className="group relative flex flex-col justify-between rounded-3xl border border-border/80 bg-card/50 p-6 sm:p-7 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:bg-card/80 hover:shadow-lg hover:shadow-primary/5"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">
                     <span
-                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition-all duration-300 group-hover:scale-105 shadow-sm ${iconBg} ${iconColor}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300 group-hover:scale-105 shadow-sm ${iconBg} ${iconColor}`}
                     >
                       <Icon className="h-5 w-5" aria-hidden />
                     </span>
