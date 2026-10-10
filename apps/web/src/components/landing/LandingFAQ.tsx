@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ChevronDown, HelpCircle, MessageSquare } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://form.emoicons.com";
+
 export interface FAQItem {
   id: string;
   question: string;
@@ -34,7 +36,7 @@ export const FAQ_ITEMS: FAQItem[] = [
     id: "embedding",
     question: "How do I embed a form onto my website (WordPress, Webflow, Shopify, React)?",
     answer:
-      "Publish your form and copy the 1-line lightweight embed script: <script src=\"https://form.emoicons.com/embed.js\" data-form-id=\"YOUR_FORM_ID\"></script>. Paste this snippet into any website or CMS to render the form responsively with custom themes.",
+      `Publish your form and copy the 1-line lightweight embed script: <script src="${APP_URL}/embed.js" data-form-id="YOUR_FORM_ID"></script>. Paste this snippet into any website or CMS to render the form responsively with custom themes.`,
   },
   {
     id: "sentiment-analysis",
@@ -50,9 +52,9 @@ export const FAQ_ITEMS: FAQItem[] = [
   },
   {
     id: "security-gdpr",
-    question: "Are form submissions secure and GDPR compliant?",
+    question: "How are form submissions protected?",
     answer:
-      "Yes. All form data in transit is protected via TLS 1.3 encryption, and database records are safeguarded with AES-256 encryption at rest, along with client and server validation and Redis rate limiting.",
+      "Submissions are validated on both client and server and rate limited to curb abuse, embeds can be restricted to domains you allow, and drafts stay private until you publish. Formu.AI is open source, so you can also self-host it and keep responses in your own database.",
   },
   {
     id: "export-integrations",

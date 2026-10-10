@@ -21,6 +21,7 @@ interface AIFormModalProps {
   onGenerate: (prompt: string) => Promise<void>;
   isDemo?: boolean;
   aiCredits?: number;
+  initialPrompt?: string;
 }
 
 export function AIFormModal({
@@ -29,13 +30,20 @@ export function AIFormModal({
   onGenerate,
   isDemo = false,
   aiCredits = 2,
+  initialPrompt = "",
 }: AIFormModalProps) {
   const t = useTranslations("Dashboard");
   const tCommon = useTranslations("Common");
 
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(initialPrompt);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  React.useEffect(() => {
+    if (initialPrompt && isOpen) {
+      setPrompt(initialPrompt);
+    }
+  }, [initialPrompt, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

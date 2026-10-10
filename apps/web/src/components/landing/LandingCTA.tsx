@@ -2,95 +2,43 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { signIn, useSession } from "next-auth/react";
 import { motion } from "motion/react";
-import { ArrowRight } from "lucide-react";
-import { HighlightedWord, OrganicBlob } from "./HandDrawn";
-import { useTranslations } from "next-intl";
-
-import { saveLocalForm } from "@/utils/localForms";
+import { Container } from "./ui";
+import { PromptBox } from "./PromptBox";
 
 export function LandingCTA() {
-  const { data: session } = useSession();
-  const router = useRouter();
-  const t = useTranslations("Landing");
-
-  const handleStartBuilding = () => {
-    const id = crypto.randomUUID();
-    const localForm = {
-      id,
-      title: "Untitled Form",
-      description: "",
-      slug: `form-${Math.random().toString(36).substring(2, 8)}`,
-      visibility: "draft" as const,
-      schemaJson: {
-        fields: [
-          {
-            id: crypto.randomUUID(),
-            type: "text" as const,
-            label: "Untitled Question",
-            required: false,
-            placeholder: "Type your answer here...",
-          },
-        ],
-      },
-      userId: session?.user?.id || "local-user",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    saveLocalForm(localForm);
-    router.push(`/dashboard/my-forms/${id}/edit`);
-  };
-
   return (
-    <section className="py-32 relative overflow-hidden">
-      {/* <OrganicBlob className="bottom-[-60px] right-[-60px] w-72 h-72 text-primary/60 pointer-events-none" />
-      <OrganicBlob className="top-[-40px] left-[-50px] w-60 h-60 text-[#a78bfa]/60 rotate-90 pointer-events-none" /> */}
-
-      <div className="container mx-auto px-4 sm:px-6 max-w-4xl">
+    <section className="py-24 sm:py-32">
+      <Container className="max-w-4xl">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ type: "tween", ease: "easeOut", duration: 0.4 }}
-          className="relative rounded-[2rem] bg-card border border-border shadow-2xl p-10 md:p-16 text-center overflow-hidden"
+          className="relative overflow-hidden rounded-[2rem] border border-primary/20 bg-card p-8 text-center shadow-2xl shadow-primary/10 sm:p-14"
         >
-          {/* Internal glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full bg-primary/10 blur-[80px] pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col items-center">
-
-            <h2 className="font-outfit text-4xl sm:text-5xl font-black text-foreground tracking-tight mb-3">
-              Build your first form{" "}
-              <HighlightedWord className="text-primary">today</HighlightedWord>
+          <div className="pointer-events-none absolute left-1/2 top-0 h-48 w-[560px] -translate-x-1/2 rounded-full bg-primary/15 blur-[90px]" aria-hidden />
+          <div className="relative z-10">
+            <h2 className="font-outfit text-3xl font-black tracking-tight text-foreground sm:text-5xl">
+              Your next form is one sentence away
             </h2>
-            <p className="text-[17px] text-muted-foreground max-w-md mb-10">
-              Free forever. No credit card. Unlimited forms on the free plan.
+            <p className="mx-auto mt-4 max-w-lg text-base text-muted-foreground sm:text-lg">
+              Start free, no credit card. Upgrade only when you need more.
             </p>
 
-            <div className="flex flex-wrap justify-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={handleStartBuilding}
-                className="inline-flex h-12 items-center gap-2.5 rounded-xl bg-primary px-8 text-[15px] font-bold text-primary-foreground shadow-lg shadow-primary/20 hover:bg-primary/90 transition-colors"
-              >
-                Create form free
-                <ArrowRight className="h-4 w-4" />
-              </motion.button>
-              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                <Link
-                  href="/pricing"
-                  className="inline-flex h-12 items-center rounded-xl border border-border bg-background px-8 text-[15px] font-semibold text-foreground hover:bg-accent transition-colors shadow-sm"
-                >
-                  View pricing
-                </Link>
-              </motion.div>
+            <div className="mx-auto mt-9 max-w-2xl">
+              <PromptBox showChips={false} />
             </div>
+
+            <Link
+              href="/pricing"
+              className="mt-6 inline-block text-sm font-medium text-muted-foreground underline-offset-4 transition hover:text-foreground hover:underline"
+            >
+              Compare plans
+            </Link>
           </div>
         </motion.div>
-      </div>
+      </Container>
     </section>
   );
 }

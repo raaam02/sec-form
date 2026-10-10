@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Github, Twitter, Code, Lock } from "lucide-react";
+import { Github, Code, ExternalLink } from "lucide-react";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ColorThemeSwitcher } from "@/components/ColorThemeSwitcher";
@@ -24,7 +24,7 @@ const NAV_COLUMNS: FooterColumn[] = [
   {
     title: "Product",
     links: [
-      { label: "Templates", href: "/dashboard/explore" },
+      { label: "Templates", href: "/explore" },
       { label: "Theme Gallery", href: "/themes" },
       { label: "Pricing", href: "/pricing" },
       { label: "Changelog", href: "/changelog" },
@@ -74,8 +74,7 @@ export function LandingFooter() {
               <div className="flex items-center gap-2">
                 {[
                   { icon: Github, label: "GitHub", href: "https://github.com/raaam02/sec-form" },
-                  { icon: Twitter, label: "Twitter", href: "https://twitter.com" },
-                  { icon: Code, label: "API", href: "http://localhost:4000/docs" },
+                  { icon: Code, label: "API", href: apiDocsUrl },
                 ].map(({ icon: Icon, label, href }) => (
                   <a
                     key={label}
@@ -115,9 +114,7 @@ export function LandingFooter() {
                         className="text-[13px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                       >
                         {label}
-                        {label.includes("API") || label.includes("Open Source") ? (
-                          <Lock className="h-2.5 w-2.5 opacity-50" />
-                        ) : null}
+                        <ExternalLink className="h-2.5 w-2.5 opacity-50" />
                       </a>
                     ) : (
                       <Link

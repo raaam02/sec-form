@@ -1,203 +1,214 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "motion/react";
-import { Layers } from "lucide-react";
-import { CircledWord, ScribbleUnderline } from "./HandDrawn";
-import {
-  IllustrationAI, IllustrationTheme, IllustrationAnalytics,
-  IllustrationSecurity, IllustrationDragDrop, IllustrationPublish,
-} from "./Illustrations";
+import { Check, GripVertical, Palette, Rocket, ShieldCheck, Sparkles, BarChart3, LayoutGrid } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Container, SectionHeader } from "./ui";
 import { fadeUp, stagger } from "./motion";
 
-interface FeatureCard {
-  id: string;
-  bg: string;
-  border: string;
-  accentColor: string;
-  heading: string;
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://form.emoicons.com";
+
+// ─── Tile shell ──────────────────────────────────────────────────────────────
+
+function Tile({
+  icon: Icon,
+  title,
+  body,
+  className,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
   body: string;
-  illustration: React.ReactNode;
-  tag: string;
-  tagBg: string;
-  tagText: string;
-  highlight: string;
-  highlightColor: string;
-}
-
-const FEATURE_CARDS: FeatureCard[] = [
-  {
-    id: "ai",
-    bg: "bg-purple-50 dark:bg-purple-950/25",
-    border: "border-purple-200/60 dark:border-purple-800/40",
-    accentColor: "rgb(192,132,252)",
-    heading: "AI-Powered Generation",
-    body: "Describe your form in plain English. Our AI builds it instantly — fields, validation, logic, all included.",
-    illustration: <IllustrationAI />,
-    tag: "AI",
-    tagBg: "bg-purple-100 dark:bg-purple-900/50 border-purple-200 dark:border-purple-700",
-    tagText: "text-purple-700 dark:text-purple-300",
-    highlight: "AI builds it",
-    highlightColor: "text-purple-600 dark:text-purple-400",
-  },
-  {
-    id: "theme",
-    bg: "bg-teal-50 dark:bg-teal-950/25",
-    border: "border-teal-200/60 dark:border-teal-800/40",
-    accentColor: "rgb(20,184,166)",
-    heading: "Theme Customization",
-    body: "Choose from dozens of presets or create custom styling. Control page background, text colors, card colors, input colors, and button accents to perfectly match your brand.",
-    illustration: <IllustrationTheme />,
-    tag: "Design",
-    tagBg: "bg-teal-100 dark:bg-teal-900/50 border-teal-200 dark:border-teal-700",
-    tagText: "text-teal-700 dark:text-teal-300",
-    highlight: "perfectly match your brand",
-    highlightColor: "text-teal-600 dark:text-teal-400",
-  },
-  {
-    id: "analytics",
-    bg: "bg-blue-50 dark:bg-blue-950/25",
-    border: "border-blue-200/60 dark:border-blue-800/40",
-    accentColor: "rgb(59,130,246)",
-    heading: "Deep Analytics",
-    body: "Track submissions, measure conversion, identify drop-offs. Every insight you need, visualized clearly.",
-    illustration: <IllustrationAnalytics />,
-    tag: "Insights",
-    tagBg: "bg-blue-100 dark:bg-blue-900/50 border-blue-200 dark:border-blue-700",
-    tagText: "text-blue-700 dark:text-blue-300",
-    highlight: "Every insight",
-    highlightColor: "text-blue-600 dark:text-blue-400",
-  },
-  {
-    id: "security",
-    bg: "bg-emerald-50 dark:bg-emerald-950/25",
-    border: "border-emerald-200/60 dark:border-emerald-800/40",
-    accentColor: "rgb(34,197,94)",
-    heading: "Enterprise Security",
-    body: "Role-based access, encrypted submissions, GDPR compliance built-in. Security you can trust at any scale.",
-    illustration: <IllustrationSecurity />,
-    tag: "Secure",
-    tagBg: "bg-emerald-100 dark:bg-emerald-900/50 border-emerald-200 dark:border-emerald-700",
-    tagText: "text-emerald-700 dark:text-emerald-300",
-    highlight: "trust at any scale",
-    highlightColor: "text-emerald-600 dark:text-emerald-400",
-  },
-  {
-    id: "builder",
-    bg: "bg-yellow-50 dark:bg-yellow-950/25",
-    border: "border-yellow-200/60 dark:border-yellow-800/40",
-    accentColor: "rgb(234,179,8)",
-    heading: "Visual Builder",
-    body: "Drag, drop, reorder. Build complex multi-step forms visually with our intuitive canvas — no code needed.",
-    illustration: <IllustrationDragDrop />,
-    tag: "Builder",
-    tagBg: "bg-yellow-100 dark:bg-yellow-900/50 border-yellow-200 dark:border-yellow-700",
-    tagText: "text-yellow-700 dark:text-yellow-300",
-    highlight: "no code needed",
-    highlightColor: "text-yellow-600 dark:text-yellow-400",
-  },
-  {
-    id: "publish",
-    bg: "bg-orange-50 dark:bg-orange-950/25",
-    border: "border-orange-200/60 dark:border-orange-800/40",
-    accentColor: "rgb(249,115,22)",
-    heading: "One-Click Publish",
-    body: "Share via link, embed on any site, or integrate with your stack via our REST API and webhooks.",
-    illustration: <IllustrationPublish />,
-    tag: "Publish",
-    tagBg: "bg-orange-100 dark:bg-orange-900/50 border-orange-200 dark:border-orange-700",
-    tagText: "text-orange-700 dark:text-orange-300",
-    highlight: "any site",
-    highlightColor: "text-orange-600 dark:text-orange-400",
-  },
-];
-
-function FeatureCardItem({ card }: { card: FeatureCard }) {
-  const parts = card.body.split(card.highlight);
+  className?: string;
+  children?: React.ReactNode;
+}) {
   return (
-    <motion.div
+    <motion.article
       variants={fadeUp}
-      whileHover={{ y: -5, transition: { duration: 0.2, ease: "easeOut" } }}
-      className={`relative group rounded-3xl border ${card.border} ${card.bg} p-7 flex flex-col gap-5 overflow-hidden shadow-sm hover:shadow-md transition-shadow`}
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-3xl border border-border bg-card/50 p-6 transition-colors hover:border-primary/30 sm:p-7",
+        className
+      )}
     >
-      {/* Corner organic circle */}
-      <div
-        className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-10 dark:opacity-5 pointer-events-none"
-        style={{ background: card.accentColor }}
-      />
-
-      {/* Tag + illustration */}
-      <div className="flex items-start justify-between">
-        <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-bold tracking-wide ${card.tagBg} ${card.tagText}`}>
-          {card.tag}
-        </span>
-        <div className="shrink-0 opacity-90 group-hover:scale-105 transition-transform duration-300">
-          {card.illustration}
-        </div>
-      </div>
-
-      {/* Text */}
-      <div>
-        <h3 className="font-outfit text-[19px] font-bold text-foreground mb-2 leading-snug">
-          {card.heading}
-        </h3>
-        <p className="text-[14px] text-muted-foreground leading-relaxed">
-          {parts.map((part, i, arr) =>
-            i < arr.length - 1 ? (
-              <React.Fragment key={i}>
-                {part}
-                <span className={`relative font-semibold ${card.highlightColor}`}>
-                  {card.highlight}
-                  <ScribbleUnderline className={card.highlightColor} />
-                </span>
-              </React.Fragment>
-            ) : part
-          )}
-        </p>
-      </div>
-    </motion.div>
+      <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Icon className="h-5 w-5" aria-hidden />
+      </span>
+      <h3 className="font-outfit text-xl font-bold text-foreground">{title}</h3>
+      <p className="mt-1.5 max-w-md text-sm leading-relaxed text-muted-foreground">{body}</p>
+      {children && <div className="mt-6 flex flex-1 flex-col justify-end">{children}</div>}
+    </motion.article>
   );
 }
 
+// ─── Mini visuals ────────────────────────────────────────────────────────────
+
+const Skeleton = ({ w = "w-full" }: { w?: string }) => <div className={`h-2.5 rounded-full bg-muted-foreground/15 ${w}`} />;
+
+function AIVisual() {
+  return (
+    <div className="space-y-3 rounded-2xl border border-border bg-background/60 p-4">
+      <div className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-foreground">
+        <Sparkles className="h-4 w-4 shrink-0 text-primary" />
+        <span className="truncate">Onboarding survey with an NPS score and open feedback</span>
+      </div>
+      {["How likely are you to recommend us?", "What almost stopped you from signing up?"].map((q, i) => (
+        <div key={q} className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2.5">
+          <div className="min-w-0 space-y-1.5">
+            <p className="truncate text-xs font-semibold text-foreground">{q}</p>
+            <Skeleton w={i === 0 ? "w-24" : "w-40"} />
+          </div>
+          <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">{i === 0 ? "Rating" : "Long text"}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+const SWATCHES = ["#7c3aed", "#0ea5e9", "#10b981", "#f97316", "#e11d48"];
+
+function ThemeVisual() {
+  const [color, setColor] = useState(SWATCHES[0]);
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2.5 rounded-2xl border border-border bg-background/60 p-4" style={{ borderColor: `${color}55` }}>
+        <Skeleton w="w-1/2" />
+        <div className="h-8 rounded-lg border border-border" />
+        <div className="flex h-8 items-center justify-center rounded-lg text-xs font-bold text-white transition-colors" style={{ background: color }}>
+          Submit
+        </div>
+      </div>
+      <div className="flex gap-2" role="group" aria-label="Preview accent colour">
+        {SWATCHES.map((c) => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => setColor(c)}
+            aria-label={`Use accent ${c}`}
+            aria-pressed={color === c}
+            className={`h-6 w-6 rounded-full ring-offset-2 ring-offset-card transition ${color === c ? "ring-2 ring-foreground/60" : "hover:scale-110"}`}
+            style={{ background: c }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BuilderVisual() {
+  const rows = ["Short text", "Rating", "Multiple choice"];
+  return (
+    <div className="space-y-2">
+      {rows.map((r, i) => (
+        <div
+          key={r}
+          className={cn(
+            "flex items-center gap-2 rounded-xl border bg-background/60 px-3 py-2.5 text-xs font-medium text-foreground transition-transform duration-300",
+            i === 1 ? "translate-x-2 border-primary/40 shadow-md group-hover:translate-x-3" : "border-border"
+          )}
+        >
+          <GripVertical className="h-4 w-4 text-muted-foreground" aria-hidden />
+          {r}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AnalyticsVisual() {
+  const bars = [32, 48, 40, 66, 58, 82, 74];
+  return (
+    <div className="grid gap-4 sm:grid-cols-[1fr_1.2fr]">
+      <div className="flex h-28 items-end gap-1.5 rounded-2xl border border-border bg-background/60 p-4" aria-hidden>
+        {bars.map((h, i) => (
+          <div key={i} className={`flex-1 rounded-t-md ${i === bars.length - 1 ? "bg-primary" : "bg-primary/25"}`} style={{ height: `${h}%` }} />
+        ))}
+      </div>
+      <div className="rounded-2xl border border-border bg-background/60 p-4">
+        <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-primary">
+          <Sparkles className="h-3.5 w-3.5" /> AI summary · example
+        </p>
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          Mostly positive. Wait times are the most common complaint; three people asked for oat milk.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function PublishVisual() {
+  return (
+    <div className="space-y-3">
+      <pre className="overflow-x-auto rounded-2xl border border-border bg-background/70 p-4 font-mono text-xs leading-relaxed text-muted-foreground">
+        <code>
+          {`<script src="${APP_URL}/embed.js"\n  data-form-id="YOUR_FORM_ID"></script>`}
+        </code>
+      </pre>
+      <div className="flex flex-wrap gap-2">
+        {["Share link", "Embed", "QR code", "REST API"].map((c) => (
+          <span key={c} className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground">
+            {c}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SecureVisual() {
+  const items = ["Allowed embed domains", "Rate-limited submissions", "Private drafts", "Self-host with Docker"];
+  return (
+    <ul className="space-y-2">
+      {items.map((i) => (
+        <li key={i} className="flex items-center gap-2 text-sm text-foreground">
+          <Check className="h-4 w-4 shrink-0 text-emerald-500" aria-hidden /> {i}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// ─── Section ─────────────────────────────────────────────────────────────────
+
 export function LandingFeatures() {
   return (
-    <section className="py-28 bg-card/30 border-t border-border">
-      <div className="container mx-auto px-4 sm:px-6 max-w-6xl">
-        {/* Header */}
-        <motion.div
-          variants={fadeUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-60px" }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/8 px-3 py-1 text-[11px] font-bold text-primary uppercase tracking-wider mb-4">
-            <Layers className="h-3 w-3" />
-            Features
-          </div>
-          <h2 className="font-outfit text-3xl sm:text-5xl font-black tracking-tight text-foreground max-w-2xl mx-auto leading-tight">
-            Everything a{" "}
-            <CircledWord circleClass="text-primary">great form</CircledWord>
-            {" "}needs.
-          </h2>
-          <p className="mt-5 text-[16px] text-muted-foreground max-w-xl mx-auto">
-            Built with the details that turn good forms into ones people actually complete.
-          </p>
-        </motion.div>
+    <section className="border-t border-border bg-card/20 py-24 sm:py-32">
+      <Container>
+        <SectionHeader
+          eyebrow="Features"
+          title="Everything a great form needs"
+          description="Built around the details that make people actually finish a form."
+        />
 
-        {/* Cards grid */}
         <motion.div
           variants={stagger}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          className="grid grid-cols-1 gap-4 md:grid-cols-6"
         >
-          {FEATURE_CARDS.map((card) => (
-            <FeatureCardItem key={card.id} card={card} />
-          ))}
+          <Tile className="md:col-span-4" icon={Sparkles} title="AI form generation" body="Describe the form in plain English. Get fields, validation and copy you can publish as-is, or tweak in the builder.">
+            <AIVisual />
+          </Tile>
+          <Tile className="md:col-span-2" icon={Palette} title="Themes that fit your brand" body="50+ presets, or describe a style and let AI generate one. Try a colour.">
+            <ThemeVisual />
+          </Tile>
+          <Tile className="md:col-span-2" icon={LayoutGrid} title="Visual builder" body="Drag, drop and reorder with live preview.">
+            <BuilderVisual />
+          </Tile>
+          <Tile className="md:col-span-4" icon={BarChart3} title="Analytics and AI insights" body="Track views, submissions and conversion, then let Gemini summarize sentiment and common requests.">
+            <AnalyticsVisual />
+          </Tile>
+          <Tile className="md:col-span-4" icon={Rocket} title="Publish anywhere" body="Share a link, embed it on any site, or connect through the REST API.">
+            <PublishVisual />
+          </Tile>
+          <Tile className="md:col-span-2" icon={ShieldCheck} title="Safe by default" body="Sensible protections out of the box, and full control if you self-host.">
+            <SecureVisual />
+          </Tile>
         </motion.div>
-      </div>
+      </Container>
     </section>
   );
 }

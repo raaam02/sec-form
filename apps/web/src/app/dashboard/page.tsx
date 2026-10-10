@@ -26,6 +26,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const templateParam = searchParams.get("createTemplate");
+  const promptParam = searchParams.get("prompt");
   const t = useTranslations("Dashboard");
 
   const utils = trpc.useUtils();
@@ -74,6 +75,7 @@ export default function DashboardPage() {
   const [selectedFormForDrawer, setSelectedFormForDrawer] = useState<any | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [initialAIPrompt, setInitialAIPrompt] = useState("");
 
   // Keyboard Shortcuts
   useGlobalShortcut("new-form", "n", "Create New Form", () => {
@@ -93,6 +95,25 @@ export default function DashboardPage() {
       }
     }
   }, [templateParam]);
+
+  // Handle AI prompt from query parameter or sessionStorage on load
+  useEffect(() => {
+    let promptToUse = promptParam;
+    if (!promptToUse && typeof window !== "undefined") {
+      try {
+        promptToUse = sessionStorage.getItem("formu:pending-prompt");
+      } catch {}
+    }
+    if (promptToUse) {
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.removeItem("formu:pending-prompt");
+        } catch {}
+      }
+      setInitialAIPrompt(promptToUse);
+      setIsAIModalOpen(true);
+    }
+  }, [promptParam]);
 
   const importTemplate = async (template: typeof FORM_TEMPLATES[0]) => {
     try {
@@ -359,6 +380,7 @@ export default function DashboardPage() {
         onGenerate={handleAICreateForm}
         isDemo={isDemo}
         aiCredits={aiCredits}
+        initialPrompt={initialAIPrompt}
       />
     </div>
   );
