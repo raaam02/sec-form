@@ -1,175 +1,413 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
-import { HighlightedWord } from "./HandDrawn";
-import { fadeUp, stagger } from "./motion";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { motion, useReducedMotion } from "motion/react";
+import {
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Lock,
+  RotateCcw,
+  Sparkles,
+  Star,
+} from "lucide-react";
 import { Container } from "./ui";
 import { PromptBox } from "./PromptBox";
+import { fadeUp, stagger } from "./motion";
 
-// ─── Animated "AI builds your form" demo (pure client-side, no API calls) ────
+// ─── Scenario Data ─────────────────────────────────────────────────────────────
 
 type DemoField =
-  | { kind: "text" | "textarea" | "rating"; label: string }
+  | { kind: "text"; label: string; placeholder: string; required?: boolean }
+  | { kind: "textarea"; label: string; placeholder: string }
+  | { kind: "rating"; label: string; count: number }
   | { kind: "choice"; label: string; options: string[] };
 
-const DEMOS: { prompt: string; title: string; slug: string; fields: DemoField[] }[] = [
+interface DemoScenario {
+  id: string;
+  tabLabel: string;
+  prompt: string;
+  title: string;
+  slug: string;
+  themeColor: string;
+  fields: DemoField[];
+}
+
+const DEMOS: DemoScenario[] = [
   {
-    prompt: "Customer feedback survey for a coffee shop",
-    title: "Coffee Shop Feedback",
-    slug: "coffee-feedback",
+    id: "nps-feedback",
+    tabLabel: "Feedback",
+    prompt: "Customer feedback survey with 1–5 rating and open comments",
+    title: "Customer Feedback",
+    slug: "customer-feedback",
+    themeColor: "#8b5cf6",
     fields: [
-      { kind: "text", label: "Your name" },
-      { kind: "rating", label: "How was your visit?" },
-      { kind: "textarea", label: "What could we improve?" },
+      { kind: "text", label: "Your name", placeholder: "Alex Rivera", required: true },
+      { kind: "rating", label: "How was your experience?", count: 5 },
+      { kind: "textarea", label: "What could we improve?", placeholder: "Tell us anything..." },
     ],
   },
   {
-    prompt: "Event RSVP with dietary preferences",
+    id: "launch-rsvp",
+    tabLabel: "RSVP",
+    prompt: "Event RSVP with attendance and dietary preferences",
     title: "Launch Party RSVP",
     slug: "launch-rsvp",
+    themeColor: "#0ea5e9",
     fields: [
-      { kind: "text", label: "Full name" },
-      { kind: "choice", label: "Will you attend?", options: ["Yes", "No", "Maybe"] },
-      { kind: "text", label: "Dietary needs" },
+      { kind: "text", label: "Work email", placeholder: "alex@company.com", required: true },
+      { kind: "choice", label: "Attending in person?", options: ["Yes", "Virtual", "Can't attend"] },
+      { kind: "text", label: "Dietary needs", placeholder: "Vegetarian, gluten-free, etc." },
     ],
   },
   {
-    prompt: "Job application for a frontend developer",
-    title: "Frontend Developer Application",
-    slug: "frontend-role",
+    id: "hiring-apply",
+    tabLabel: "Job Application",
+    prompt: "Frontend developer application with portfolio and experience",
+    title: "Developer Application",
+    slug: "developer-application",
+    themeColor: "#10b981",
     fields: [
-      { kind: "text", label: "Email" },
-      { kind: "text", label: "Portfolio URL" },
-      { kind: "choice", label: "Years of experience", options: ["0–2", "3–5", "6+"] },
+      { kind: "text", label: "Portfolio URL", placeholder: "https://github.com/alexrivera", required: true },
+      { kind: "choice", label: "Experience", options: ["1–3 yrs", "4–7 yrs", "8+ yrs"] },
+      { kind: "textarea", label: "Recent project", placeholder: "Briefly describe your stack..." },
     ],
   },
 ];
 
-function FieldPreview({ field }: { field: DemoField }) {
+// ─── Realistic Form Field Renderer ───────────────────────────────────────────
+
+function LiveField({ field }: { field: DemoField }) {
+  const [rating, setRating] = useState(4);
+  const [selectedChoice, setSelectedChoice] = useState(0);
+
+  if (field.kind === "rating") {
+    return (
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-foreground/90 block">{field.label}</label>
+        <div className="flex items-center gap-1.5 pt-0.5">
+          {Array.from({ length: field.count }).map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setRating(i + 1)}
+              className="p-1 rounded transition-transform hover:scale-110 active:scale-95"
+            >
+              <Star
+                className={`h-5 w-5 ${
+                  i < rating
+                    ? "fill-amber-400 text-amber-400"
+                    : "fill-muted text-muted-foreground/30"
+                }`}
+              />
+            </button>
+          ))}
+          <span className="ml-2 text-xs font-mono font-semibold text-foreground">
+            {rating} / {field.count}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (field.kind === "choice") {
+    return (
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-foreground/90 block">{field.label}</label>
+        <div className="flex flex-wrap gap-2 pt-0.5">
+          {field.options.map((opt, i) => {
+            const isSelected = selectedChoice === i;
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setSelectedChoice(i)}
+                className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs transition-all shadow-sm ${
+                  isSelected
+                    ? "border-primary bg-primary/10 text-primary font-semibold ring-1 ring-primary/20"
+                    : "border-border/80 bg-background/80 dark:bg-card text-muted-foreground hover:border-border hover:text-foreground font-medium"
+                }`}
+              >
+                <span
+                  className={`h-3 w-3 rounded-full border flex items-center justify-center transition-colors ${
+                    isSelected ? "border-primary bg-primary" : "border-muted-foreground/40"
+                  }`}
+                >
+                  {isSelected && <span className="h-1 w-1 rounded-full bg-primary-foreground" />}
+                </span>
+                <span>{opt}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  if (field.kind === "textarea") {
+    return (
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold text-foreground/90 block">{field.label}</label>
+        <div className="min-h-[64px] rounded-lg border border-border/80 bg-background/80 dark:bg-card px-3.5 py-2 text-xs text-muted-foreground/80 shadow-sm">
+          {field.placeholder}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-1.5">
-      <div className="text-xs font-semibold text-foreground/80">{field.label}</div>
-      {field.kind === "rating" ? (
-        <div className="flex gap-1 text-lg leading-none text-amber-400">
-          {"★★★★".split("").map((s, i) => <span key={i}>{s}</span>)}
-          <span className="text-muted-foreground/30">★</span>
-        </div>
-      ) : field.kind === "choice" ? (
-        <div className="flex gap-2">
-          {field.options.map((o, i) => (
-            <span
-              key={o}
-              className={`rounded-lg border px-3 py-1.5 text-xs font-medium ${
-                i === 0 ? "border-primary/50 bg-primary/10 text-primary" : "border-border text-muted-foreground"
-              }`}
-            >
-              {o}
-            </span>
-          ))}
-        </div>
-      ) : (
-        <div className={`${field.kind === "textarea" ? "h-16" : "h-9"} rounded-lg border border-border bg-muted/40`} />
-      )}
+      <label className="text-xs font-semibold text-foreground/90 block">
+        {field.label} {field.required && <span className="text-destructive">*</span>}
+      </label>
+      <div className="h-10 rounded-lg border border-border/80 bg-background/80 dark:bg-card px-3.5 flex items-center text-xs text-muted-foreground/80 shadow-sm">
+        {field.placeholder}
+      </div>
     </div>
   );
 }
+
+// ─── Dual-Panel Application Window Demo ──────────────────────────────────────
 
 function GeneratedFormDemo() {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
-  const [typed, setTyped] = useState(0);
-  const [shown, setShown] = useState(0);
-  const demo = DEMOS[index];
+  const [typedChars, setTypedChars] = useState(0);
+  const [visibleFieldsCount, setVisibleFieldsCount] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const scenario = DEMOS[index];
+  const timerRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearAllTimers = useCallback(() => {
+    timerRef.current.forEach(clearTimeout);
+    timerRef.current = [];
+  }, []);
+
+  const switchScenario = (newIndex: number) => {
+    clearAllTimers();
+    setIndex(newIndex);
+  };
 
   useEffect(() => {
+    clearAllTimers();
+
     if (reduce) {
-      setTyped(demo.prompt.length);
-      setShown(demo.fields.length);
+      setTypedChars(scenario.prompt.length);
+      setVisibleFieldsCount(scenario.fields.length);
       return;
     }
-    setTyped(0);
-    setShown(0);
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    let i = 0;
-    const typing = setInterval(() => {
-      i += 1;
-      setTyped(i);
-      if (i >= demo.prompt.length) {
-        clearInterval(typing);
-        demo.fields.forEach((_, f) => timers.push(setTimeout(() => setShown(f + 1), 500 + f * 450)));
-        const total = 500 + demo.fields.length * 450 + 2800;
-        timers.push(setTimeout(() => setIndex((p) => (p + 1) % DEMOS.length), total));
-      }
-    }, 38);
-    return () => {
-      clearInterval(typing);
-      timers.forEach(clearTimeout);
-    };
-  }, [index, reduce, demo]);
 
-  const done = shown >= demo.fields.length;
+    setTypedChars(0);
+    setVisibleFieldsCount(0);
+
+    let charCount = 0;
+    const typingInterval = setInterval(() => {
+      charCount += 1;
+      setTypedChars(charCount);
+
+      if (charCount >= scenario.prompt.length) {
+        clearInterval(typingInterval);
+
+        scenario.fields.forEach((_, fieldIdx) => {
+          const timeout = setTimeout(() => {
+            setVisibleFieldsCount(fieldIdx + 1);
+          }, 300 + fieldIdx * 350);
+          timerRef.current.push(timeout);
+        });
+
+        if (!isPaused) {
+          const totalWait = 300 + scenario.fields.length * 350 + 3500;
+          const cycleTimeout = setTimeout(() => {
+            setIndex((prev) => (prev + 1) % DEMOS.length);
+          }, totalWait);
+          timerRef.current.push(cycleTimeout);
+        }
+      }
+    }, 25);
+
+    return () => {
+      clearInterval(typingInterval);
+      clearAllTimers();
+    };
+  }, [index, reduce, scenario, isPaused, clearAllTimers]);
+
+  const isComplete = visibleFieldsCount >= scenario.fields.length;
 
   return (
-    <div className="relative">
-      <div className="pointer-events-none absolute inset-x-6 -bottom-6 top-10 rounded-[2rem] bg-primary/15 blur-3xl" aria-hidden />
-      <div
-        className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl ring-1 ring-black/5"
-        role="img"
-        aria-label="Animated example: a typed prompt turns into a finished feedback form"
-      >
-        {/* window chrome */}
-        <div className="flex h-10 items-center gap-2 border-b border-border bg-muted/40 px-4">
-          <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/25" />
-          <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/25" />
-          <span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/25" />
-          <span className="ml-3 truncate font-mono text-xs text-muted-foreground">formu.ai/f/{demo.slug}</span>
+    <div
+      className="relative rounded-2xl border border-border/80 bg-card/60 shadow-2xl backdrop-blur-xl ring-1 ring-white/[0.05] overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      role="region"
+      aria-label="Interactive demonstration of AI form generation"
+    >
+      {/* Studio Window Chrome */}
+      <div className="flex items-center justify-between border-b border-border/80 bg-card/90 px-4 py-2.5">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5" aria-hidden>
+            <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-500/80" />
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/80" />
+          </div>
+          <div className="hidden sm:flex items-center gap-1.5 rounded-md border border-border/60 bg-background/50 px-2 py-0.5 text-[11px] font-mono text-muted-foreground">
+            <Lock className="h-2.5 w-2.5 text-muted-foreground/60" />
+            <span>formu.ai/f/{scenario.slug}</span>
+          </div>
         </div>
 
-        <div className="grid gap-0 md:grid-cols-[5fr_6fr]" aria-hidden>
-          {/* prompt side */}
-          <div className="border-b border-border p-6 md:border-b-0 md:border-r">
-            <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-primary">
-              <Sparkles className="h-3.5 w-3.5" /> Your prompt
+        {/* Form Scenario Switcher (Justified between with slug) */}
+        <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-background/50 p-1">
+          {DEMOS.map((d, i) => (
+            <button
+              key={d.id}
+              type="button"
+              onClick={() => switchScenario(i)}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                index === i
+                  ? "bg-card text-foreground shadow-sm border border-border/70 font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {d.tabLabel}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Studio Viewport (Dual-Panel Grid) */}
+      <div className="grid grid-cols-1 md:grid-cols-12 min-h-[380px]">
+        {/* Left: Prompt & Gemini Pipeline (5 cols) */}
+        <div className="md:col-span-5 border-b md:border-b-0 md:border-r border-border/80 p-5 sm:p-6 flex flex-col justify-between bg-card/30">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">
+                <Sparkles className="h-3 w-3" /> Prompt
+              </span>
+              
+              {/* Live / Generating Tag placed here along with Prompt */}
+              <span
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold transition-colors ${
+                  isComplete
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                    : "border-primary/30 bg-primary/10 text-primary"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    isComplete ? "bg-emerald-500" : "animate-pulse bg-primary"
+                  }`}
+                />
+                {isComplete ? "Live" : "Generating"}
+              </span>
             </div>
-            <p className="min-h-[3.5rem] text-lg font-medium leading-snug text-foreground">
-              {demo.prompt.slice(0, typed)}
-              <span className="ml-0.5 inline-block h-5 w-0.5 translate-y-1 animate-pulse bg-primary" />
-            </p>
-            <div className="mt-6 space-y-2 text-xs text-muted-foreground">
-              {["Picks field types", "Adds validation", "Writes the copy"].map((s, i) => (
-                <div key={s} className={`flex items-center gap-2 transition-opacity duration-300 ${shown > i ? "opacity-100" : "opacity-30"}`}>
-                  <CheckCircle2 className={`h-3.5 w-3.5 ${shown > i ? "text-emerald-500" : ""}`} /> {s}
-                </div>
-              ))}
+
+            <div className="rounded-xl border border-border/70 bg-background/60 p-3.5 shadow-inner">
+              <p className="text-sm font-medium leading-snug text-foreground min-h-[44px]">
+                {scenario.prompt.slice(0, typedChars)}
+                <span className="ml-0.5 inline-block h-3.5 w-0.5 translate-y-0.5 animate-pulse bg-primary" />
+              </p>
+            </div>
+
+            {/* Inferred Checklist */}
+            <div className="mt-5 space-y-2">
+              {[
+                { label: "Optimal field types", step: 1 },
+                { label: "Validation rules", step: 2 },
+                { label: "Custom theme", step: 3 },
+              ].map(({ label, step }) => {
+                const active = visibleFieldsCount >= step || isComplete;
+                return (
+                  <div
+                    key={label}
+                    className={`flex items-center gap-2 text-xs transition-opacity duration-300 ${
+                      active ? "text-foreground opacity-100" : "text-muted-foreground opacity-35"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
+                        active
+                          ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
+                          : "border border-border text-muted-foreground/30"
+                      }`}
+                    >
+                      <Check className="h-2.5 w-2.5" />
+                    </div>
+                    <span>{label}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* form side */}
-          <div className="min-h-[21rem] bg-background/40 p-6">
-            <AnimatePresence mode="wait">
-              <motion.div key={index} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <div className="mb-5 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-foreground">{typed >= demo.prompt.length ? demo.title : "…"}</h3>
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-semibold transition-colors ${
-                      done ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" : "border-border text-muted-foreground"
-                    }`}
-                  >
-                    <span className={`h-1.5 w-1.5 rounded-full ${done ? "bg-emerald-500" : "animate-pulse bg-muted-foreground"}`} />
-                    {done ? "Ready to publish" : "Generating"}
-                  </span>
-                </div>
-                <div className="space-y-4">
-                  {demo.fields.slice(0, shown).map((f) => (
-                    <motion.div key={f.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
-                      <FieldPreview field={f} />
-                    </motion.div>
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
+          <div className="mt-6 pt-3 border-t border-border/40 flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>Powered by Gemini</span>
+            <button
+              type="button"
+              onClick={() => switchScenario((index + 1) % DEMOS.length)}
+              className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+            >
+              <RotateCcw className="h-3 w-3" /> Next
+            </button>
+          </div>
+        </div>
+
+        {/* Right: The Live Rendered Form (7 cols) */}
+        <div className="md:col-span-7 p-5 sm:p-6 flex flex-col justify-center bg-background/50">
+          <div className="mx-auto w-full max-w-sm h-[390px] rounded-xl border border-border/80 bg-card p-5 sm:p-6 shadow-md flex flex-col justify-between">
+            <div>
+              {/* Form Card Header */}
+              <div className="border-b border-border/60 pb-3 mb-4">
+                <h4 className="font-outfit text-base font-bold text-foreground">
+                  {typedChars >= 10 ? scenario.title : "..."}
+                </h4>
+              </div>
+
+              {/* Form Fields Stack */}
+              <div className="space-y-3.5 h-[230px] overflow-hidden">
+                {scenario.fields.map((field, fieldIdx) => {
+                  const isFieldVisible = visibleFieldsCount > fieldIdx;
+                  return (
+                    <div
+                      key={field.label}
+                      className={`transition-all duration-300 ${
+                        isFieldVisible
+                          ? "opacity-100 translate-y-0"
+                          : "opacity-0 translate-y-2 pointer-events-none"
+                      }`}
+                    >
+                      <LiveField field={field} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom Form Actions (Always anchored to bottom) */}
+            <div className="pt-3.5 border-t border-border/40 flex items-center justify-between mt-auto">
+              <span
+                className={`text-[11px] flex items-center gap-1 transition-opacity duration-300 ${
+                  isComplete ? "text-muted-foreground opacity-100" : "text-muted-foreground/40 opacity-50"
+                }`}
+              >
+                <CheckCircle2
+                  className={`h-3.5 w-3.5 transition-colors ${
+                    isComplete ? "text-emerald-500" : "text-muted-foreground/30"
+                  }`}
+                />
+                Validated
+              </span>
+              <button
+                type="button"
+                className={`inline-flex items-center justify-center h-8.5 px-4 rounded-lg text-xs font-semibold shadow-sm transition-all duration-200 ${
+                  isComplete
+                    ? "bg-foreground text-background hover:opacity-90 active:scale-[0.98] cursor-pointer"
+                    : "bg-muted text-muted-foreground/50 cursor-not-allowed opacity-60"
+                }`}
+              >
+                Submit
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -177,65 +415,62 @@ function GeneratedFormDemo() {
   );
 }
 
-// ─── Hero ────────────────────────────────────────────────────────────────────
+// ─── Landing Hero Main Section ────────────────────────────────────────────────
 
 export function LandingHero() {
   return (
-    <section className="relative overflow-hidden pb-24 pt-8 sm:pt-14">
+    <section className="relative overflow-hidden pt-28 sm:pt-36 pb-16 sm:pb-24">
+      {/* Subtle Grid */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute inset-0 opacity-[0.03] dark:opacity-[0.04]"
           style={{
             backgroundImage: "radial-gradient(circle, hsl(var(--primary)) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-            maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, white, transparent)",
-            WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, white, transparent)",
+            backgroundSize: "32px 32px",
+            maskImage: "radial-gradient(ellipse 75% 65% at 50% 30%, white, transparent)",
+            WebkitMaskImage: "radial-gradient(ellipse 75% 65% at 50% 30%, white, transparent)",
           }}
         />
-        <div className="absolute left-1/2 top-0 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-primary/10 blur-[110px]" />
+        <div className="absolute left-1/2 top-0 h-[320px] w-[600px] -translate-x-1/2 rounded-full bg-primary/10 blur-[100px]" />
       </div>
 
       <Container className="relative z-10">
-        <motion.div variants={stagger} initial="hidden" animate="visible" className="flex flex-col items-center text-center">
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate="visible"
+          className="flex flex-col items-center text-center pt-4 sm:pt-8 pb-4"
+        >
+          {/* Eyebrow Pill */}
           <motion.a
             variants={fadeUp}
             href="https://github.com/raaam02/sec-form"
             target="_blank"
             rel="noopener noreferrer"
-            className="group mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 text-xs font-semibold text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+            className="group mb-6 inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/60 px-3.5 py-1 text-xs font-medium text-muted-foreground backdrop-blur-md transition hover:border-primary/40 hover:text-foreground"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Open-source AI form builder
-            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+            <span>Open Source AI Form Builder</span>
+            <ArrowRight className="h-3 w-3 text-muted-foreground/60 transition-transform group-hover:translate-x-0.5" />
           </motion.a>
 
+          {/* Clean Headline */}
           <motion.h1
             variants={fadeUp}
-            className="mx-auto max-w-4xl font-outfit text-5xl font-black leading-[1.06] tracking-tight text-foreground md:text-6xl lg:text-[72px]"
+            className="mx-auto max-w-3xl font-outfit text-4xl sm:text-5xl lg:text-7xl font-semibold leading-[1.08] tracking-tight text-foreground"
           >
-            Describe a form.
-            <br />
-            <HighlightedWord className="text-primary">Publish it in minutes.</HighlightedWord>
+            Describe a form.{" "}
+            <br className="hidden sm:inline" />
+            <span className="text-primary">Publish in seconds.</span>
           </motion.h1>
 
-          <motion.p variants={fadeUp} className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            Type what you need in plain English. Formu.AI builds the fields, validation and styling, then helps you make sense of the responses.
-          </motion.p>
-
-          <motion.div variants={fadeUp} className="mt-10 w-full max-w-2xl">
+          {/* Command Composer */}
+          <motion.div variants={fadeUp} className="mt-8 w-full max-w-2xl">
             <PromptBox />
           </motion.div>
 
-          <motion.div variants={fadeUp} className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2">
-            {["No credit card", "Free plan", "Self-hostable"].map((item) => (
-              <span key={item} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                {item}
-              </span>
-            ))}
-          </motion.div>
-
-          <motion.div variants={fadeUp} className="mt-16 w-full max-w-4xl text-left">
+          {/* App Window Demo */}
+          <motion.div variants={fadeUp} className="mt-12 sm:mt-28 w-full max-w-4xl text-left">
             <GeneratedFormDemo />
           </motion.div>
         </motion.div>

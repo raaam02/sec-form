@@ -193,7 +193,7 @@ export const homepageFaqJsonLd = {
       name: "How do I embed a form onto my website (WordPress, Webflow, Shopify, React)?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Publish your form and copy the 1-line lightweight embed script: <script src=\"https://form.emoicons.com/embed.js\" data-form-id=\"YOUR_FORM_ID\"></script>. Paste this snippet into any website or CMS to render the form responsively with custom themes.",
+        text: "Publish your form and copy the 1-line lightweight embed script snippet (using embed.js with your data-form-id). Paste this snippet into any website or CMS to render the form responsively with custom themes.",
       },
     },
     {

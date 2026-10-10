@@ -105,7 +105,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={`${plusJakarta.variable} h-full`} suppressHydrationWarning>
+    <html lang={locale} className={`${plusJakarta.variable} h-full`} data-color-theme="monochrome" suppressHydrationWarning>
       <head>
         <script
           type="application/ld+json"
@@ -114,7 +114,7 @@ export default async function RootLayout({
               softwareApplicationJsonLd,
               organizationJsonLd,
               homepageFaqJsonLd,
-            ]),
+            ]).replace(/</g, "\\u003c"),
           }}
         />
       </head>

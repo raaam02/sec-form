@@ -2,40 +2,71 @@
 
 import React from "react";
 import { motion } from "motion/react";
-import { Github, Palette, Sparkles, TextCursorInput } from "lucide-react";
+import { Github, Palette, Sparkles, SlidersHorizontal } from "lucide-react";
 import { Container } from "./ui";
 import { fadeUp, stagger } from "./motion";
 
-const FIELD_TYPES = 11;
-
-const FACTS = [
-  { icon: Github, title: "Open source", sub: "Read it, fork it, self-host it" },
-  { icon: Sparkles, title: "Gemini-powered", sub: "Generation and response insights" },
-  { icon: TextCursorInput, title: `${FIELD_TYPES} field types`, sub: "Text, rating, choice, date and more" },
-  { icon: Palette, title: "50+ themes", sub: "Or generate one from a prompt" },
+const CAPABILITIES = [
+  {
+    icon: Github,
+    tag: "MIT",
+    title: "100% Open Source",
+    description: "Self-host with Docker. Zero lock-in.",
+  },
+  {
+    icon: Sparkles,
+    tag: "Gemini",
+    title: "AI Schema Engine",
+    description: "Instant field and validation inference.",
+  },
+  {
+    icon: SlidersHorizontal,
+    tag: "11 Inputs",
+    title: "Rich Field Library",
+    description: "Ratings, choices, files, dates & text.",
+  },
+  {
+    icon: Palette,
+    tag: "50+ Presets",
+    title: "Aesthetic Theming",
+    description: "Custom hex tokens and dark mode.",
+  },
 ];
 
 export function LandingTrustBar() {
   return (
-    <section className="border-y border-border bg-card/30 py-10">
+    <section className="border-y border-border/70 bg-card/20 py-7 sm:py-8 backdrop-blur-sm">
       <Container>
-        <motion.ul
+        <motion.div
           variants={stagger}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-40px" }}
-          className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4 lg:divide-x lg:divide-border"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-0 lg:divide-x lg:divide-border/60"
         >
-          {FACTS.map(({ icon: Icon, title, sub }) => (
-            <motion.li key={title} variants={fadeUp} className="flex items-start gap-3 lg:px-6 lg:first:pl-0 lg:last:pr-0">
-              <Icon className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
-              <div>
-                <p className="text-sm font-bold text-foreground">{title}</p>
-                <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{sub}</p>
+          {CAPABILITIES.map(({ icon: Icon, tag, title, description }) => (
+            <motion.div
+              key={title}
+              variants={fadeUp}
+              className="flex items-start gap-3 lg:px-6 lg:first:pl-0 lg:last:pr-0"
+            >
+              <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20">
+                <Icon className="h-4 w-4" aria-hidden />
               </div>
-            </motion.li>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-xs sm:text-sm font-bold text-foreground tracking-tight">{title}</h3>
+                  <span className="rounded border border-border/60 bg-card/80 px-1 py-0.2 text-[9px] font-mono text-muted-foreground">
+                    {tag}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {description}
+                </p>
+              </div>
+            </motion.div>
           ))}
-        </motion.ul>
+        </motion.div>
       </Container>
     </section>
   );

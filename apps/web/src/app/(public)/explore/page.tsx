@@ -208,7 +208,7 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="py-12 pb-24 container mx-auto px-4 sm:px-6 max-w-6xl">
+    <div className="pt-32 sm:pt-36 pb-24 container mx-auto px-4 sm:px-6 max-w-6xl">
       <div className="text-center max-w-2xl mx-auto">
           <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             {tExplore("title")}

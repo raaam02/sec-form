@@ -39,21 +39,19 @@ interface ColorThemeContextType {
 }
 
 const ColorThemeContext = createContext<ColorThemeContextType>({
-  colorTheme: "purple",
+  colorTheme: "monochrome",
   setColorTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [colorTheme, setColorThemeState] = useState<ColorTheme>("purple");
+  const [colorTheme, setColorThemeState] = useState<ColorTheme>("monochrome");
 
   useEffect(() => {
     const saved = localStorage.getItem("color-theme") as ColorTheme;
-    if (saved) {
-      setColorThemeState(saved);
-      document.documentElement.setAttribute("data-color-theme", saved);
-    } else {
-      document.documentElement.setAttribute("data-color-theme", "purple");
-    }
+    // Default to Zinc Monochrome ("monochrome")
+    const themeToUse = saved && saved !== "purple" ? saved : "monochrome";
+    setColorThemeState(themeToUse);
+    document.documentElement.setAttribute("data-color-theme", themeToUse);
   }, []);
 
   const setColorTheme = (theme: ColorTheme) => {

@@ -10,7 +10,7 @@ export default function PublicGroupLayout({
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
       <LandingNav />
-      <main className="flex-1 pt-16 sm:pt-24">{children}</main>
+      <main className="flex-1">{children}</main>
       <LandingFooter />
     </div>
   );

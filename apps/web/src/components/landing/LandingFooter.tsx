@@ -26,17 +26,17 @@ const NAV_COLUMNS: FooterColumn[] = [
     links: [
       { label: "Templates", href: "/explore" },
       { label: "Theme Gallery", href: "/themes" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "Pricing Plans", href: "/pricing" },
       { label: "Changelog", href: "/changelog" },
     ],
   },
   {
     title: "Developers",
     links: [
-      { label: "API Docs", href: apiDocsUrl, external: true },
-      { label: "LLMs.txt", href: "/llms.txt", external: true },
-      { label: "REST API", href: apiDocsUrl, external: true },
-      { label: "Open Source", href: "https://github.com/raaam02/sec-form", external: true },
+      { label: "API Documentation", href: apiDocsUrl, external: true },
+      { label: "LLMs Protocol", href: "/llms.txt", external: true },
+      { label: "REST Endpoints", href: apiDocsUrl, external: true },
+      { label: "GitHub Repository", href: "https://github.com/raaam02/sec-form", external: true },
     ],
   },
   {
@@ -54,100 +54,104 @@ export function LandingFooter() {
   const t = useTranslations("Landing");
 
   return (
-    <footer className="border-t border-border bg-card/60 relative overflow-hidden">
-      {/* Top section */}
-      <div className="container mx-auto px-4 sm:px-6 max-w-6xl relative z-10 pt-16">
-        <div className="grid grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10">
+    <footer className="border-t border-border/70 bg-card/40 relative overflow-hidden">
+      {/* Top Main Section */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl relative z-10 pt-16 sm:pt-20 pb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+          {/* Brand Column (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
+            <div className="space-y-4">
+              <Link href="/" className="flex items-center gap-2.5 w-fit">
+                <Logo size="md" />
+              </Link>
+              <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed max-w-xs">
+                The intelligent AI form builder powered by Gemini.
+              </p>
+            </div>
 
-          {/* Brand column */}
-          <div className="col-span-2 lg:col-span-1 flex flex-col gap-5">
-            <Link href="/" className="flex items-center gap-2.5 w-fit">
-              <Logo size="md" />
-            </Link>
-
-            <p className="text-[13px] text-muted-foreground leading-relaxed max-w-[260px]">
-              The intelligent form builder powered by Gemini AI. Create, style, and analyze forms in minutes.
-            </p>
-
-            <div className="flex md:flex-col gap-5 justify-between pr-8">
-              {/* Social links */}
+            <div className="space-y-4">
+              {/* External Dev Links */}
               <div className="flex items-center gap-2">
-                {[
-                  { icon: Github, label: "GitHub", href: "https://github.com/raaam02/sec-form" },
-                  { icon: Code, label: "API", href: apiDocsUrl },
-                ].map(({ icon: Icon, label, href }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="h-8 w-8 rounded-lg border border-border backdrop-blur-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                  </a>
-                ))}
+                <a
+                  href="https://github.com/raaam02/sec-form"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub Repository"
+                  className="h-8.5 w-8.5 rounded-xl border border-border/70 bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+                >
+                  <Github className="h-4 w-4" />
+                </a>
+                <a
+                  href={apiDocsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="API Documentation"
+                  className="h-8.5 w-8.5 rounded-xl border border-border/70 bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border transition-colors"
+                >
+                  <Code className="h-4 w-4" />
+                </a>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 pt-2">
+              {/* Utility Switches */}
+              <div className="flex flex-wrap items-center gap-2">
                 <LocaleSwitcher />
                 <ThemeToggle />
-                <ColorThemeSwitcher />
+                {/* <ColorThemeSwitcher /> */}
               </div>
             </div>
           </div>
 
-          {/* Nav columns */}
-          {NAV_COLUMNS.map((col) => (
-            <div key={col.title} className="flex flex-col gap-4">
-              <h4 className="text-[11px] font-black uppercase tracking-[0.15em] text-foreground">
-                {col.title}
-              </h4>
-              <ul className="flex flex-col gap-2.5">
-                {col.links.map(({ label, href, external }) => (
-                  <li key={label}>
-                    {external ? (
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[13px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                      >
-                        {label}
-                        <ExternalLink className="h-2.5 w-2.5 opacity-50" />
-                      </a>
-                    ) : (
-                      <Link
-                        href={href}
-                        className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Navigation Columns (7 cols split across 3 columns) */}
+          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
+            {NAV_COLUMNS.map((col) => (
+              <div key={col.title} className="space-y-3.5">
+                <h4 className="text-[11px] font-bold uppercase tracking-[0.16em] text-foreground font-mono">
+                  {col.title}
+                </h4>
+                <ul className="space-y-2.5">
+                  {col.links.map(({ label, href, external }) => (
+                    <li key={label}>
+                      {external ? (
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group"
+                        >
+                          <span>{label}</span>
+                          <ExternalLink className="h-2.5 w-2.5 opacity-40 group-hover:opacity-80 transition-opacity" />
+                        </a>
+                      ) : (
+                        <Link
+                          href={href}
+                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          {label}
+                        </Link>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Giant brand watermark */}
-      <div
-        className="inset-0 flex items-center justify-center overflow-hidden"
-      >
-        <span className="font-outfit leading-none translate-y-[7px] sm:translate-y-[14px] md:translate-y-[28px] font-black text-[22vw] sm:text-[18vw] tracking-tighter text-foreground/[0.035] dark:text-foreground/[0.04] whitespace-nowrap">
+      {/* Tasteful Brand Watermark (Subtle and proportionate) */}
+      <div className="flex items-center justify-center overflow-hidden pointer-events-none select-none py-2" aria-hidden>
+        <span className="font-outfit font-black text-[14vw] leading-none tracking-tighter text-foreground/[0.025] dark:text-foreground/[0.035] whitespace-nowrap">
           Formu.AI
         </span>
       </div>
 
-      {/* Bottom strip */}
-      <div className="border-t border-border/50">
-        <div className="container mx-auto px-4 sm:px-6 max-w-6xl py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-[12px] text-muted-foreground relative z-10">
-          <span>{t("rights")}</span>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+      {/* Bottom Legal Strip */}
+      <div className="border-t border-border/50 bg-background/50">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+          <span>{t("rights") || "© 2026 Formu.AI. All rights reserved."}</span>
+          <div className="flex items-center gap-5">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
             <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Sitemap</a>
           </div>
         </div>

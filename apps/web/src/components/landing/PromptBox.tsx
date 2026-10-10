@@ -1,89 +1,88 @@
 "use client";
 
 import React, { useId, useRef, useState } from "react";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles, CornerDownLeft, ArrowRight, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStartBuilding } from "./useStartBuilding";
 
-export const EXAMPLE_PROMPTS = [
-  { label: "Customer feedback", prompt: "Customer feedback survey for a coffee shop with a rating and comments" },
-  { label: "Event RSVP", prompt: "Event RSVP with guest count and dietary preferences" },
-  { label: "Job application", prompt: "Job application for a frontend developer with portfolio link" },
-  { label: "Contact form", prompt: "Simple contact form with name, email and message" },
-];
-
 export function PromptBox({
   className,
-  showChips = true,
 }: {
   className?: string;
   showChips?: boolean;
 }) {
-  const { startWithPrompt, startBlank } = useStartBuilding();
+  const { startWithPrompt } = useStartBuilding();
   const [value, setValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const id = useId();
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    startWithPrompt(value || EXAMPLE_PROMPTS[0].prompt);
+    const finalPrompt = value.trim() || "Customer feedback survey with 1-5 rating and open comments";
+    startWithPrompt(finalPrompt);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submit(e);
+    }
   };
 
   return (
-    <div className={cn("w-full", className)}>
+    <div className={cn("w-full transition-all", className)}>
       <form
         onSubmit={submit}
-        className="flex items-center gap-2 rounded-2xl border border-border bg-card p-2 shadow-xl shadow-primary/5 transition focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10"
+        className={cn(
+          "relative flex flex-col rounded-2xl border bg-card/90 text-card-foreground p-3 sm:p-4 shadow-xl backdrop-blur-xl transition-all duration-300",
+          isFocused
+            ? "border-primary/60 ring-2 ring-primary/20 shadow-2xl"
+            : "border-border/80 hover:border-border shadow-black/5 dark:shadow-black/25"
+        )}
       >
-        <Sparkles className="ml-3 hidden h-5 w-5 shrink-0 text-primary sm:block" aria-hidden />
-        <label htmlFor={id} className="sr-only">
-          Describe the form you want to build
-        </label>
-        <input
-          id={id}
-          ref={inputRef}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Describe your form… e.g. customer feedback survey for a café"
-          className="h-12 min-w-0 flex-1 bg-transparent px-2 text-base text-foreground outline-none placeholder:text-muted-foreground/70"
-        />
-        <button
-          type="submit"
-          className="group inline-flex h-12 shrink-0 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 active:scale-[0.98]"
-        >
-          Generate
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-        </button>
-      </form>
-
-      {showChips && (
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-          <span className="text-xs text-muted-foreground">Try:</span>
-          {EXAMPLE_PROMPTS.map((ex) => (
-            <button
-              key={ex.label}
-              type="button"
-              onClick={() => {
-                setValue(ex.prompt);
-                inputRef.current?.focus();
-              }}
-              className="rounded-full border border-border bg-card/60 px-3 py-1 text-xs font-medium text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
-            >
-              {ex.label}
-            </button>
-          ))}
-          <span className="px-1 text-xs text-muted-foreground/60" aria-hidden>
-            ·
-          </span>
-          <button
-            type="button"
-            onClick={startBlank}
-            className="text-xs font-medium text-muted-foreground underline-offset-4 transition hover:text-foreground hover:underline"
-          >
-            Start from blank
-          </button>
+        {/* Textarea Area */}
+        <div className="relative px-1 pt-1 pb-2">
+          <label htmlFor={id} className="sr-only">
+            Describe the form you want to build
+          </label>
+          <textarea
+            id={id}
+            ref={textareaRef}
+            rows={2}
+            value={value}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Customer feedback survey with NPS rating and open comments"
+            className="w-full resize-none bg-transparent text-sm sm:text-[15px] font-normal leading-relaxed text-foreground placeholder:text-muted-foreground/60 outline-none"
+          />
         </div>
-      )}
+
+        {/* Bottom Bar */}
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-border/40">
+          {/* Subtle Formu AI Indicator */}
+          <div className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/80 font-medium pl-1">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            <span>AI Form Generator</span>
+          </div>
+
+          {/* Action Area */}
+          <div className="flex items-center gap-2.5">
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground/70">
+              <CornerDownLeft className="h-3 w-3" /> enter
+            </span>
+            <button
+              type="submit"
+              className="group inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-4 sm:px-5 py-2 text-xs sm:text-sm font-semibold shadow-sm transition-all duration-200 active:scale-[0.98]"
+            >
+              <span>Generate</span>
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

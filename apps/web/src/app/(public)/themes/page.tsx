@@ -37,7 +37,7 @@ export default function ThemesPage() {
   };
 
   return (
-    <div className="py-12 pb-24 container mx-auto px-4 sm:px-6 max-w-5xl">
+    <div className="pt-32 sm:pt-36 pb-24 container mx-auto px-4 sm:px-6 max-w-5xl">
       <div className="text-center max-w-2xl mx-auto">
           <h1 className="font-outfit text-4xl font-extrabold tracking-tight text-foreground sm:text-5xl">
             {tThemes("title")}
@@ -94,8 +94,7 @@ export default function ThemesPage() {
                       <div className="space-y-1">
                         <div className="h-1.5 w-1/4 bg-muted-foreground/30 rounded-sm" />
                         <div 
-                          className="h-7 w-full rounded border border-border/30 bg-background/50 px-2 text-[9px] flex items-center text-muted-foreground select-none pointer-events-none"
-                          style={{ borderRadius: `calc(${theme.borderRadius} - 6px)` }}
+                          className="h-7 w-full rounded-md border border-border/30 bg-background/50 px-2 text-[9px] flex items-center text-muted-foreground select-none pointer-events-none"
                         >
                           Placeholder text...
                         </div>
@@ -104,8 +103,7 @@ export default function ThemesPage() {
                       {/* Choice items */}
                       <div className="flex items-center gap-2">
                         <div 
-                          className="h-3 w-3 rounded border border-border/30 bg-background/50 flex items-center justify-center shrink-0"
-                          style={{ borderRadius: `calc(${theme.borderRadius} - 8px)` }}
+                          className="h-3 w-3 rounded-full border border-border/40 bg-background/50 flex items-center justify-center shrink-0"
                         >
                           <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: theme.primaryColor }} />
                         </div>
@@ -115,10 +113,9 @@ export default function ThemesPage() {
 
                     {/* Submit Button */}
                     <div 
-                      className="h-8 w-full text-[10px] font-bold flex items-center justify-center text-white shadow-sm select-none pointer-events-none"
+                      className="h-8 w-full text-xs font-semibold flex items-center justify-center text-white shadow-sm select-none pointer-events-none rounded-lg"
                       style={{ 
                         backgroundColor: theme.primaryColor,
-                        borderRadius: `calc(${theme.borderRadius} - 6px)`
                       }}
                     >
                       Submit Response
@@ -137,7 +134,7 @@ export default function ThemesPage() {
               <div className="mt-6 pt-4">
                  <Link
                    href="/login"
-                   className="block w-full text-center py-2 bg-indigo-600/10 dark:bg-indigo-950/30 hover:bg-indigo-600/20 text-indigo-700 dark:text-indigo-400 font-semibold text-sm rounded-xl transition-colors"
+                   className="block w-full text-center py-2.5 bg-primary/10 hover:bg-primary/15 text-primary font-semibold text-xs rounded-lg transition-colors"
                  >
                   {tThemes("applyTheme")}
                 </Link>
