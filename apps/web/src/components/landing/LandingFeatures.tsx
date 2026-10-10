@@ -2,7 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+import { useSession } from "next-auth/react";
+import { useAuthModal } from "@/components/auth/AuthModalContext";
 import {
   ArrowRight,
   BarChart3,
@@ -34,6 +36,8 @@ function BentoCard({
   href,
   linkText,
   external,
+  requiresAuth,
+  authLayoutId,
   iconColor = "text-primary",
   iconBg = "bg-primary/10 border-primary/20",
   className,
@@ -46,11 +50,17 @@ function BentoCard({
   href?: string;
   linkText?: string;
   external?: boolean;
+  requiresAuth?: boolean;
+  authLayoutId?: string;
   iconColor?: string;
   iconBg?: string;
   className?: string;
   children?: React.ReactNode;
 }) {
+  const { data: session } = useSession();
+  const { isOpen, layoutId: activeLayoutId, openAuthModal } = useAuthModal();
+  const layoutKey = authLayoutId || `feature-auth-${title.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+
   return (
     <motion.article
       variants={fadeUp}
@@ -84,15 +94,43 @@ function BentoCard({
 
       {href && (
         <div className="mt-5 pt-3.5 border-t border-border/30 flex items-center justify-between">
-          <Link
-            href={href}
-            target={external ? "_blank" : undefined}
-            rel={external ? "noreferrer noopener" : undefined}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground/80 hover:text-foreground transition-colors group/link"
-          >
-            <span>{linkText || "Explore"}</span>
-            <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-hover/link:translate-x-1 group-hover/link:text-foreground" />
-          </Link>
+          {requiresAuth && !session ? (
+            <div className="relative inline-flex items-center">
+              <AnimatePresence initial={false}>
+                {(!isOpen || activeLayoutId !== layoutKey) && (
+                  <motion.div
+                    layoutId={layoutKey}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 30,
+                      mass: 0.8,
+                    }}
+                    style={{ borderRadius: "10px" }}
+                    className="absolute inset-0 rounded-xl bg-card border border-border/70 transform-gpu will-change-transform shadow-xs"
+                  />
+                )}
+              </AnimatePresence>
+              <button
+                type="button"
+                onClick={() => openAuthModal("login", href, layoutKey)}
+                className="relative z-10 inline-flex items-center gap-1.5 text-xs font-semibold text-foreground/80 hover:text-foreground transition-colors group/link px-2.5 py-1"
+              >
+                <span>{linkText || "Explore"}</span>
+                <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-hover/link:translate-x-1 group-hover/link:text-foreground" />
+              </button>
+            </div>
+          ) : (
+            <Link
+              href={href}
+              target={external ? "_blank" : undefined}
+              rel={external ? "noreferrer noopener" : undefined}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground/80 hover:text-foreground transition-colors group/link"
+            >
+              <span>{linkText || "Explore"}</span>
+              <ArrowRight className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-hover/link:translate-x-1 group-hover/link:text-foreground" />
+            </Link>
+          )}
         </div>
       )}
     </motion.article>
@@ -452,6 +490,8 @@ export function LandingFeatures() {
             href="https://t.me/FormuAi_bot"
             linkText="Connect Bot"
             external
+            requiresAuth
+            authLayoutId="feature-auth-telegram"
           >
             <TelegramWebhookVisual />
           </BentoCard>
@@ -466,6 +506,8 @@ export function LandingFeatures() {
             description="Drag, drop, and reorder fields with instant live preview."
             href="/dashboard"
             linkText="Open Builder"
+            requiresAuth
+            authLayoutId="feature-auth-canvas"
           >
             <BuilderDragVisual />
           </BentoCard>
@@ -480,6 +522,8 @@ export function LandingFeatures() {
             description="Track views, conversion rates, and automated response summaries."
             href="/dashboard/analytics"
             linkText="View Analytics"
+            requiresAuth
+            authLayoutId="feature-auth-analytics"
           >
             <AnalyticsInsightsVisual />
           </BentoCard>
@@ -494,6 +538,8 @@ export function LandingFeatures() {
             description="Share a direct link, embed script, or iframe anywhere."
             href="/dashboard"
             linkText="Share & Embed"
+            requiresAuth
+            authLayoutId="feature-auth-publish"
           >
             <EmbedCodeVisual />
           </BentoCard>
