@@ -37,7 +37,7 @@ export const BUILTIN_THEMES: ThemeConfig[] = [
     backgroundColor: "#09090b", // zinc-950
     textColor: "#fafafa",
     cardColor: "#18181b", // zinc-900
-    borderRadius: "0.5rem"
+    borderRadius: "1rem"
   },
   {
     id: "corporate",

@@ -64,40 +64,9 @@ export function LandingFooter() {
               <Link href="/" className="flex items-center gap-2.5 w-fit">
                 <Logo size="md" />
               </Link>
-              <p className="text-xs sm:text-[13px] text-muted-foreground leading-relaxed max-w-xs">
+              <p className="text-sm sm:text-sm text-muted-foreground leading-relaxed max-w-xs">
                 The modern, open source AI form builder.
               </p>
-            </div>
-
-            <div className="space-y-4">
-              {/* External Dev Links */}
-              <div className="flex items-center gap-2">
-                <a
-                  href="https://github.com/raaam02/sec-form"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="GitHub Repository"
-                  className="h-8.5 w-8.5 rounded-xl border border-border/70 bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-                >
-                  <Github className="h-4 w-4" />
-                </a>
-                <a
-                  href={apiDocsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="API Documentation"
-                  className="h-8.5 w-8.5 rounded-xl border border-border/70 bg-background/50 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-border transition-colors"
-                >
-                  <Code className="h-4 w-4" />
-                </a>
-              </div>
-
-              {/* Utility Switches */}
-              <div className="flex flex-wrap items-center gap-2">
-                <LocaleSwitcher />
-                <ThemeToggle />
-                {/* <ColorThemeSwitcher /> */}
-              </div>
             </div>
           </div>
 
@@ -105,7 +74,7 @@ export function LandingFooter() {
           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
             {NAV_COLUMNS.map((col) => (
               <div key={col.title} className="space-y-3.5">
-                <h4 className="text-[11px] font-bold uppercase tracking-[0.16em] text-foreground font-mono">
+                <h4 className="text-sm font-semibold tracking-wider text-foreground">
                   {col.title}
                 </h4>
                 <ul className="space-y-2.5">
@@ -116,7 +85,7 @@ export function LandingFooter() {
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group"
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1 group"
                         >
                           <span>{label}</span>
                           <ExternalLink className="h-2.5 w-2.5 opacity-40 group-hover:opacity-80 transition-opacity" />
@@ -124,7 +93,7 @@ export function LandingFooter() {
                       ) : (
                         <Link
                           href={href}
-                          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                         >
                           {label}
                         </Link>
