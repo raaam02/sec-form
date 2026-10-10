@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FORM_TEMPLATES, FormTemplate, FormFieldTemplate, BUILTIN_THEMES } from "@sec-form/shared";
 import {
-  Sparkles, Search, ArrowRight, Eye, Check, X, Star, ChevronUp,
+  Sparkles, Search, ArrowRight, Eye, Check, X, Star, ChevronDown,
   HeartHandshake, Utensils, Smile, GraduationCap,
   Mail, UserCheck, TrendingUp, Presentation,
   Calendar, Briefcase, Bug, Wrench, LucideIcon
@@ -15,7 +15,7 @@ import { useTranslations } from "next-intl";
 import { useAuthModal } from "@/components/auth/AuthModalContext";
 import { useTheme } from "@/components/ThemeProvider";
 import { motion, AnimatePresence } from "motion/react";
-import { PopoverFormCutOutTopIcon, useClickOutside } from "@/components/ui/popover-form";
+import { useClickOutside } from "@/components/ui/popover-form";
 
 const TEMPLATE_ICONS: Record<string, LucideIcon> = {
   "customer-feedback": HeartHandshake,
@@ -86,12 +86,7 @@ function renderLiveField(field: FormFieldTemplate, primaryColor: string) {
           <span className="truncate">
             {field.options && field.options.length > 0 ? field.options[0] : "Select an option..."}
           </span>
-          <span className="opacity-60">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-
-          </span>
+          <ChevronDown className="h-4 w-4 opacity-60 shrink-0" />
         </div>
       );
     case "checkbox":
@@ -382,19 +377,6 @@ export default function ExplorePage() {
               }}
               className="relative z-10 w-full max-w-2xl rounded-[28px] pb-6 bg-card border border-border/60 shadow-2xl max-h-[90vh] flex flex-col justify-between overflow-hidden outline-none"
             >
-              {/* Cult UI Cutout Top Tab with ChevronUp Close Button */}
-              <div className="absolute -top-[5px] left-1/2 z-30 flex h-[26px] w-[12px] -translate-x-1/2 transform items-center justify-center pointer-events-auto">
-                <button
-                  type="button"
-                  onClick={() => setPreviewTemplate(null)}
-                  className="text-muted-foreground hover:text-foreground absolute z-20 -mt-1 flex h-[14px] w-[18px] items-center justify-center rounded-full focus:outline-none transition-colors"
-                  aria-label="Close"
-                >
-                  <ChevronUp className="h-3 w-3 text-muted-foreground/80 hover:text-foreground" />
-                </button>
-                <PopoverFormCutOutTopIcon />
-              </div>
-
               {/* Live Form Canvas Inside Modal with custom-scrollbar */}
               <div
                 className="rounded-[28px] p-6 sm:p-8 border border-border/30 shadow-sm space-y-5 transition-all overflow-y-auto flex-1 custom-scrollbar"
