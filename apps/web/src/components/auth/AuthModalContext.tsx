@@ -9,7 +9,12 @@ interface AuthModalContextType {
   isOpen: boolean;
   mode: AuthModalMode;
   redirectUrl: string;
-  openAuthModal: (mode?: AuthModalMode, redirectUrl?: string) => void;
+  layoutId: string;
+  openAuthModal: (
+    mode?: AuthModalMode,
+    redirectUrl?: string,
+    layoutId?: string
+  ) => void;
   closeAuthModal: () => void;
   setMode: (mode: AuthModalMode) => void;
 }
@@ -20,10 +25,15 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<AuthModalMode>("login");
   const [redirectUrl, setRedirectUrl] = useState<string>("/dashboard");
+  const [layoutId, setLayoutId] = useState<string>("auth-modal-navbar");
   const pathname = usePathname();
 
   const openAuthModal = useCallback(
-    (newMode: AuthModalMode = "login", newRedirectUrl?: string) => {
+    (
+      newMode: AuthModalMode = "login",
+      newRedirectUrl?: string,
+      customLayoutId?: string
+    ) => {
       setMode(newMode);
       if (newRedirectUrl) {
         setRedirectUrl(newRedirectUrl);
@@ -32,6 +42,8 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
       } else {
         setRedirectUrl("/dashboard");
       }
+
+      setLayoutId(customLayoutId || "auth-modal-navbar");
       setIsOpen(true);
     },
     [pathname]
@@ -42,7 +54,6 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Intercept any click on links with href="/login" or href="/signup"
-  // so all existing and future buttons across the site trigger the compact modal seamlessly
   useEffect(() => {
     const handleDocumentClick = (e: MouseEvent) => {
       // Don't intercept if user is already on dedicated /login or /signup page
@@ -60,12 +71,12 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
         e.preventDefault();
         const urlParams = new URLSearchParams(href.split("?")[1] || "");
         const redirect = urlParams.get("redirect") || "/dashboard";
-        openAuthModal("login", redirect);
+        openAuthModal("login", redirect, "auth-modal-navbar");
       } else if (href === "/signup" || href.startsWith("/signup?")) {
         e.preventDefault();
         const urlParams = new URLSearchParams(href.split("?")[1] || "");
         const redirect = urlParams.get("redirect") || "/dashboard";
-        openAuthModal("signup", redirect);
+        openAuthModal("signup", redirect, "auth-modal-navbar");
       }
     };
 
@@ -81,6 +92,7 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
         isOpen,
         mode,
         redirectUrl,
+        layoutId,
         openAuthModal,
         closeAuthModal,
         setMode,

@@ -15,7 +15,7 @@ let isFirstMount = true;
 
 export function LandingNav() {
   const { data: session } = useSession();
-  const { isOpen, openAuthModal } = useAuthModal();
+  const { isOpen, layoutId: activeLayoutId, openAuthModal } = useAuthModal();
   const [shouldAnimate] = useState(isFirstMount);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -143,11 +143,11 @@ export function LandingNav() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <div className="relative inline-flex items-center justify-center">
+                <div className="relative inline-flex h-9 items-center justify-center">
                   <AnimatePresence initial={false}>
-                    {!isOpen && (
+                    {(!isOpen || activeLayoutId !== "auth-modal-navbar") && (
                       <motion.div
-                        layoutId="auth-modal"
+                        layoutId="auth-modal-navbar"
                         transition={{
                           type: "spring",
                           stiffness: 300,
@@ -155,14 +155,14 @@ export function LandingNav() {
                           mass: 0.8,
                         }}
                         style={{ borderRadius: "12px" }}
-                        className="absolute inset-0 bg-card border border-border/70 transform-gpu will-change-transform shadow-xs"
+                        className="absolute inset-0 rounded-xl bg-card border border-border/70 transform-gpu will-change-transform shadow-xs"
                       />
                     )}
                   </AnimatePresence>
                   <button
                     type="button"
-                    onClick={() => openAuthModal("login")}
-                    className="relative z-10 inline-flex h-8.5 items-center rounded-xl px-3 sm:px-3.5 text-xs font-semibold text-foreground transition hover:opacity-80 active:scale-95"
+                    onClick={() => openAuthModal("login", undefined, "auth-modal-navbar")}
+                    className="relative z-10 inline-flex h-9 items-center justify-center rounded-xl px-3 sm:px-3.5 text-xs font-semibold text-foreground transition hover:opacity-80 active:scale-95"
                   >
                     {t("login") || "Log in"}
                   </button>

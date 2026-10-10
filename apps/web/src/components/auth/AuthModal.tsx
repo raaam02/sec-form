@@ -51,7 +51,7 @@ const swipeVariants: Variants = {
 };
 
 export function AuthModal() {
-  const { isOpen, mode, redirectUrl, closeAuthModal, setMode } = useAuthModal();
+  const { isOpen, mode, redirectUrl, layoutId, closeAuthModal, setMode } = useAuthModal();
   const router = useRouter();
 
   // 1 = swipe forward (login -> signup), -1 = swipe backward (signup -> login)
@@ -201,7 +201,7 @@ export function AuthModal() {
     <ExpandableScreen
       expanded={isOpen}
       onExpandChange={(expanded) => !expanded && closeAuthModal()}
-      layoutId="auth-modal"
+      layoutId={layoutId}
       triggerRadius="16px"
       contentRadius="24px"
       animationDuration={0.25}

@@ -184,7 +184,7 @@ export function ExpandableScreenContent({
             className="fixed inset-0 bg-background/80 backdrop-blur-md"
           />
 
-          {/* Morphing background with shared layoutId and smooth spring physics */}
+          {/* Morphing container with shared layoutId and smooth spring physics */}
           <motion.div
             layoutId={layoutId}
             transition={{
@@ -197,7 +197,7 @@ export function ExpandableScreenContent({
               borderRadius: contentRadius,
             }}
             layout
-            className={`relative z-10 flex h-full w-full transform-gpu overflow-y-auto will-change-transform ${className}`}
+            className={`relative z-10 flex h-full w-full transform-gpu overflow-y-auto will-change-transform shadow-2xl ${className}`}
           >
             <motion.div
               initial={{ opacity: 0 }}

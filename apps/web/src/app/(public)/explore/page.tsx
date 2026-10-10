@@ -141,7 +141,7 @@ export default function ExplorePage() {
 
   const tExplore = useTranslations("Explore");
   const tCommon = useTranslations("Common");
-  const { openAuthModal } = useAuthModal();
+  const { isOpen, layoutId: activeLayoutId, openAuthModal } = useAuthModal();
   const { theme } = useTheme();
 
   const categories = ["All", ...Array.from(new Set(FORM_TEMPLATES.map((t) => t.category)))];
@@ -157,9 +157,10 @@ export default function ExplorePage() {
     });
   }, [selectedCategory, searchQuery]);
 
-  const handleUseTemplate = (templateId: string) => {
+  const handleUseTemplate = (templateId: string, customLayoutId?: string) => {
+    const layout = customLayoutId || `template-use-${templateId}`;
     if (!session) {
-      openAuthModal("login", `/dashboard?createTemplate=${templateId}`);
+      openAuthModal("login", `/dashboard?createTemplate=${templateId}`, layout);
       return;
     }
     router.push(`/dashboard?createTemplate=${templateId}`);
@@ -321,14 +322,31 @@ export default function ExplorePage() {
                     <span>Preview</span>
                   </motion.button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleUseTemplate(template.id)}
-                    className="group/button flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-foreground text-background hover:opacity-90 py-2.5 text-xs font-semibold transition-opacity shadow-xs"
-                  >
-                    <span>Use Template</span>
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/button:translate-x-1" />
-                  </button>
+                  <div className="relative flex-1 inline-flex h-9">
+                    <AnimatePresence initial={false}>
+                      {(!isOpen || activeLayoutId !== `template-use-${template.id}`) && (
+                        <motion.div
+                          layoutId={`template-use-${template.id}`}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 30,
+                            mass: 0.8,
+                          }}
+                          style={{ borderRadius: "12px" }}
+                          className="absolute inset-0 rounded-xl bg-foreground transform-gpu will-change-transform shadow-xs"
+                        />
+                      )}
+                    </AnimatePresence>
+                    <button
+                      type="button"
+                      onClick={() => handleUseTemplate(template.id, `template-use-${template.id}`)}
+                      className="relative z-10 w-full group/button inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-transparent text-background hover:opacity-90 px-3 text-xs font-semibold transition-opacity"
+                    >
+                      <span>Use Template</span>
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/button:translate-x-1" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -449,18 +467,35 @@ export default function ExplorePage() {
                 >
                   Close
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const id = previewTemplate.id;
-                    setPreviewTemplate(null);
-                    handleUseTemplate(id);
-                  }}
-                  className="group/button inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-foreground text-background text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
-                >
-                  <span>Use template</span>
-                  <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/button:translate-x-1" />
-                </button>
+                <div className="relative inline-flex h-9">
+                  <AnimatePresence initial={false}>
+                    {(!isOpen || activeLayoutId !== `template-preview-use-${previewTemplate.id}`) && (
+                      <motion.div
+                        layoutId={`template-preview-use-${previewTemplate.id}`}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                          mass: 0.8,
+                        }}
+                        style={{ borderRadius: "12px" }}
+                        className="absolute inset-0 rounded-xl bg-foreground transform-gpu will-change-transform shadow-sm"
+                      />
+                    )}
+                  </AnimatePresence>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const id = previewTemplate.id;
+                      setPreviewTemplate(null);
+                      handleUseTemplate(id, `template-preview-use-${id}`);
+                    }}
+                    className="relative z-10 group/button inline-flex h-9 items-center gap-1.5 px-5 rounded-xl bg-transparent text-background text-xs font-semibold hover:opacity-90 transition-opacity shadow-sm"
+                  >
+                    <span>Use template</span>
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover/button:translate-x-1" />
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>
