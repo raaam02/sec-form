@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Plus, Github } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
@@ -15,7 +15,7 @@ let isFirstMount = true;
 
 export function LandingNav() {
   const { data: session } = useSession();
-  const { openAuthModal } = useAuthModal();
+  const { isOpen, openAuthModal } = useAuthModal();
   const [shouldAnimate] = useState(isFirstMount);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -143,13 +143,30 @@ export function LandingNav() {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => openAuthModal("login")}
-                  className="inline-flex h-8.5 items-center rounded-xl px-2.5 sm:px-3 text-xs font-medium text-muted-foreground transition hover:text-foreground"
-                >
-                  {t("login") || "Log in"}
-                </button>
+                <div className="relative inline-flex items-center justify-center">
+                  <AnimatePresence initial={false}>
+                    {!isOpen && (
+                      <motion.div
+                        layoutId="auth-modal"
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 30,
+                          mass: 0.8,
+                        }}
+                        style={{ borderRadius: "12px" }}
+                        className="absolute inset-0 bg-card border border-border/70 transform-gpu will-change-transform shadow-xs"
+                      />
+                    )}
+                  </AnimatePresence>
+                  <button
+                    type="button"
+                    onClick={() => openAuthModal("login")}
+                    className="relative z-10 inline-flex h-8.5 items-center rounded-xl px-3 sm:px-3.5 text-xs font-semibold text-foreground transition hover:opacity-80 active:scale-95"
+                  >
+                    {t("login") || "Log in"}
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={handleStartBuilding}

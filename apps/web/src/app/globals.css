@@ -1632,3 +1632,33 @@
 .dark .canvas-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(63, 63, 70, 0.5);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PREVENT MODAL/POPUP SCROLLBAR LAYOUT SHIFT & SLEEK SCROLLBAR STYLING
+   ═══════════════════════════════════════════════════════════════════════ */
+html {
+  scrollbar-gutter: stable;
+}
+
+/* Sleek global page scrollbar matching the dark/light design system */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.22);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.4);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(161, 161, 170, 0.22);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(161, 161, 170, 0.45);
+}
+

@@ -15,9 +15,12 @@ import {
   CheckCircle2,
   ArrowLeft,
   X,
+  Sparkles,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ExpandableScreen, ExpandableScreenContent } from "@/components/ui/expandable-screen";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/Logo";
@@ -195,34 +198,125 @@ export function AuthModal() {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && closeAuthModal()}>
-      <DialogContent className="max-w-[420px] p-0 overflow-hidden rounded-2xl border border-border bg-card/95 backdrop-blur-xl shadow-2xl">
-        <DialogTitle className="sr-only">
-          {mode === "login" ? "Sign In to Formu.AI" : "Create Formu.AI Account"}
-        </DialogTitle>
-        <DialogDescription className="sr-only">
-          Authentication dialog with animated mode toggle
-        </DialogDescription>
+    <ExpandableScreen
+      expanded={isOpen}
+      onExpandChange={(expanded) => !expanded && closeAuthModal()}
+      layoutId="auth-modal"
+      triggerRadius="16px"
+      contentRadius="24px"
+      animationDuration={0.25}
+    >
+      <ExpandableScreenContent
+        className="w-full max-w-[1100px] border border-border/60 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-y-auto text-foreground"
+        showCloseButton={true}
+        closeButtonClassName="text-muted-foreground hover:text-foreground hover:bg-muted/80 bg-background/60 backdrop-blur-xs border border-border/40 absolute top-5 right-5 z-30 flex h-9 w-9 items-center justify-center rounded-full transition-colors"
+      >
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="auth-modal-title"
+          className="relative z-10 mx-auto flex h-full w-full max-w-[1100px] flex-col lg:flex-row items-center justify-center gap-8 lg:gap-14 p-6 sm:p-10 lg:p-14 my-auto"
+        >
+          {/* Left Column: Brand Story & Value Pillars */}
+          <div className="flex-1 space-y-6 text-center lg:text-left w-full max-w-lg lg:max-w-none">
+            <div className="inline-flex items-center gap-2">
+              <Logo size="md" />
+            </div>
 
-        {/* Top Header */}
-        <div className="relative pt-6 px-6 pb-5 text-center border-b border-border/40">
-          <div className="inline-flex items-center gap-2 mb-2">
-            <Logo size="sm" />
+            <div className="space-y-3">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-outfit tracking-tight text-foreground leading-[1.15]">
+                {mode === "login"
+                  ? "Welcome back to your workspace."
+                  : "Supercharge how you build forms."}
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-md mx-auto lg:mx-0">
+                AI-powered form generation, live schemas, enterprise encryption, and multi-channel instant analytics.
+              </p>
+            </div>
+
+            {/* Feature highlights */}
+            <div className="grid gap-3 pt-2 text-left">
+              <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-muted/40 border border-border/50">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <Sparkles className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground">AI Schema Generation</h4>
+                  <p className="text-[11px] text-muted-foreground">Type prompt, get production-ready reactive forms in seconds.</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3.5 p-3 rounded-2xl bg-muted/40 border border-border/50">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <ShieldCheck className="h-4.5 w-4.5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-semibold text-foreground">End-to-End Encryption</h4>
+                  <p className="text-[11px] text-muted-foreground">Zero-knowledge responses, strictly secured by SEC-level standards.</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Testimonial Quote */}
+            <div className="pt-2 hidden sm:block">
+              <p className="text-xs italic text-muted-foreground">
+                "Formu.AI replaced our entire complex form pipeline in an afternoon. Truly game-changing speed."
+              </p>
+              <div className="mt-2 flex items-center gap-2 justify-center lg:justify-start">
+                <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-[10px] font-bold text-white shadow-xs">
+                  A
+                </div>
+                <span className="text-xs font-medium text-foreground">Alex Chen</span>
+                <span className="text-[11px] text-muted-foreground">• Product Lead at HyperGrowth</span>
+              </div>
+            </div>
           </div>
 
-          <h2 className="font-outfit text-xl font-bold tracking-tight text-foreground">
-            {mode === "login" ? "Welcome back" : "Create an account"}
-          </h2>
-          {/*<p className="text-xs text-muted-foreground mt-0.5">
-            {mode === "login"
-              ? "Sign in to manage your forms and AI insights"
-              : "Start building and customizing forms for free"}
-          </p>*/}
-        </div>
+          {/* Right Column: Elevated Interactive Auth Card */}
+          <div className="w-full flex-1 max-w-md bg-card/80 dark:bg-card/60 backdrop-blur-xl border border-border/70 rounded-3xl p-6 sm:p-8 shadow-2xl">
+            {/* Header / Mode Switch Tabs */}
+            <div className="flex items-center justify-between border-b border-border/50 pb-4 mb-5">
+              <div>
+                <h2 id="auth-modal-title" className="font-outfit text-xl font-bold tracking-tight text-foreground">
+                  {mode === "login" ? "Sign In" : "Get Started Free"}
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {mode === "login"
+                    ? "Access your dashboard & analytics"
+                    : "No credit card required • Instant access"}
+                </p>
+              </div>
 
-        {/* Swipe Animated Container */}
-        <div className="p-6 overflow-hidden relative min-h-[340px]">
-          <AnimatePresence initial={false} custom={direction} mode="wait">
+              {/* Mode switch pills */}
+              <div className="flex p-0.5 rounded-xl bg-muted/60 border border-border/40 text-xs">
+                <button
+                  type="button"
+                  onClick={() => switchMode("login")}
+                  className={`px-3 py-1 rounded-lg font-medium transition-all ${
+                    mode === "login"
+                      ? "bg-background text-foreground shadow-xs font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Log in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => switchMode("signup")}
+                  className={`px-3 py-1 rounded-lg font-medium transition-all ${
+                    mode === "signup"
+                      ? "bg-background text-foreground shadow-xs font-semibold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Sign up
+                </button>
+              </div>
+            </div>
+
+            {/* Swipe Animated Form Body */}
+            <div className="overflow-hidden relative min-h-[320px]">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
             {mode === "login" ? (
               <motion.div
                 key="login"
@@ -505,9 +599,11 @@ export function AuthModal() {
                 </div>
               </motion.div>
             )}
-          </AnimatePresence>
+            </AnimatePresence>
+            </div>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </ExpandableScreenContent>
+    </ExpandableScreen>
   );
 }

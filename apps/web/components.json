@@ -14,5 +14,8 @@
     "components": "@/components",
     "utils": "@/lib/utils",
     "ui": "@/components/ui"
+  },
+  "registries": {
+    "@cult-ui": "https://cult-ui.com/r/{name}.json"
   }
 }
