@@ -307,15 +307,21 @@ export default function ExplorePage() {
 
                 {/* Subtle Both Preview & Use Action Buttons */}
                 <div className="mt-5 pt-3.5 border-t border-border/30 flex items-center gap-2">
-                  <motion.button
-                    layoutId={`template-preview-${template.id}`}
-                    type="button"
-                    onClick={() => setPreviewTemplate(template)}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/60 bg-muted/30 hover:bg-muted text-foreground py-2.5 text-xs font-semibold transition-colors"
-                  >
-                    <Eye className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span>Preview</span>
-                  </motion.button>
+                  <div className="flex-1 inline-flex">
+                    <AnimatePresence initial={false}>
+                      {(!previewTemplate || previewTemplate.id !== template.id) && (
+                        <motion.button
+                          layoutId={`template-preview-btn-${template.id}`}
+                          type="button"
+                          onClick={() => setPreviewTemplate(template)}
+                          className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-border/60 bg-muted/30 hover:bg-muted text-foreground py-2.5 text-xs font-semibold transition-colors"
+                        >
+                          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                          <span>Preview</span>
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
+                  </div>
 
                   <div className="relative flex-1 inline-flex h-9">
                     <AnimatePresence initial={false}>
@@ -365,7 +371,6 @@ export default function ExplorePage() {
 
             {/* Modal Dialog with Spring Popover Animation */}
             <motion.div
-              layoutId={`template-preview-${previewTemplate.id}`}
               ref={modalRef}
               initial={{ opacity: 0, scale: 0.95, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -442,13 +447,20 @@ export default function ExplorePage() {
 
               {/* Modal Footer */}
               <div className="pt-4 flex items-center justify-end gap-3 px-6">
-                <button
+                <motion.button
+                  layoutId={`template-preview-btn-${previewTemplate.id}`}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 30,
+                    mass: 0.8,
+                  }}
                   type="button"
                   onClick={() => setPreviewTemplate(null)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border/40"
                 >
                   Close
-                </button>
+                </motion.button>
                 <div className="relative inline-flex h-9">
                   <AnimatePresence initial={false}>
                     {(!isOpen || activeLayoutId !== `template-preview-use-${previewTemplate.id}`) && (
