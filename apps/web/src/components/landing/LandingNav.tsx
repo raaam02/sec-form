@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, Github } from "lucide-react";
+import { Plus, Github, LayoutDashboard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/Logo";
 import { useAuthModal } from "@/components/auth/AuthModalContext";
@@ -102,6 +102,7 @@ export function LandingNav() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={true}
                   target={link.target}
                   rel={link.target === "_blank" ? "noopener noreferrer" : undefined}
                   className={`transition-colors hover:text-foreground py-1 ${
@@ -130,17 +131,12 @@ export function LandingNav() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/dashboard"
-                  className="inline-flex h-8.5 items-center rounded-xl border border-border/80 bg-card/60 px-3.5 text-xs font-semibold text-foreground transition hover:bg-card hover:border-foreground/20"
+                  prefetch={true}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-foreground px-3.5 sm:px-4 text-xs font-semibold text-background shadow-sm transition hover:opacity-90 active:scale-[0.98]"
                 >
-                  Dashboard
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  <span>Dashboard</span>
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                  className="inline-flex h-8.5 items-center rounded-xl px-2.5 text-xs font-medium text-muted-foreground transition hover:text-foreground"
-                >
-                  Log out
-                </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">

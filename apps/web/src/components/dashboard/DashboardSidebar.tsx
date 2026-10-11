@@ -128,6 +128,7 @@ export function DashboardSidebar({
                     >
                       <Link
                         href={item.href}
+                        prefetch={true}
                         className={`group relative flex items-center justify-center h-10 mx-auto rounded-xl text-sm font-semibold transition-all ${
                           item.active
                             ? "bg-primary/10 text-primary"

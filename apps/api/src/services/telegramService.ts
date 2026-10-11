@@ -28,6 +28,7 @@ export async function sendTelegramMessage(chatId: string, text: string) {
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      signal: AbortSignal.timeout(3000),
       body: JSON.stringify({
         chat_id: cleanChatId,
         text: text,
@@ -46,6 +47,7 @@ export async function sendTelegramMessage(chatId: string, text: string) {
       const fallbackResponse = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(3000),
         body: JSON.stringify({
           chat_id: cleanChatId,
           text: plainText,

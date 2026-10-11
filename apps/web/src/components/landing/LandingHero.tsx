@@ -247,14 +247,14 @@ function GeneratedFormDemo() {
 
   return (
     <div
-      className="relative rounded-3xl border border-border/80 bg-card/60 shadow-2xl backdrop-blur-xl ring-1 ring-white/[0.05] overflow-hidden"
+      className="relative rounded-3xl border border-border/80 bg-card/95 dark:bg-card/95 shadow-2xl backdrop-blur-xl ring-1 ring-white/[0.05] overflow-hidden"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       role="region"
       aria-label="Interactive demonstration of AI form generation"
     >
       {/* Studio Window Chrome */}
-      <div className="flex items-center justify-between border-b border-border/80 bg-card/90 px-4 py-2.5">
+      <div className="flex items-center justify-between border-b border-border/80 bg-card px-4 py-2.5">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5" aria-hidden>
             <span className="h-2.5 w-2.5 rounded-full bg-red-500/80" />
@@ -289,7 +289,7 @@ function GeneratedFormDemo() {
       {/* Main Studio Viewport (Dual-Panel Grid) */}
       <div className="grid grid-cols-1 md:grid-cols-12 min-h-[380px]">
         {/* Left: Prompt & Gemini Pipeline (5 cols) */}
-        <div className="md:col-span-5 border-b md:border-b-0 md:border-r border-border/80 p-5 sm:p-6 flex flex-col justify-between bg-card/30">
+        <div className="md:col-span-5 border-b md:border-b-0 md:border-r border-border/80 p-5 sm:p-6 flex flex-col justify-between bg-muted/40 dark:bg-muted/20">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-primary">

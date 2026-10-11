@@ -55,7 +55,7 @@ export function LandingHowItWorks() {
               <motion.div
                 key={step}
                 variants={fadeUp}
-                className="group relative flex flex-col justify-between rounded-3xl border border-border/80 bg-card/50 p-6 sm:p-7 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:bg-card/80 hover:shadow-lg hover:shadow-primary/5"
+                className="group relative flex flex-col justify-between rounded-3xl border border-border/80 bg-card dark:bg-card/90 p-6 sm:p-7 shadow-xs dark:shadow-md dark:shadow-black/25 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-lg hover:shadow-primary/5 dark:hover:border-primary/40 dark:hover:bg-card"
               >
                 <div>
                   <div className="flex items-center justify-between mb-5">

@@ -60,10 +60,10 @@
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
 
-    --card: 224 71.4% 7%;
+    --card: 224 38% 9.5%;
     --card-foreground: 210 20% 98%;
 
-    --popover: 224 71.4% 7%;
+    --popover: 224 38% 9.5%;
     --popover-foreground: 210 20% 98%;
 
     --primary: 217.2 91.2% 59.8%;
@@ -81,8 +81,8 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 20% 98%;
 
-    --border: 222.2 84% 12%;
-    --input: 222.2 84% 12%;
+    --border: 222.2 36% 15%;
+    --input: 222.2 36% 15%;
     --ring: 217.2 91.2% 59.8%;
 
     --success: 142 70% 45%;

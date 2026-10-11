@@ -65,7 +65,7 @@ function BentoCard({
     <motion.article
       variants={fadeUp}
       className={cn(
-        "group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/40 bg-card/40 p-6 sm:p-7 backdrop-blur-sm transition-all duration-300 hover:border-border hover:bg-card/70 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20",
+        "group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/80 bg-card dark:bg-card/90 p-6 sm:p-7 shadow-xs dark:shadow-md dark:shadow-black/25 backdrop-blur-sm transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-lg hover:shadow-primary/5 dark:hover:border-primary/40 dark:hover:bg-card",
         className
       )}
     >
@@ -422,7 +422,7 @@ function SecurityVisual() {
 
 export function LandingFeatures() {
   return (
-    <section className="border-t border-border/70 bg-card/15 py-20 sm:py-28">
+    <section className="border-t border-border/60 py-20 sm:py-28">
       <Container>
         <SectionHeader
           eyebrow="Features"

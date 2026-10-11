@@ -395,7 +395,7 @@ export function FormDrawer({ form, onClose, isSidebarMode = false }: FormDrawerP
                       </div>
                       <button
                         onClick={handleRunAI}
-                        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-gradient-to-r from-primary to-pink-500 px-4 text-xs font-bold text-white shadow-sm hover:opacity-95"
+                        className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-primary px-4 text-xs font-bold text-primary-foreground shadow-sm hover:opacity-90"
                       >
                         <Sparkles className="h-3.5 w-3.5" /> Analyze Responses
                       </button>

@@ -9,6 +9,7 @@ import {
 } from "react"
 import { X } from "lucide-react"
 import { AnimatePresence, motion } from "motion/react"
+import { cn } from "@/lib/utils"
 
 // Context
 interface ExpandableScreenContextValue {
@@ -197,14 +198,17 @@ export function ExpandableScreenContent({
               borderRadius: contentRadius,
             }}
             layout
-            className={`relative z-10 flex h-full w-full transform-gpu overflow-y-auto will-change-transform shadow-2xl ${className}`}
+            className={cn(
+              "relative z-10 flex flex-col h-auto max-h-[94vh] sm:max-h-[90vh] w-full transform-gpu overflow-y-auto will-change-transform shadow-2xl my-auto",
+              className
+            )}
           >
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, transition: { duration: 0.1 } }}
               transition={{ delay: 0.12, duration: 0.25 }}
-              className="relative z-20 w-full"
+              className="relative z-20 w-full my-auto"
             >
               {children}
             </motion.div>

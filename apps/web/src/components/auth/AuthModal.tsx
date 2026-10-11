@@ -69,7 +69,9 @@ export function AuthModal() {
       if (res && !res.error) {
         toast.success("Welcome back!", { id: toastId });
         closeAuthModal();
-        router.push(redirectUrl);
+        const target = redirectUrl && redirectUrl !== "/" ? redirectUrl : "/dashboard";
+        router.push(target);
+        router.refresh();
       } else {
         toast.error("Invalid email or password", { id: toastId });
         setError("Invalid email or password. Please try again.");
@@ -83,7 +85,8 @@ export function AuthModal() {
   };
 
   const handleGoogleLogin = () => {
-    signIn("google", { callbackUrl: redirectUrl });
+    const target = redirectUrl && redirectUrl !== "/" ? redirectUrl : "/dashboard";
+    signIn("google", { callbackUrl: target });
   };
 
   const handleSignupSubmit = async (e: React.FormEvent) => {
@@ -104,10 +107,21 @@ export function AuthModal() {
       } else if ("needsOtp" in res && res.needsOtp) {
         setNeedsOtp(true);
       } else {
-        setSuccess("Account created successfully!");
-        setTimeout(() => {
+        setSuccess("Account created! Signing you in...");
+        const loginRes = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+        if (loginRes && !loginRes.error) {
+          toast.success("Welcome to Formu.AI!");
+          closeAuthModal();
+          const target = redirectUrl && redirectUrl !== "/" ? redirectUrl : "/dashboard";
+          router.push(target);
+          router.refresh();
+        } else {
           switchMode("login");
-        }, 1500);
+        }
       }
     } catch {
       setError("An unexpected error occurred during signup.");
@@ -140,7 +154,9 @@ export function AuthModal() {
         if (loginRes && !loginRes.error) {
           toast.success("Welcome to Formu.AI!");
           closeAuthModal();
-          router.push(redirectUrl);
+          const target = redirectUrl && redirectUrl !== "/" ? redirectUrl : "/dashboard";
+          router.push(target);
+          router.refresh();
         } else {
           switchMode("login");
         }
@@ -178,7 +194,7 @@ export function AuthModal() {
       animationDuration={0.25}
     >
       <ExpandableScreenContent
-        className="w-full max-w-[1100px] border border-border/60 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-y-auto text-foreground"
+        className="w-full max-w-6xl border border-border/60 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-y-auto text-foreground"
         showCloseButton={true}
         closeButtonClassName="text-muted-foreground hover:text-foreground hover:bg-muted/80 bg-background/60 backdrop-blur-xs border border-border/40 absolute top-5 right-5 z-30 flex h-9 w-9 items-center justify-center rounded-full transition-colors"
       >
@@ -186,10 +202,10 @@ export function AuthModal() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="auth-modal-title"
-          className="relative z-10 mx-auto flex h-full w-full max-w-[1100px] flex-col lg:flex-row items-center justify-center gap-8 lg:gap-14 p-6 sm:p-10 lg:p-14 my-auto"
+          className="relative z-10 mx-auto flex w-full max-w-[1100px] flex-col lg:flex-row items-center justify-center gap-3.5 sm:gap-6 lg:gap-14 p-4 sm:p-8 lg:p-14 my-auto"
         >
           {/* Left Column: Brand Story & Value Pillars */}
-          <div className="relative flex-1 space-y-6 text-center lg:text-left w-full max-w-lg lg:max-w-none">
+          <div className="relative flex-none lg:flex-1 space-y-2 sm:space-y-4 lg:space-y-6 text-center lg:text-left w-full max-w-lg lg:max-w-none">
             {/* Subtle atmospheric glow behind brand column */}
             <div className="pointer-events-none absolute -top-16 -left-16 h-72 w-72 rounded-full bg-gradient-to-br from-primary/10 via-violet-500/5 to-transparent blur-3xl opacity-70" />
 
@@ -197,8 +213,8 @@ export function AuthModal() {
               <Logo size="md" />
             </div>
 
-            <div className="space-y-3">
-              <div className="min-h-[72px] sm:min-h-[88px] lg:min-h-[104px] flex items-center justify-center lg:justify-start">
+            <div className="space-y-1 sm:space-y-3">
+              <div className="min-h-0 sm:min-h-[72px] lg:min-h-[104px] flex items-center justify-center lg:justify-start">
                 <AnimatePresence mode="wait" initial={false}>
                   {mode === "login" ? (
                     <motion.h1
@@ -207,7 +223,7 @@ export function AuthModal() {
                       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                       exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
                       transition={{ duration: 0.22, ease: "easeOut" }}
-                      className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold font-outfit tracking-tight text-foreground leading-[1.12]"
+                      className="text-2xl sm:text-4xl lg:text-[44px] font-extrabold font-outfit tracking-tight text-foreground leading-[1.12]"
                     >
                       Welcome back to{" "}
                       <span className="bg-gradient-to-r from-foreground via-foreground/90 to-muted-foreground bg-clip-text text-transparent">
@@ -221,7 +237,7 @@ export function AuthModal() {
                       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                       exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
                       transition={{ duration: 0.22, ease: "easeOut" }}
-                      className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold font-outfit tracking-tight text-foreground leading-[1.12]"
+                      className="text-2xl sm:text-4xl lg:text-[44px] font-extrabold font-outfit tracking-tight text-foreground leading-[1.12]"
                     >
                       Build reactive forms{" "}
                       <span className="bg-gradient-to-r from-primary via-violet-500 to-indigo-500 bg-clip-text text-transparent">
@@ -233,8 +249,8 @@ export function AuthModal() {
               </div>
             </div>
 
-            {/* Feature highlights */}
-            <div className="space-y-2.5 pt-2 text-left">
+            {/* Feature highlights - hidden on mobile screens to keep auth focused and compact */}
+            <div className="hidden lg:block space-y-2.5 pt-2 text-left">
               {/* Pillar 1: AI Engine */}
               <div className="group/pillar flex items-center gap-3.5 p-3 rounded-2xl bg-muted/30 border border-border/40 hover:bg-muted/50 hover:border-border/60 transition-all duration-200">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-500 border border-violet-500/20 group-hover/pillar:scale-105 transition-transform">
@@ -292,7 +308,7 @@ export function AuthModal() {
           </div>
 
           {/* Right Column: Elevated Interactive Auth Card */}
-          <div className="w-full flex-1 max-w-md bg-card/80 dark:bg-card/60 backdrop-blur-xl border border-border/70 rounded-3xl p-6 sm:p-8 shadow-2xl">
+          <div className="w-full flex-none lg:flex-1 max-w-md bg-card/90 dark:bg-card/85 backdrop-blur-xl border border-border/80 rounded-3xl p-5 sm:p-8 shadow-2xl">
             {/* Header / Mode Switch Tabs */}
             <div className="flex items-center justify-between border-b border-border/50 pb-4 mb-5">
               <div>
@@ -305,19 +321,10 @@ export function AuthModal() {
                       : "Get Started Free"}
                   </TextMorph>
                 </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  <TextMorph as="span">
-                    {needsOtp
-                      ? "Enter verification code"
-                      : mode === "login"
-                      ? "Access your dashboard & analytics"
-                      : "No credit card required • Instant access"}
-                  </TextMorph>
-                </p>
               </div>
 
               {/* Mode switch pills with smooth shared indicator */}
-              <div className="relative flex p-0.5 rounded-xl bg-muted/60 border border-border/40 text-xs">
+              <div className="relative flex p-1 rounded-2xl bg-muted/60 border border-border/40 text-xs">
                 <button
                   type="button"
                   onClick={() => switchMode("login")}

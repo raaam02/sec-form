@@ -37,7 +37,7 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
       setMode(newMode);
       if (newRedirectUrl) {
         setRedirectUrl(newRedirectUrl);
-      } else if (pathname && pathname !== "/login" && pathname !== "/signup") {
+      } else if (pathname && pathname !== "/login" && pathname !== "/signup" && pathname !== "/") {
         setRedirectUrl(pathname);
       } else {
         setRedirectUrl("/dashboard");

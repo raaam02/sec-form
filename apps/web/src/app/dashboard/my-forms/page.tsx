@@ -55,7 +55,7 @@ export default function DashboardPage() {
     const localFormIds = new Set(localForms.map(f => f.id));
     const deletedSeededIdsSet = new Set(deletedSeededIds);
 
-    const dbFormsFiltered = formsList.filter(f => !localFormIds.has(f.id) && !deletedSeededIdsSet.has(f.id));
+    const dbFormsFiltered = formsList.filter((f: any) => !localFormIds.has(f.id) && !deletedSeededIdsSet.has(f.id));
 
     return [...localForms, ...dbFormsFiltered].sort((a, b) =>
       new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -80,7 +80,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [visibilityFilter, setVisibilityFilter] = useState<"all" | "public" | "unlisted">("all");
 
-  const filteredForms = combinedForms?.filter((form) => {
+  const filteredForms = combinedForms?.filter((form: any) => {
     const matchesSearch = form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (form.description?.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesVisibility = visibilityFilter === "all" || form.visibility === visibilityFilter;
@@ -286,9 +286,10 @@ export default function DashboardPage() {
               >
                 <Button
                   onClick={() => setIsAIModalOpen(true)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-pink-500 px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
+                  variant="outline"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-accent shadow-sm transition-colors"
                 >
-                  <Sparkles className="h-4 w-4" /> {isDemo ? t("generateAi") : `${t("generateAi")} (${aiCredits}/2)`}
+                  <Sparkles className="h-4 w-4 text-primary" /> {isDemo ? t("generateAi") : `${t("generateAi")} (${aiCredits}/2)`}
                 </Button>
               </motion.div>
             </TooltipTrigger>
@@ -304,8 +305,7 @@ export default function DashboardPage() {
               >
                 <Button
                   onClick={() => setIsCreateModalOpen(true)}
-                  variant="outline"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-foreground px-4 text-xs font-semibold text-background shadow-sm hover:opacity-90 active:scale-[0.98] transition-all"
                 >
                   <Plus className="h-4 w-4" /> {t("newForm")}
                 </Button>

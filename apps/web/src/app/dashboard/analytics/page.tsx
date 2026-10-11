@@ -73,7 +73,7 @@ export default function AnalyticsDashboardPage() {
 
   const filteredAndSortedForms = useMemo(() => {
     if (!formsList) return [];
-    let result = formsList.filter((f) => {
+    let result = formsList.filter((f: any) => {
       const q = searchQuery.toLowerCase();
       return (
         f.title.toLowerCase().includes(q) ||

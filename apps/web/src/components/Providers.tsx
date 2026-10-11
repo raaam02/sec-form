@@ -21,7 +21,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         defaultOptions: {
           queries: {
             refetchOnWindowFocus: false,
-            retry: false,
+            retry: 1,
+            // 60-second stale time prevents redundant API refetches on every page/tab navigation
+            staleTime: 60 * 1000,
+            // Keep unused data in memory cache for 5 minutes
+            cacheTime: 5 * 60 * 1000,
           },
           mutations: {
             onError: (error: any) => {
@@ -36,8 +40,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }),
         mutationCache: new MutationCache({
           onError: (error) => {
-            // Toast is handled in defaultOptions.mutations.onError, or we can do it here.
-            // Let's rely on defaultOptions.mutations for mutations.
+            // Handled via defaultOptions.mutations.onError
           },
         }),
       })
@@ -49,6 +52,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       links: [
         httpBatchLink({
           url: `${getBaseUrl()}/api/trpc-proxy`,
+          maxURLLength: 2083,
         }),
       ],
     })
@@ -57,7 +61,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
       <GlobalShortcutProvider>
-        <SessionProvider>
+        <SessionProvider refetchOnWindowFocus={false} refetchWhenOffline={false}>
           <trpc.Provider client={trpcClient} queryClient={queryClient}>
             <QueryClientProvider client={queryClient}>
               <TooltipProvider delayDuration={300}>

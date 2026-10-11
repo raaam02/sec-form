@@ -16,7 +16,7 @@ export function LandingCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-b from-card/90 via-card/50 to-card/90 p-7 sm:p-14 text-center shadow-2xl backdrop-blur-xl ring-1 ring-white/[0.05]"
+          className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-b from-card via-card/90 to-card dark:from-card dark:via-card/90 dark:to-card p-7 sm:p-14 text-center shadow-2xl backdrop-blur-xl ring-1 ring-white/[0.05]"
         >
           {/* Subtle Ambient Glow */}
           <div

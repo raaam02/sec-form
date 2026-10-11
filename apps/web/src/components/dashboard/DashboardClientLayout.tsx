@@ -65,9 +65,17 @@ export function DashboardClientLayout({ children }: { children: React.ReactNode 
     }
   }, [status, router, pathname]);
 
-  // Optimistic shell: render the layout immediately.
-  // While auth is loading we show a placeholder sidebar + spinner in content.
-  const isAuthChecking = status === "loading";
+  // Avoid showing full-screen loading spinner on subsequent client transitions
+  const [hasResolvedAuth, setHasResolvedAuth] = useState(false);
+
+  useEffect(() => {
+    if (status !== "loading") {
+      setHasResolvedAuth(true);
+    }
+  }, [status]);
+
+  // Show spinner ONLY on first cold mount if no session is available yet
+  const isInitialAuthLoading = status === "loading" && !hasResolvedAuth && !session;
   const user = session?.user ?? {};
   const isBuilderPage = pathname.includes("/edit") || pathname.includes("/builder/");
 
@@ -105,7 +113,7 @@ export function DashboardClientLayout({ children }: { children: React.ReactNode 
 
         {/* Main content container */}
         <main className="flex-1 flex flex-col min-w-0 h-full overflow-hidden bg-transparent">
-          {isAuthChecking ? (
+          {isInitialAuthLoading ? (
             <div className="h-full w-full flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">
                 <LoadingSpinner className="w-8 h-8" color="text-primary" />

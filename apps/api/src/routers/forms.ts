@@ -1,32 +1,71 @@
 import { router, protectedProcedure, publicProcedure } from "../trpc";
 import { CreateFormInput, UpdateFormInput } from "@sec-form/validators";
 import { forms, formViews, submissions, plans } from "@sec-form/db";
-import { eq, and, ne, count } from "@sec-form/db";
+import { eq, and, ne, count, inArray } from "@sec-form/db";
 import { z } from "zod";
 import crypto from "crypto";
 import { BUILTIN_THEMES } from "@sec-form/shared";
 import { TRPCError } from "@trpc/server";
+import { cache } from "../redis";
 
 const PUBLIC_FORM_LIMIT = 5;
 
 export const formsRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
+    const cacheKey = `forms:list:${ctx.user.id}`;
     const userForms = await ctx.db.query.forms.findMany({
       where: eq(forms.userId, ctx.user.id),
       orderBy: (forms, { desc }) => [desc(forms.updatedAt)],
     });
 
-    const formsWithCounts = await Promise.all(userForms.map(async (form) => {
-      const viewsCount = await ctx.db.select({ count: count() }).from(formViews).where(eq(formViews.formId, form.id));
-      const subsCount = await ctx.db.select({ count: count() }).from(submissions).where(eq(submissions.formId, form.id));
-      return {
-        ...form,
-        totalViews: Number(viewsCount[0]?.count || 0),
-        totalResponses: Number(subsCount[0]?.count || 0),
-      };
+    if (userForms.length === 0) {
+      return [];
+    }
+
+    try {
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        return parsed as (typeof userForms[number] & { totalViews: number; totalResponses: number })[];
+      }
+    } catch {}
+
+    const formIds = userForms.map((f) => f.id);
+
+    // Fast batch aggregation via inArray and groupBy
+    const [viewsGroup, subsGroup] = await Promise.all([
+      ctx.db
+        .select({
+          formId: formViews.formId,
+          count: count(),
+        })
+        .from(formViews)
+        .where(inArray(formViews.formId, formIds))
+        .groupBy(formViews.formId),
+      ctx.db
+        .select({
+          formId: submissions.formId,
+          count: count(),
+        })
+        .from(submissions)
+        .where(inArray(submissions.formId, formIds))
+        .groupBy(submissions.formId),
+    ]);
+
+    const viewsMap = new Map(viewsGroup.map((v) => [v.formId, Number(v.count)]));
+    const subsMap = new Map(subsGroup.map((s) => [s.formId, Number(s.count)]));
+
+    const result = userForms.map((form) => ({
+      ...form,
+      totalViews: viewsMap.get(form.id) || 0,
+      totalResponses: subsMap.get(form.id) || 0,
     }));
 
-    return formsWithCounts;
+    try {
+      await cache.set(cacheKey, JSON.stringify(result), 15);
+    } catch {}
+
+    return result;
   }),
 
   get: protectedProcedure
@@ -136,6 +175,7 @@ export const formsRouter = router({
         })
         .returning();
 
+      await cache.del(`forms:list:${ctx.user.id}`).catch(() => {});
       return newForm;
     }),
 
@@ -243,6 +283,7 @@ export const formsRouter = router({
         .where(eq(forms.id, id))
         .returning();
 
+      await cache.del(`forms:list:${ctx.user.id}`).catch(() => {});
       return updatedForm;
     }),
 
@@ -274,6 +315,7 @@ export const formsRouter = router({
         .where(eq(forms.id, input.id))
         .returning();
 
+      await cache.del(`forms:list:${ctx.user.id}`).catch(() => {});
       return updatedForm;
     }),
 
@@ -292,6 +334,7 @@ export const formsRouter = router({
       }
 
       await ctx.db.delete(forms).where(eq(forms.id, input.id));
+      await cache.del(`forms:list:${ctx.user.id}`).catch(() => {});
       return { success: true };
     }),
 

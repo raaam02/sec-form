@@ -102,7 +102,7 @@ export function AIFormModal({
               <Button
                 type="button"
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                className="h-10 px-5 bg-gradient-to-r from-primary to-pink-500 hover:opacity-95 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5"
+                className="h-10 px-5 bg-primary text-primary-foreground hover:opacity-90 font-semibold text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
               >
                 Sign Out
               </Button>
@@ -168,7 +168,7 @@ export function AIFormModal({
                 </Button>
                 <Button
                   type="submit"
-                  className="h-10 px-5 bg-gradient-to-r from-primary to-pink-500 hover:opacity-95 text-white font-semibold text-sm rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5"
+                  className="h-10 px-5 bg-primary text-primary-foreground hover:opacity-90 font-semibold text-sm rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
                   disabled={isLoading || aiCredits <= 0}
                 >
                   {isLoading ? (

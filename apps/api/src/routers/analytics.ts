@@ -1,18 +1,36 @@
 import { router, protectedProcedure } from "../trpc";
 import { forms, submissions, formViews } from "@sec-form/db";
-import { eq, and, count } from "@sec-form/db";
+import { eq, and, count, inArray } from "@sec-form/db";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { cache } from "../redis";
 
+type DashboardStats = {
+  totalForms: number;
+  totalViews: number;
+  totalSubmissions: number;
+  averageConversionRate: number;
+  timeline: { date: string; submissions: number; views: number }[];
+  topForms: { id: string; title: string; views: number; submissions: number }[];
+};
+
 export const analyticsRouter = router({
-  getDashboardStats: protectedProcedure.query(async ({ ctx }) => {
-    // 1. Get all forms for user
+  getDashboardStats: protectedProcedure.query(async ({ ctx }): Promise<DashboardStats> => {
+    // 1. Check Cache
+    const cacheKey = `analytics:dashboard:${ctx.user.id}`;
+    try {
+      const cached = await cache.get(cacheKey);
+      if (cached) {
+        return JSON.parse(cached) as DashboardStats;
+      }
+    } catch {}
+
+    // 2. Get all forms for user
     const userForms = await ctx.db.query.forms.findMany({
       where: eq(forms.userId, ctx.user.id),
     });
 
-    const formIds = userForms.map(f => f.id);
+    const formIds = userForms.map((f) => f.id);
 
     if (formIds.length === 0) {
       return {
@@ -25,13 +43,22 @@ export const analyticsRouter = router({
       };
     }
 
-    // 2. Fetch views and submissions across all forms with timeline aggregation
-    let totalViewsCount = 0;
-    let totalSubmissionsCount = 0;
-    const topForms = [];
+    // 3. Batch fetch views and submissions in parallel
+    const [allViews, allSubs] = await Promise.all([
+      ctx.db.query.formViews.findMany({
+        where: inArray(formViews.formId, formIds),
+      }),
+      ctx.db.query.submissions.findMany({
+        where: inArray(submissions.formId, formIds),
+      }),
+    ]);
 
+    const totalViewsCount = allViews.length;
+    const totalSubmissionsCount = allSubs.length;
+
+    // Build timeline skeleton for 30 days
     const dailyTimeline: Record<string, { date: string; submissions: number; views: number }> = {};
-    const datesList = [];
+    const datesList: string[] = [];
 
     for (let i = 29; i >= 0; i--) {
       const d = new Date();
@@ -41,47 +68,38 @@ export const analyticsRouter = router({
       dailyTimeline[dateStr] = { date: dateStr, submissions: 0, views: 0 };
     }
 
-    for (const form of userForms) {
-      const viewsList = await ctx.db.query.formViews.findMany({
-        where: eq(formViews.formId, form.id),
-      });
-      const submissionsList = await ctx.db.query.submissions.findMany({
-        where: eq(submissions.formId, form.id),
-      });
-
-      const viewsCount = viewsList.length;
-      const submissionsCount = submissionsList.length;
-
-      totalViewsCount += viewsCount;
-      totalSubmissionsCount += submissionsCount;
-
-      topForms.push({
-        id: form.id,
-        title: form.title,
-        views: viewsCount,
-        submissions: submissionsCount,
-      });
-
-      for (const view of viewsList) {
-        const dateStr = view.createdAt.toISOString().split("T")[0];
-        if (dailyTimeline[dateStr]) {
-          dailyTimeline[dateStr].views += 1;
-        }
-      }
-
-      for (const sub of submissionsList) {
-        const dateStr = sub.createdAt.toISOString().split("T")[0];
-        if (dailyTimeline[dateStr]) {
-          dailyTimeline[dateStr].submissions += 1;
-        }
+    // Group views by form and date
+    const formViewsCount: Record<string, number> = {};
+    for (const view of allViews) {
+      formViewsCount[view.formId] = (formViewsCount[view.formId] || 0) + 1;
+      const dateStr = view.createdAt.toISOString().split("T")[0];
+      if (dailyTimeline[dateStr]) {
+        dailyTimeline[dateStr].views += 1;
       }
     }
+
+    // Group submissions by form and date
+    const formSubsCount: Record<string, number> = {};
+    for (const sub of allSubs) {
+      formSubsCount[sub.formId] = (formSubsCount[sub.formId] || 0) + 1;
+      const dateStr = sub.createdAt.toISOString().split("T")[0];
+      if (dailyTimeline[dateStr]) {
+        dailyTimeline[dateStr].submissions += 1;
+      }
+    }
+
+    const topForms = userForms.map((form) => ({
+      id: form.id,
+      title: form.title,
+      views: formViewsCount[form.id] || 0,
+      submissions: formSubsCount[form.id] || 0,
+    }));
 
     const timelineData = datesList.map((d) => dailyTimeline[d]);
     const sortedTopForms = topForms.sort((a, b) => b.submissions - a.submissions).slice(0, 5);
     const conversionRate = totalViewsCount > 0 ? (totalSubmissionsCount / totalViewsCount) * 100 : 0;
 
-    return {
+    const result = {
       totalForms: formIds.length,
       totalViews: totalViewsCount,
       totalSubmissions: totalSubmissionsCount,
@@ -89,6 +107,12 @@ export const analyticsRouter = router({
       timeline: timelineData,
       topForms: sortedTopForms,
     };
+
+    try {
+      await cache.set(cacheKey, JSON.stringify(result), 30);
+    } catch {}
+
+    return result;
   }),
 
   getFormAnalytics: protectedProcedure

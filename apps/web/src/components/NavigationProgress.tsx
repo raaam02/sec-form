@@ -26,17 +26,18 @@ export function NavigationProgress() {
 
   const start = useCallback(() => {
     clear();
-    setProgress(0);
+    // Instant initial progress so user immediately sees response
+    setProgress(15);
     setVisible(true);
 
-    let current = 0;
+    let current = 15;
     intervalRef.current = setInterval(() => {
       // Ease towards 85% — never quite reaches 100% until navigation completes
       const remaining = 85 - current;
-      const step = Math.max(0.5, remaining * 0.08);
+      const step = Math.max(0.5, remaining * 0.1);
       current = Math.min(current + step, 85);
       setProgress(current);
-    }, 80);
+    }, 60);
   }, []);
 
   const finish = useCallback(() => {
@@ -45,7 +46,7 @@ export function NavigationProgress() {
     timerRef.current = setTimeout(() => {
       setVisible(false);
       setProgress(0);
-    }, 400);
+    }, 300);
   }, []);
 
   // Detect route change completion
@@ -57,10 +58,40 @@ export function NavigationProgress() {
     }
   }, [pathname, searchParams, finish]);
 
-  // Listen for clicks on anchors and Next.js Link elements
+  // Intercept history.pushState and history.replaceState for programmatic navigation (e.g., router.push)
+  useEffect(() => {
+    const originalPushState = window.history.pushState;
+    const originalReplaceState = window.history.replaceState;
+
+    window.history.pushState = function (...args) {
+      const url = args[2];
+      if (url) {
+        const dest = typeof url === "string" ? url : url.toString();
+        const current = window.location.pathname + window.location.search;
+        if (dest !== current && !dest.startsWith("#")) {
+          start();
+        }
+      }
+      return originalPushState.apply(this, args);
+    };
+
+    window.history.replaceState = function (...args) {
+      return originalReplaceState.apply(this, args);
+    };
+
+    return () => {
+      window.history.pushState = originalPushState;
+      window.history.replaceState = originalReplaceState;
+    };
+  }, [start]);
+
+  // Listen for clicks on anchors and Next.js Link elements (using capture phase so child element clicks aren't lost)
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      const target = (e.target as Element).closest("a");
+      // Don't trigger on right click or modified clicks
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+      const target = (e.target as Element | null)?.closest?.("a");
       if (!target) return;
 
       // Ignore links that don't open in the current window/tab
@@ -70,12 +101,8 @@ export function NavigationProgress() {
       // Ignore download links
       if (target.hasAttribute("download")) return;
 
-      // Ignore modified clicks (Ctrl, Cmd, Shift, right-click, etc.)
-      // Ignore if event was already prevented
-      if (e.defaultPrevented) return;
-
       const href = target.getAttribute("href");
-      if (!href) return;
+      if (!href || href.startsWith("#") || href.startsWith("javascript:")) return;
 
       // Ignore auth modal triggers
       if (
@@ -99,9 +126,10 @@ export function NavigationProgress() {
       }
     };
 
-    document.addEventListener("click", handleClick);
+    // Use capture: true so we receive the click before any stopPropagation
+    document.addEventListener("click", handleClick, { capture: true });
     return () => {
-      document.removeEventListener("click", handleClick);
+      document.removeEventListener("click", handleClick, { capture: true });
       clear();
     };
   }, [pathname, searchParams, start]);
@@ -110,15 +138,15 @@ export function NavigationProgress() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-[9999] pointer-events-none"
+      className="fixed top-0 left-0 right-0 z-[99999] pointer-events-none"
       aria-hidden="true"
     >
       <div
-        className="h-[2.5px] transition-all duration-200 ease-out"
+        className="h-[3px] transition-all duration-150 ease-out"
         style={{
           width: `${progress}%`,
-          background: "linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7)",
-          boxShadow: "0 0 8px rgba(139, 92, 246, 0.7)",
+          background: "linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899)",
+          boxShadow: "0 0 10px rgba(139, 92, 246, 0.8), 0 0 4px rgba(236, 72, 153, 0.6)",
           opacity: visible ? 1 : 0,
         }}
       />
