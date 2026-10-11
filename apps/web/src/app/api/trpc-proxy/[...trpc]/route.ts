@@ -4,24 +4,40 @@ import { auth } from "@/lib/auth";
 const API_TRPC_URL = process.env.API_URL || "http://localhost:4000/trpc";
 
 async function handleProxy(req: NextRequest) {
-  const session = await auth();
   const url = new URL(req.url);
   const path = url.pathname.replace(/^\/api\/trpc-proxy/, "");
-
   const targetUrl = `${API_TRPC_URL}${path}${url.search}`;
 
   const headers = new Headers();
 
   // Forward critical headers
   req.headers.forEach((val, key) => {
-    if (key !== "host" && key !== "connection" && key !== "content-length" && key !== "accept-encoding") {
+    if (
+      key !== "host" &&
+      key !== "connection" &&
+      key !== "content-length" &&
+      key !== "accept-encoding"
+    ) {
       headers.set(key, val);
     }
   });
 
-  // Inject authenticated user ID if session exists
-  if (session?.user?.id) {
-    headers.set("x-user-id", session.user.id);
+  // Only authenticate if a session cookie actually exists, avoiding crypto overhead on public requests
+  const hasAuthCookie =
+    req.cookies.has("authjs.session-token") ||
+    req.cookies.has("__Secure-authjs.session-token") ||
+    req.cookies.has("next-auth.session-token") ||
+    req.cookies.has("__Secure-next-auth.session-token");
+
+  if (hasAuthCookie) {
+    try {
+      const session = await auth();
+      if (session?.user?.id) {
+        headers.set("x-user-id", session.user.id);
+      }
+    } catch {
+      // Continue even if session resolution fails
+    }
   }
 
   // Read request body
@@ -29,7 +45,7 @@ async function handleProxy(req: NextRequest) {
   if (req.method === "POST" || req.method === "PUT") {
     try {
       body = await req.text();
-    } catch (e) {
+    } catch {
       // Ignore empty body
     }
   }
@@ -44,7 +60,11 @@ async function handleProxy(req: NextRequest) {
 
     const responseHeaders = new Headers();
     res.headers.forEach((val, key) => {
-      if (key !== "content-encoding" && key !== "content-length" && key !== "transfer-encoding") {
+      if (
+        key !== "content-encoding" &&
+        key !== "content-length" &&
+        key !== "transfer-encoding"
+      ) {
         responseHeaders.set(key, val);
       }
     });
@@ -63,4 +83,9 @@ async function handleProxy(req: NextRequest) {
   }
 }
 
-export { handleProxy as GET, handleProxy as POST, handleProxy as PUT, handleProxy as DELETE };
+export {
+  handleProxy as GET,
+  handleProxy as POST,
+  handleProxy as PUT,
+  handleProxy as DELETE,
+};

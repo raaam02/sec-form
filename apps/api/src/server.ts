@@ -14,15 +14,39 @@ import { sendTelegramMessage, checkAndSendTelegramNotification, escapeHtml } fro
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 
-const allowedOrigins = process.env.CORS_ORIGIN
+const appOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
   : ["http://localhost:3000", "http://127.0.0.1:3000"];
 
-// Enable CORS
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
+// 1. Permissive CORS for Public REST API endpoints & embeds
+app.use(
+  "/api/v1/forms",
+  cors({
+    origin: (origin, callback) => callback(null, true),
+    credentials: false,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "x-api-key"],
+  })
+);
+
+// 2. Strict CORS for internal /trpc endpoints (protects user session & credentials)
+app.use(
+  "/trpc",
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (appOrigins.includes(origin)) return callback(null, true);
+      if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
+        return callback(null, true);
+      }
+      callback(new Error("CORS policy violation for this origin on private /trpc API"));
+    },
+    credentials: true,
+  })
+);
+
+// General fallback for static docs and openapi
+app.use(cors({ origin: true }));
 
 app.use(express.json());
 
@@ -73,53 +97,113 @@ app.get("/api/v1/forms/slug/:slug", async (req, res) => {
   }
 });
 
-// POST submit answers
+// POST submit answers (High-performance endpoint for third-party websites, apps, and embeds)
 app.post("/api/v1/forms/:formId/submissions", async (req, res) => {
   const { formId } = req.params;
   const answersJson = req.body;
-  const clientIp = (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "127.0.0.1";
+  const clientIp =
+    (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ||
+    req.socket.remoteAddress ||
+    "127.0.0.1";
 
   try {
-    // Rate limiter
+    // 1. Fast Rate limiter (never blocks on Redis latency)
     const rateLimitKey = `rate:form:${formId}:ip:${clientIp}`;
     const submissionCount = await cache.incrAndExpire(rateLimitKey, 60);
-    if (submissionCount > 5) {
-      return res.status(429).json({ error: "Too many submissions. Please wait a minute before trying again." });
+    if (submissionCount > 15) {
+      return res.status(429).json({
+        error: "Too many submissions. Please wait a minute before trying again.",
+      });
     }
 
-    const form = await db.query.forms.findFirst({
-      where: eq(forms.id, formId),
-    });
+    // 2. Fetch Form by UUID or Slug (with in-memory cache lookup)
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        formId
+      );
+    const formCacheKey = `form:meta:${formId}`;
+    let form: any = null;
+
+    try {
+      const cached = await cache.get(formCacheKey);
+      if (cached) form = JSON.parse(cached);
+    } catch {}
 
     if (!form) {
-      return res.status(404).json({ error: "Form not found" });
+      form = await db.query.forms.findFirst({
+        where: isUuid ? eq(forms.id, formId) : eq(forms.slug, formId),
+      });
+
+      if (!form) {
+        return res.status(404).json({ error: "Form not found" });
+      }
+
+      // Cache form metadata for 60 seconds
+      cache.set(formCacheKey, JSON.stringify(form), 60).catch(() => {});
+      if (form.slug) {
+        cache.set(`form:meta:${form.slug}`, JSON.stringify(form), 60).catch(() => {});
+      }
     }
 
     if (form.visibility !== "public") {
-      return res.status(403).json({ error: "This form is not public and does not accept submissions." });
+      return res.status(403).json({
+        error: "This form is not public and does not accept submissions.",
+      });
     }
 
-    // Dynamic Zod Validation against published fields
+    // 3. User-configured Allowed Domains whitelist enforcement
     const schemaData = (form.publishedSchemaJson || form.schemaJson) as any;
+    const allowedDomains: string[] = schemaData.allowedDomains || [];
+    const originHeader = req.headers.origin || req.headers.referer;
+
+    if (allowedDomains.length > 0 && originHeader) {
+      try {
+        const originHost = new URL(originHeader).hostname.toLowerCase();
+        const isAllowed = allowedDomains.some((d) => {
+          const clean = d.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].split(":")[0];
+          return originHost === clean || originHost.endsWith("." + clean);
+        });
+        if (!isAllowed) {
+          return res.status(403).json({
+            error: `Domain restriction: Submissions from '${originHost}' are not allowed for this form. Allowed domains: ${allowedDomains.join(", ")}`,
+          });
+        }
+      } catch {
+        // If origin cannot be parsed as a URL, continue
+      }
+    }
+
+    // 4. Dynamic Zod Validation against published fields
     const fields = schemaData.fields || [];
     const validator = buildSubmissionValidator(fields);
     const parsedAnswers = validator.parse(answersJson);
 
+    // 4. Save Submission using canonical form.id
     const [sub] = await db
       .insert(submissions)
       .values({
         id: crypto.randomUUID() as any,
-        formId,
+        formId: form.id,
         answersJson: parsedAnswers,
+        createdAt: new Date(),
       })
       .returning();
 
-    // Trigger Telegram notification if enabled
-    checkAndSendTelegramNotification(form, parsedAnswers).catch((e) =>
-      console.error("[TelegramService] Failed to send REST submission notification:", e)
-    );
-
+    // 5. Send instant 201 response immediately!
     res.status(201).json({ success: true, submissionId: sub.id });
+
+    // 6. Non-blocking background jobs: cache invalidation & Telegram alerts
+    setImmediate(async () => {
+      if (form.userId) {
+        cache.del(`analytics:dashboard:${form.userId}`).catch(() => {});
+        cache.del(`forms:list:${form.userId}`).catch(() => {});
+      }
+      cache.del(`analytics:form:${form.id}`).catch(() => {});
+
+      checkAndSendTelegramNotification(form, parsedAnswers).catch((e) =>
+        console.error("[TelegramService] Failed to send REST submission notification:", e)
+      );
+    });
   } catch (err: any) {
     if (err.name === "ZodError") {
       return res.status(400).json({ error: "Validation failed", details: err.errors });

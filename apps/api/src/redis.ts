@@ -5,13 +5,20 @@ console.log("Initializing Redis with URL:", redisUrl);
 let redis: Redis | null = null;
 let isRedisConnected = false;
 
-// Mock cache in-memory fallback
+// High-speed In-Memory cache fallback
 const mockCache: Record<string, { value: string; expiresAt: number }> = {};
 
 try {
   redis = new Redis(redisUrl, {
-    maxRetriesPerRequest: 10,
+    maxRetriesPerRequest: 1,
+    connectTimeout: 1000,
+    commandTimeout: 300,
+    enableOfflineQueue: false, // Do NOT block HTTP requests when offline; immediately use in-memory cache
     lazyConnect: true,
+    retryStrategy(times) {
+      if (times > 3) return null; // stop aggressive retries
+      return Math.min(times * 500, 2000);
+    },
   });
 
   redis.on("connect", () => {
@@ -19,8 +26,11 @@ try {
     isRedisConnected = true;
   });
 
+  redis.on("ready", () => {
+    isRedisConnected = true;
+  });
+
   redis.on("error", (err) => {
-    console.error("Redis connection error:", err.message || err);
     isRedisConnected = false;
   });
 
@@ -29,20 +39,23 @@ try {
   });
 
   redis.connect().catch(() => {
-    console.log("Redis initial connection attempt deferred; running fallback cache until connected.");
     isRedisConnected = false;
   });
 } catch (e) {
-  console.log("Redis initialization failed, falling back to In-Memory cache.");
+  console.log("Redis initialization deferred, using In-Memory cache fallback.");
 }
 
 export const cache = {
   async get(key: string): Promise<string | null> {
     if (redis && isRedisConnected) {
       try {
-        return await redis.get(key);
-      } catch (e) {
-        // fail silently and fallback
+        const res = await Promise.race([
+          redis.get(key),
+          new Promise<null>((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 200)),
+        ]);
+        if (res !== null) return res;
+      } catch {
+        // fail silently and fallback immediately
       }
     }
     const item = mockCache[key];
@@ -56,45 +69,56 @@ export const cache = {
   },
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
+    const expiresAt = ttlSeconds ? Date.now() + ttlSeconds * 1000 : Infinity;
+    mockCache[key] = { value, expiresAt };
+
     if (redis && isRedisConnected) {
       try {
         if (ttlSeconds) {
-          await redis.set(key, value, "EX", ttlSeconds);
+          await Promise.race([
+            redis.set(key, value, "EX", ttlSeconds),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 200)),
+          ]);
         } else {
-          await redis.set(key, value);
+          await Promise.race([
+            redis.set(key, value),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 200)),
+          ]);
         }
-        return;
-      } catch (e) {
-        // fail silently and fallback
+      } catch {
+        // In-memory cache is already updated
       }
     }
-    const expiresAt = ttlSeconds ? Date.now() + ttlSeconds * 1000 : Infinity;
-    mockCache[key] = { value, expiresAt };
   },
 
   async del(key: string): Promise<void> {
+    delete mockCache[key];
     if (redis && isRedisConnected) {
       try {
-        await redis.del(key);
-        return;
-      } catch (e) {
-        // fail silently and fallback
+        await Promise.race([
+          redis.del(key),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 200)),
+        ]);
+      } catch {
+        // In-memory cache already deleted
       }
     }
-    delete mockCache[key];
   },
 
-  // Helper for rate limiting
+  // High-performance rate limiting counter (never blocks)
   async incrAndExpire(key: string, ttlSeconds: number): Promise<number> {
     if (redis && isRedisConnected) {
       try {
-        const count = await redis.incr(key);
+        const count = await Promise.race([
+          redis.incr(key),
+          new Promise<number>((_, reject) => setTimeout(() => reject(new Error("Redis timeout")), 150)),
+        ]);
         if (count === 1) {
-          await redis.expire(key, ttlSeconds);
+          redis.expire(key, ttlSeconds).catch(() => {});
         }
         return count;
-      } catch (e) {
-        // fallback to memory
+      } catch {
+        // Instant fallback to memory
       }
     }
 
@@ -106,6 +130,7 @@ export const cache = {
     const expiresAt = item ? item.expiresAt : Date.now() + ttlSeconds * 1000;
     mockCache[key] = { value: count.toString(), expiresAt };
     return count;
-  }
+  },
 };
+
 export default redis;

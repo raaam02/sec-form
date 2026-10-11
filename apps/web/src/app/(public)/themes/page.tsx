@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { BUILTIN_THEMES, ThemeConfig } from "@sec-form/shared";
 import { Sparkles, Copy, Check, ArrowRight, Star } from "lucide-react";
@@ -8,14 +8,17 @@ import { useTranslations } from "next-intl";
 
 export default function ThemesPage() {
   // Default to Dark Mode theme matching the website
-  const defaultTheme = BUILTIN_THEMES.find((t) => t.id === "dark") || BUILTIN_THEMES[0];
+  const defaultTheme = useMemo(
+    () => BUILTIN_THEMES.find((t) => t.id === "dark") || BUILTIN_THEMES[0],
+    []
+  );
   const [selectedTheme, setSelectedTheme] = useState<ThemeConfig>(defaultTheme);
   const [activeRating, setActiveRating] = useState<number>(4);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const tThemes = useTranslations("Themes");
 
-  const copyConfig = (theme: ThemeConfig) => {
+  const copyConfig = useCallback((theme: ThemeConfig) => {
     navigator.clipboard.writeText(
       JSON.stringify(
         {
@@ -32,7 +35,7 @@ export default function ThemesPage() {
     );
     setCopiedId(theme.id);
     setTimeout(() => setCopiedId(null), 2000);
-  };
+  }, []);
 
   return (
     <div className="pt-32 sm:pt-36 pb-24 container mx-auto px-4 sm:px-6 max-w-6xl">

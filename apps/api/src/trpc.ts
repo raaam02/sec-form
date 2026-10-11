@@ -15,11 +15,13 @@ export interface Context {
     planId: string;
   } | null;
   ip: string;
+  origin?: string;
 }
 
 export async function createContext({ req, res }: trpcExpress.CreateExpressContextOptions): Promise<Context> {
   let user = null;
   const ip = (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "127.0.0.1";
+  const origin = (req.headers["origin"] || req.headers["referer"]) as string | undefined;
 
   // Support reading developer bypass header during local work/seeding
   const userIdHeader = req.headers["x-user-id"];
@@ -99,6 +101,7 @@ export async function createContext({ req, res }: trpcExpress.CreateExpressConte
     db,
     user,
     ip,
+    origin,
   };
 }
 

@@ -55,7 +55,7 @@ export default function DashboardPage() {
     const localFormIds = new Set(localForms.map(f => f.id));
     const deletedSeededIdsSet = new Set(deletedSeededIds);
 
-    const dbFormsFiltered = formsList.filter(f => !localFormIds.has(f.id) && !deletedSeededIdsSet.has(f.id));
+    const dbFormsFiltered = formsList.filter((f: any) => !localFormIds.has(f.id) && !deletedSeededIdsSet.has(f.id));
 
     return [...localForms, ...dbFormsFiltered].sort((a, b) =>
       new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -80,7 +80,7 @@ export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [visibilityFilter, setVisibilityFilter] = useState<"all" | "public" | "unlisted">("all");
 
-  const filteredForms = combinedForms?.filter((form) => {
+  const filteredForms = combinedForms?.filter((form: any) => {
     const matchesSearch = form.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (form.description?.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesVisibility = visibilityFilter === "all" || form.visibility === visibilityFilter;

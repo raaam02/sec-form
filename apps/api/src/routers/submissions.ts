@@ -14,11 +14,11 @@ export const submissionsRouter = router({
     .mutation(async ({ input, ctx }) => {
       const { formId, answersJson } = input;
 
-      // 1. Rate Limiting Check (max 5 submissions per IP per form per minute)
+      // 1. Rate Limiting Check (max 15 submissions per IP per form per minute, never blocks)
       const rateLimitKey = `rate:form:${formId}:ip:${ctx.ip}`;
       try {
         const submissionCount = await cache.incrAndExpire(rateLimitKey, 60);
-        if (submissionCount > 5) {
+        if (submissionCount > 15) {
           throw new TRPCError({
             code: "TOO_MANY_REQUESTS",
             message: "Too many submissions. Please wait a minute before trying again.",
@@ -29,16 +29,30 @@ export const submissionsRouter = router({
         console.warn("Rate limit check failed, skipping:", e);
       }
 
-      // 2. Fetch Form
-      const form = await ctx.db.query.forms.findFirst({
-        where: eq(forms.id, formId),
-      });
+      // 2. Fetch Form with metadata cache
+      const formCacheKey = `form:meta:${formId}`;
+      let form: any = null;
+      try {
+        const cached = await cache.get(formCacheKey);
+        if (cached) form = JSON.parse(cached);
+      } catch {}
 
       if (!form) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Form not found",
+        form = await ctx.db.query.forms.findFirst({
+          where: eq(forms.id, formId),
         });
+
+        if (!form) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Form not found",
+          });
+        }
+
+        cache.set(formCacheKey, JSON.stringify(form), 60).catch(() => {});
+        if (form.slug) {
+          cache.set(`form:meta:${form.slug}`, JSON.stringify(form), 60).catch(() => {});
+        }
       }
 
       // Check visibility: only public forms accept submissions
@@ -52,10 +66,29 @@ export const submissionsRouter = router({
       // 3. Compile validation Zod schema and check answers (against published schema)
       const schemaData = (form.publishedSchemaJson || form.schemaJson) as any;
       const fields = schemaData.fields || [];
+
+      // Check user-configured domain restriction if enabled by form owner
+      const allowedDomains: string[] = schemaData.allowedDomains || [];
+      if (allowedDomains.length > 0 && ctx.origin) {
+        try {
+          const originHost = new URL(ctx.origin).hostname.toLowerCase();
+          const isAllowed = allowedDomains.some((d) => {
+            const clean = d.trim().toLowerCase().replace(/^(https?:\/\/)?(www\.)?/, "").split("/")[0].split(":")[0];
+            return originHost === clean || originHost.endsWith("." + clean);
+          });
+          if (!isAllowed) {
+            throw new TRPCError({
+              code: "FORBIDDEN",
+              message: `Domain restriction: Submissions from '${originHost}' are not allowed for this form.`,
+            });
+          }
+        } catch (e: any) {
+          if (e instanceof TRPCError) throw e;
+        }
+      }
       
       try {
         const dynamicValidator = buildSubmissionValidator(fields);
-        // Parse answers against dynamic validator
         dynamicValidator.parse(answersJson);
       } catch (err: any) {
         throw new TRPCError({
@@ -70,16 +103,24 @@ export const submissionsRouter = router({
         .insert(submissions)
         .values({
           id: crypto.randomUUID() as any,
-          formId,
+          formId: form.id,
           answersJson,
           createdAt: new Date(),
         })
         .returning();
 
-      // Trigger Telegram notification if enabled
-      checkAndSendTelegramNotification(form, answersJson).catch((e) =>
-        console.error("[TelegramService] Failed to send tRPC submission notification:", e)
-      );
+      // 5. Asynchronous background tasks (cache invalidation + Telegram)
+      setImmediate(async () => {
+        if (form.userId) {
+          cache.del(`analytics:dashboard:${form.userId}`).catch(() => {});
+          cache.del(`forms:list:${form.userId}`).catch(() => {});
+        }
+        cache.del(`analytics:form:${form.id}`).catch(() => {});
+
+        checkAndSendTelegramNotification(form, answersJson).catch((e) =>
+          console.error("[TelegramService] Failed to send tRPC submission notification:", e)
+        );
+      });
 
       return { success: true, submissionId: newSubmission.id };
     }),
