@@ -321,19 +321,10 @@ export function AuthModal() {
                       : "Get Started Free"}
                   </TextMorph>
                 </h2>
-                <p className="hidden sm:block text-xs text-muted-foreground mt-0.5">
-                  <TextMorph as="span">
-                    {needsOtp
-                      ? "Enter verification code"
-                      : mode === "login"
-                      ? "Access your dashboard & analytics"
-                      : "No credit card required • Instant access"}
-                  </TextMorph>
-                </p>
               </div>
 
               {/* Mode switch pills with smooth shared indicator */}
-              <div className="relative flex p-0.5 rounded-xl bg-muted/60 border border-border/40 text-xs">
+              <div className="relative flex p-1 rounded-2xl bg-muted/60 border border-border/40 text-xs">
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
