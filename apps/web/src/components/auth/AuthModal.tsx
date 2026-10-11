@@ -178,7 +178,7 @@ export function AuthModal() {
       animationDuration={0.25}
     >
       <ExpandableScreenContent
-        className="w-full max-w-[1100px] border border-border/60 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-y-auto text-foreground"
+        className="w-full max-w-6xl border border-border/60 bg-card/95 backdrop-blur-2xl shadow-2xl overflow-y-auto text-foreground"
         showCloseButton={true}
         closeButtonClassName="text-muted-foreground hover:text-foreground hover:bg-muted/80 bg-background/60 backdrop-blur-xs border border-border/40 absolute top-5 right-5 z-30 flex h-9 w-9 items-center justify-center rounded-full transition-colors"
       >
@@ -186,10 +186,10 @@ export function AuthModal() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="auth-modal-title"
-          className="relative z-10 mx-auto flex h-full w-full max-w-[1100px] flex-col lg:flex-row items-center justify-center gap-5 sm:gap-8 lg:gap-14 p-4 sm:p-10 lg:p-14 my-auto"
+          className="relative z-10 mx-auto flex w-full max-w-[1100px] flex-col lg:flex-row items-center justify-center gap-3.5 sm:gap-6 lg:gap-14 p-4 sm:p-8 lg:p-14 my-auto"
         >
           {/* Left Column: Brand Story & Value Pillars */}
-          <div className="relative flex-1 space-y-3 sm:space-y-6 text-center lg:text-left w-full max-w-lg lg:max-w-none">
+          <div className="relative flex-none lg:flex-1 space-y-2 sm:space-y-4 lg:space-y-6 text-center lg:text-left w-full max-w-lg lg:max-w-none">
             {/* Subtle atmospheric glow behind brand column */}
             <div className="pointer-events-none absolute -top-16 -left-16 h-72 w-72 rounded-full bg-gradient-to-br from-primary/10 via-violet-500/5 to-transparent blur-3xl opacity-70" />
 
@@ -197,8 +197,8 @@ export function AuthModal() {
               <Logo size="md" />
             </div>
 
-            <div className="space-y-3 hidden sm:block">
-              <div className="min-h-[72px] sm:min-h-[88px] lg:min-h-[104px] flex items-center justify-center lg:justify-start">
+            <div className="space-y-1 sm:space-y-3">
+              <div className="min-h-0 sm:min-h-[72px] lg:min-h-[104px] flex items-center justify-center lg:justify-start">
                 <AnimatePresence mode="wait" initial={false}>
                   {mode === "login" ? (
                     <motion.h1
@@ -207,7 +207,7 @@ export function AuthModal() {
                       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                       exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
                       transition={{ duration: 0.22, ease: "easeOut" }}
-                      className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold font-outfit tracking-tight text-foreground leading-[1.12]"
+                      className="text-2xl sm:text-4xl lg:text-[44px] font-extrabold font-outfit tracking-tight text-foreground leading-[1.12]"
                     >
                       Welcome back to{" "}
                       <span className="bg-gradient-to-r from-foreground via-foreground/90 to-muted-foreground bg-clip-text text-transparent">
@@ -292,7 +292,7 @@ export function AuthModal() {
           </div>
 
           {/* Right Column: Elevated Interactive Auth Card */}
-          <div className="w-full flex-1 max-w-md bg-card/90 dark:bg-card/85 backdrop-blur-xl border border-border/80 rounded-3xl p-5 sm:p-8 shadow-2xl">
+          <div className="w-full flex-none lg:flex-1 max-w-md bg-card/90 dark:bg-card/85 backdrop-blur-xl border border-border/80 rounded-3xl p-5 sm:p-8 shadow-2xl">
             {/* Header / Mode Switch Tabs */}
             <div className="flex items-center justify-between border-b border-border/50 pb-4 mb-5">
               <div>

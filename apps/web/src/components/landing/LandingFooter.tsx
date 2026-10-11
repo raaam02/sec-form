@@ -67,6 +67,10 @@ export function LandingFooter() {
               <p className="text-sm sm:text-sm text-muted-foreground leading-relaxed max-w-xs">
                 The modern, open source AI form builder.
               </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <LocaleSwitcher />
+                <ThemeToggle />
+              </div>
             </div>
           </div>
 
