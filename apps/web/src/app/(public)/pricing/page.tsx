@@ -4,9 +4,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Check, Sparkles, HelpCircle, ChevronDown, ArrowRight, ShieldCheck, Zap } from "lucide-react";
+import { Check, Sparkles, HelpCircle, ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { ContactAdminModal } from "@/components/builder/ContactAdminModal";
+import { FAQAccordion } from "@/components/FAQAccordion";
 
 interface PlanItem {
   id: string;
@@ -108,7 +109,6 @@ export default function PricingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
   const [showContactAdminModal, setShowContactAdminModal] = useState(false);
   const [contactPlan, setContactPlan] = useState<"general" | "pro" | "enterprise">("pro");
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const tPricing = useTranslations("Pricing");
   const locale = useLocale();
@@ -279,35 +279,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <div className="space-y-3">
-          {PRICING_FAQS.map((faq, index) => {
-            const isOpen = openFaq === index;
-            return (
-              <div
-                key={faq.q}
-                className="rounded-2xl border border-border/40 bg-card/50 overflow-hidden transition-colors"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(isOpen ? null : index)}
-                  className="w-full p-4 text-left flex items-center justify-between gap-4 text-sm font-semibold text-foreground"
-                >
-                  <span>{faq.q}</span>
-                  <ChevronDown
-                    className={`h-4 w-4 text-muted-foreground transition-transform duration-200 shrink-0 ${
-                      isOpen ? "rotate-180 text-foreground" : ""
-                    }`}
-                  />
-                </button>
-                {isOpen && (
-                  <div className="px-4 pb-4 pt-1 text-xs text-muted-foreground leading-relaxed border-t border-border/20">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <FAQAccordion items={PRICING_FAQS} defaultOpenId={PRICING_FAQS[0]?.q} />
       </div>
 
       <ContactAdminModal

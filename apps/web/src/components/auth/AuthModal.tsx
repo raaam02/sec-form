@@ -221,7 +221,7 @@ export function AuthModal() {
                       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                       exit={{ opacity: 0, y: -8, filter: "blur(4px)" }}
                       transition={{ duration: 0.22, ease: "easeOut" }}
-                      className="text-3xl sm:text-4xl lg:text-[44px] font-extrabold font-outfit tracking-tight text-foreground leading-[1.12]"
+                      className="text-2xl sm:text-4xl lg:text-[44px] font-extrabold font-outfit tracking-tight text-foreground leading-[1.12]"
                     >
                       Build reactive forms{" "}
                       <span className="bg-gradient-to-r from-primary via-violet-500 to-indigo-500 bg-clip-text text-transparent">
