@@ -37,7 +37,8 @@ const FloatingBadge = ({ children, delay, className = "" }: { children: React.Re
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const rawRedirect = searchParams.get("redirect");
+  const redirect = rawRedirect && rawRedirect !== "/" ? rawRedirect : "/dashboard";
   const t = useTranslations("Login");
   const tLanding = useTranslations("Landing");
 

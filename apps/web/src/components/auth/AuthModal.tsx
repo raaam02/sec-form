@@ -69,7 +69,9 @@ export function AuthModal() {
       if (res && !res.error) {
         toast.success("Welcome back!", { id: toastId });
         closeAuthModal();
-        router.push(redirectUrl);
+        const target = redirectUrl && redirectUrl !== "/" ? redirectUrl : "/dashboard";
+        router.push(target);
+        router.refresh();
       } else {
         toast.error("Invalid email or password", { id: toastId });
         setError("Invalid email or password. Please try again.");
@@ -83,7 +85,8 @@ export function AuthModal() {
   };
 
   const handleGoogleLogin = () => {
-    signIn("google", { callbackUrl: redirectUrl });
+    const target = redirectUrl && redirectUrl !== "/" ? redirectUrl : "/dashboard";
+    signIn("google", { callbackUrl: target });
   };
 
   const handleSignupSubmit = async (e: React.FormEvent) => {
@@ -104,10 +107,21 @@ export function AuthModal() {
       } else if ("needsOtp" in res && res.needsOtp) {
         setNeedsOtp(true);
       } else {
-        setSuccess("Account created successfully!");
-        setTimeout(() => {
+        setSuccess("Account created! Signing you in...");
+        const loginRes = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+        if (loginRes && !loginRes.error) {
+          toast.success("Welcome to Formu.AI!");
+          closeAuthModal();
+          const target = redirectUrl && redirectUrl !== "/" ? redirectUrl : "/dashboard";
+          router.push(target);
+          router.refresh();
+        } else {
           switchMode("login");
-        }, 1500);
+        }
       }
     } catch {
       setError("An unexpected error occurred during signup.");
@@ -140,7 +154,9 @@ export function AuthModal() {
         if (loginRes && !loginRes.error) {
           toast.success("Welcome to Formu.AI!");
           closeAuthModal();
-          router.push(redirectUrl);
+          const target = redirectUrl && redirectUrl !== "/" ? redirectUrl : "/dashboard";
+          router.push(target);
+          router.refresh();
         } else {
           switchMode("login");
         }

@@ -284,9 +284,10 @@ export default function DashboardPage() {
               >
                 <Button
                   onClick={() => setIsAIModalOpen(true)}
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-pink-500 px-3 sm:px-4 text-xs font-semibold text-white shadow-sm hover:opacity-95 transition-all"
+                  variant="outline"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-3 sm:px-4 text-xs font-semibold text-foreground hover:bg-accent shadow-sm transition-colors"
                 >
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4 text-primary" />
                   <span className="hidden sm:inline">
                     {isDemo ? t("generateAi") : `${t("generateAi")} (${aiCredits}/2)`}
                   </span>
@@ -305,8 +306,7 @@ export default function DashboardPage() {
               >
                 <Button
                   onClick={() => setIsCreateModalOpen(true)}
-                  variant="outline"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-border bg-card px-3 sm:px-4 text-xs font-semibold text-muted-foreground hover:bg-accent hover:text-accent-foreground shadow-sm transition-colors"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-foreground px-3.5 sm:px-4 text-xs font-semibold text-background shadow-sm hover:opacity-90 active:scale-[0.98] transition-all"
                 >
                   <Plus className="h-4 w-4" />
                   <span className="hidden sm:inline">{t("newForm")}</span>
