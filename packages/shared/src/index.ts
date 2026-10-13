@@ -9,6 +9,86 @@ export interface ThemeConfig {
   borderRadius: string;
   inputBgColor?: string;
   inputBorderColor?: string;
+  dark?: {
+    primaryColor?: string;
+    backgroundColor?: string;
+    textColor?: string;
+    cardColor?: string;
+    inputBgColor?: string;
+    inputBorderColor?: string;
+  };
+}
+
+/**
+ * Returns active theme colors according to color mode (light vs dark).
+ * If dark mode is active and the theme doesn't define dark overrides,
+ * it returns harmonious dark mode values automatically.
+ */
+export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark: boolean): {
+  primaryColor: string;
+  backgroundColor: string;
+  textColor: string;
+  cardColor: string;
+  borderRadius: string;
+  inputBgColor: string;
+  inputBorderColor: string;
+} {
+  const t = theme || BUILTIN_THEMES[0];
+  const borderRadius = t.borderRadius || "0.5rem";
+
+  if (!isDark) {
+    return {
+      primaryColor: t.primaryColor,
+      backgroundColor: t.backgroundColor,
+      textColor: t.textColor,
+      cardColor: t.cardColor,
+      borderRadius,
+      inputBgColor: t.inputBgColor || "transparent",
+      inputBorderColor: t.inputBorderColor || "rgba(128,128,128,0.22)",
+    };
+  }
+
+  // Dark Mode active
+  if (t.dark) {
+    return {
+      primaryColor: t.dark.primaryColor || t.primaryColor,
+      backgroundColor: t.dark.backgroundColor || "#09090b",
+      textColor: t.dark.textColor || "#fafafa",
+      cardColor: t.dark.cardColor || "#18181b",
+      borderRadius,
+      inputBgColor: t.dark.inputBgColor || "rgba(255,255,255,0.04)",
+      inputBorderColor: t.dark.inputBorderColor || "rgba(255,255,255,0.12)",
+    };
+  }
+
+  // Auto-adapt light themes when dark mode is turned on
+  const isThemeAlreadyDark =
+    t.backgroundColor.startsWith("#0") ||
+    t.backgroundColor.startsWith("#1") ||
+    t.backgroundColor.includes("rgb(0") ||
+    t.backgroundColor.includes("rgb(1");
+
+  if (isThemeAlreadyDark) {
+    return {
+      primaryColor: t.primaryColor,
+      backgroundColor: t.backgroundColor,
+      textColor: t.textColor,
+      cardColor: t.cardColor,
+      borderRadius,
+      inputBgColor: t.inputBgColor || "rgba(255,255,255,0.05)",
+      inputBorderColor: t.inputBorderColor || "rgba(255,255,255,0.14)",
+    };
+  }
+
+  return {
+    primaryColor: t.primaryColor,
+    backgroundColor: "#09090b",
+    textColor: "#fafafa",
+    cardColor: "#18181b",
+    borderRadius,
+    inputBgColor: "rgba(255,255,255,0.04)",
+    inputBorderColor: "rgba(255,255,255,0.12)",
+  };
 }
 
 export const BUILTIN_THEMES: ThemeConfig[] = [

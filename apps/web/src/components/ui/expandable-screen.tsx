@@ -79,9 +79,17 @@ export function ExpandableScreen({
   useEffect(() => {
     if (lockScroll) {
       if (isExpanded) {
+        const originalBodyOverflow = document.body.style.overflow
+        const originalHtmlOverflow = document.documentElement.style.overflow
         document.body.style.overflow = "hidden"
+        document.documentElement.style.overflow = "hidden"
+        return () => {
+          document.body.style.overflow = originalBodyOverflow || "unset"
+          document.documentElement.style.overflow = originalHtmlOverflow || "unset"
+        }
       } else {
         document.body.style.overflow = "unset"
+        document.documentElement.style.overflow = "unset"
       }
     }
   }, [isExpanded, lockScroll])
@@ -174,7 +182,11 @@ export function ExpandableScreenContent({
   return (
     <AnimatePresence initial={false}>
       {isExpanded && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden"
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           {/* Dimmed backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -197,9 +209,8 @@ export function ExpandableScreenContent({
             style={{
               borderRadius: contentRadius,
             }}
-            layout
             className={cn(
-              "relative z-10 flex flex-col h-auto max-h-[94vh] sm:max-h-[90vh] w-full transform-gpu overflow-y-auto will-change-transform shadow-2xl my-auto",
+              "relative z-10 flex flex-col w-full transform-gpu overflow-hidden shadow-2xl",
               className
             )}
           >
@@ -208,7 +219,7 @@ export function ExpandableScreenContent({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, transition: { duration: 0.1 } }}
               transition={{ delay: 0.12, duration: 0.25 }}
-              className="relative z-20 w-full my-auto"
+              className="relative z-20 w-full h-full flex flex-col overflow-hidden"
             >
               {children}
             </motion.div>

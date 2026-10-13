@@ -16,7 +16,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { FormField, FieldType } from "@sec-form/validators";
-import { ThemeConfig } from "@sec-form/shared";
+import { ThemeConfig, resolveThemeValues } from "@sec-form/shared";
+import { useTheme } from "@/components/ThemeProvider";
 import { Plus, Sparkles, Send } from "lucide-react";
 import { WYSIWYGFieldItem } from "./canvas/WYSIWYGFieldItem";
 import { SlashCommandMenu } from "./canvas/SlashCommandMenu";
@@ -143,16 +144,20 @@ export function FormCanvasTab({
     saveForm(updated);
   };
 
-  const primaryColor = activeTheme?.primaryColor || "var(--primary)";
-  const borderRadius = activeTheme?.borderRadius || "24px";
-  const cardColor = activeTheme?.cardColor || undefined;
-  const textColor = activeTheme?.textColor || undefined;
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const effectiveTheme = resolveThemeValues(activeTheme, isDark);
+
+  const primaryColor = effectiveTheme.primaryColor || "var(--primary)";
+  const borderRadius = effectiveTheme.borderRadius || "24px";
+  const cardColor = effectiveTheme.cardColor || undefined;
+  const textColor = effectiveTheme.textColor || undefined;
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-6">
-      {/* Live Form Canvas Paper with ambient glass styling */}
+    <div className="w-full max-w-2xl mx-auto space-y-6">
+      {/* Live Form Canvas Paper with authentic document feel */}
       <div
-        className="rounded-[28px] border border-border/80 shadow-2xl p-8 sm:p-12 transition-all duration-200 backdrop-blur-2xl bg-card/85 ring-1 ring-white/[0.08] relative"
+        className="rounded-[24px] border border-border/70 shadow-xl p-8 sm:p-12 transition-all duration-200 bg-card/90 backdrop-blur-xl relative"
         style={{
           backgroundColor: cardColor,
           color: textColor,
@@ -160,7 +165,7 @@ export function FormCanvasTab({
         }}
       >
         {/* Form Header (In-Place Title & Description) */}
-        <div className="space-y-3 pb-8 border-b border-border/60">
+        <div className="space-y-2 pb-6 border-b border-border/50">
           <input
             type="text"
             value={title}
@@ -169,7 +174,7 @@ export function FormCanvasTab({
               saveForm(fields);
             }}
             placeholder={t("canvasTitlePlaceholder") || "Untitled Form"}
-            className="w-full text-3xl sm:text-4xl md:text-5xl font-extrabold font-outfit tracking-tight bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/40 border-b border-transparent focus:border-primary/60 pb-1.5 transition-colors"
+            className="w-full text-2xl sm:text-3xl md:text-4xl font-extrabold font-outfit tracking-tight bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/30 pb-1 transition-colors"
           />
           <input
             type="text"
@@ -182,14 +187,14 @@ export function FormCanvasTab({
               t("canvasDescPlaceholder") ||
               "Write a short description, instructions or greeting..."
             }
-            className="w-full text-sm sm:text-base text-muted-foreground bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/40 border-b border-transparent focus:border-primary/60 pb-1 transition-colors"
+            className="w-full text-sm text-muted-foreground bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/40 transition-colors"
           />
         </div>
 
         {/* Form Fields Canvas */}
-        <div className="pt-6 space-y-6">
+        <div className="pt-4 space-y-4">
           {fields.length === 0 ? (
-            <div className="py-20 border-2 border-dashed border-border/80 rounded-2xl flex flex-col items-center justify-center text-center p-6 space-y-4 bg-muted/10">
+            <div className="py-16 border-2 border-dashed border-border/70 rounded-2xl flex flex-col items-center justify-center text-center p-6 space-y-4 bg-muted/10">
               <div className="p-3 bg-primary/10 rounded-2xl text-primary">
                 <Sparkles className="w-6 h-6" />
               </div>
@@ -230,19 +235,19 @@ export function FormCanvasTab({
                 {fields.map((field, index) => (
                   <React.Fragment key={field.id}>
                     {/* Subtle Between-field Insert Trigger */}
-                    <div className="group/inserter relative h-3 -my-1.5 flex items-center justify-center z-10">
-                      <div className="absolute inset-x-0 h-0.5 bg-primary/40 opacity-0 group-hover/inserter:opacity-100 transition-opacity" />
+                    <div className="group/inserter relative h-2 -my-1 flex items-center justify-center z-10">
+                      <div className="absolute inset-x-0 h-[1px] bg-primary/30 opacity-0 group-hover/inserter:opacity-100 transition-opacity" />
                       <button
                         type="button"
                         onClick={() => {
                           setInsertIndex(index);
                           setSlashMenuOpen(true);
                         }}
-                        className="relative z-10 opacity-0 group-hover/inserter:opacity-100 transition-opacity flex items-center gap-1.5 px-3 py-1 text-[11px] font-semibold text-primary-foreground bg-primary rounded-full shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+                        className="relative z-10 opacity-0 group-hover/inserter:opacity-100 transition-opacity flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground bg-primary rounded-full shadow-md hover:scale-105 active:scale-95 cursor-pointer"
                         title="Insert question here (or press '/')"
                       >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Insert Question</span>
+                        <Plus className="w-3 h-3" />
+                        <span>Insert</span>
                       </button>
                     </div>
 
@@ -255,6 +260,10 @@ export function FormCanvasTab({
                       onUpdate={handleUpdateField}
                       onDelete={handleDeleteField}
                       onDuplicate={handleDuplicateField}
+                      onInsertAfter={(type) => {
+                        setInsertIndex(index + 1);
+                        handleInsertField(type);
+                      }}
                       activeTheme={activeTheme}
                     />
                   </React.Fragment>

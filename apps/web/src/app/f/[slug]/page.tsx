@@ -16,6 +16,8 @@ import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { resolveThemeValues } from "@sec-form/shared";
+import { useTheme } from "@/components/ThemeProvider";
 
 import { getLocalForms, saveLocalForm, saveLocalSubmission } from "../../../utils/localForms";
 
@@ -371,17 +373,19 @@ export default function PublicFormPage() {
     );
   }
 
-  const theme = form.themeJson as any;
+  const { theme: colorMode } = useTheme();
+  const rawTheme = form.themeJson as any;
+  const resolved = resolveThemeValues(rawTheme, colorMode === "dark");
 
-  // Custom theme variables mapped from database theme settings
+  // Custom theme variables mapped from resolved theme settings
   const customStyles = {
-    "--primary": theme.primaryColor || "#4f46e5",
-    "--background-color": theme.backgroundColor || "#f3f4f6",
-    "--text-color": theme.textColor || "#1f2937",
-    "--card-color": theme.cardColor || "#ffffff",
-    "--border-radius": theme.borderRadius || "1rem",
-    "--input-bg": theme.inputBgColor || "transparent",
-    "--input-border": theme.inputBorderColor || "rgba(128,128,128,0.2)"
+    "--primary": resolved.primaryColor,
+    "--background-color": resolved.backgroundColor,
+    "--text-color": resolved.textColor,
+    "--card-color": resolved.cardColor,
+    "--border-radius": resolved.borderRadius,
+    "--input-bg": resolved.inputBgColor,
+    "--input-border": resolved.inputBorderColor,
   } as React.CSSProperties;
 
   return (

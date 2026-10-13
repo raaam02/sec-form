@@ -58,6 +58,14 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
   const [hasLoadedLocal, setHasLoadedLocal] = useState(false);
   const [isLeftSidebarExpanded, setIsLeftSidebarExpanded] = useState(true);
 
+  const isPublicBuilder = !session?.user || isExpandable;
+
+  useEffect(() => {
+    if (isPublicBuilder && (middleTab === "settings" || middleTab === "embed")) {
+      setMiddleTab("form");
+    }
+  }, [isPublicBuilder, middleTab]);
+
   // Load from local storage if available
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -89,12 +97,12 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
     enabled: isAuthed && !localForm,
   });
 
-  const { data: responses, isLoading: isResponsesLoading } = trpcAny.submissions.listByForm.useQuery(
+  const { data: responses, isLoading: isResponsesLoading } = trpcAny.submissions.list.useQuery(
     { formId: id },
     { enabled: !localForm && isAuthed }
   );
 
-  const { data: analytics, isLoading: isAnalyticsLoading } = trpcAny.analytics.getSummary.useQuery(
+  const { data: analytics, isLoading: isAnalyticsLoading } = trpcAny.analytics.getFormAnalytics.useQuery(
     { formId: id },
     { enabled: !localForm && isAuthed }
   );
@@ -661,6 +669,7 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
             pushToHistory={pushToHistory}
             publicFormUrl={publicFormUrl}
             hostOrigin={hostOrigin}
+            isPublicBuilder={isPublicBuilder}
           />
         </div>
       </div>
@@ -670,6 +679,8 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
         isOpen={isShareModalOpen}
         setIsOpen={setIsShareModalOpen}
         publicFormUrl={publicFormUrl}
+        formId={id}
+        hostOrigin={hostOrigin}
       />
 
       <PublishAuthModal

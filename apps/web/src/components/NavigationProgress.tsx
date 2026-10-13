@@ -69,7 +69,10 @@ export function NavigationProgress() {
         const dest = typeof url === "string" ? url : url.toString();
         const current = window.location.pathname + window.location.search;
         if (dest !== current && !dest.startsWith("#")) {
-          start();
+          // Defer update so it doesn't trigger synchronously during React's insertion/render phase
+          setTimeout(() => {
+            start();
+          }, 0);
         }
       }
       return originalPushState.apply(this, args);

@@ -1,15 +1,16 @@
 "use client";
 
 import React from "react";
-import { Undo2, Redo2, FileText, Palette, Settings, Code } from "lucide-react";
+import { Undo2, Redo2, FileText, Palette, Settings } from "lucide-react";
 import { FormField, FieldType } from "@sec-form/validators";
+import { resolveThemeValues } from "@sec-form/shared";
+import { useTheme } from "@/components/ThemeProvider";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { DirectionAwareTabs, DirectionAwareTab } from "@/components/ui/direction-aware-tabs";
 import { FormCanvasTab } from "./FormCanvasTab";
 import { SettingsCanvasTab } from "./SettingsCanvasTab";
 import { ThemeCanvasTab } from "./ThemeCanvasTab";
-import { EmbedCanvasTab } from "./EmbedCanvasTab";
 
 interface BuilderCanvasProps {
   middleTab: "form" | "theme" | "responses" | "analytics" | "settings" | "embed";
@@ -72,6 +73,7 @@ interface BuilderCanvasProps {
   isTelegramFetching?: boolean;
   onStartTelegramSync?: () => void;
   onCheckTelegramStatus?: () => void;
+  isPublicBuilder?: boolean;
 }
 
 export function BuilderCanvas({
@@ -118,6 +120,7 @@ export function BuilderCanvas({
   isTelegramFetching,
   onStartTelegramSync,
   onCheckTelegramStatus,
+  isPublicBuilder,
 }: BuilderCanvasProps) {
   const t = useTranslations("Builder");
 
@@ -127,12 +130,13 @@ export function BuilderCanvas({
     setManualChatIdInput(telegramChatId || "");
   }, [telegramChatId]);
 
-  const tabMapping: ("form" | "theme" | "settings" | "embed")[] = [
-    "form",
-    "theme",
-    "settings",
-    "embed",
-  ];
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const effectiveTheme = resolveThemeValues(activeTheme, isDark);
+
+  const tabMapping: ("form" | "theme" | "settings")[] = isPublicBuilder
+    ? ["form", "theme"]
+    : ["form", "theme", "settings"];
   const activeTabIndex = Math.max(0, tabMapping.indexOf(middleTab as any));
 
   const handleTabChange = (index: number) => {
@@ -141,7 +145,7 @@ export function BuilderCanvas({
     }
   };
 
-  const canvasTabs: DirectionAwareTab[] = [
+  const allTabs: DirectionAwareTab[] = [
     {
       id: 0,
       label: "Build",
@@ -219,28 +223,15 @@ export function BuilderCanvas({
         </div>
       ),
     },
-    {
-      id: 3,
-      label: "Embed",
-      icon: Code,
-      iconColorClass: "text-teal-400",
-      content: (
-        <div className="max-w-xl mx-auto space-y-6 pb-16">
-          <EmbedCanvasTab
-            publicFormUrl={publicFormUrl}
-            id={formId}
-            hostOrigin={hostOrigin}
-          />
-        </div>
-      ),
-    },
   ];
+
+  const canvasTabs = isPublicBuilder ? allTabs.slice(0, 2) : allTabs;
 
   return (
     <div
       className="flex-1 flex flex-col overflow-hidden min-w-0 relative transition-colors duration-300 bg-background/50"
       style={{
-        backgroundColor: activeTheme?.backgroundColor || undefined,
+        backgroundColor: effectiveTheme.backgroundColor || undefined,
       }}
     >
       {/* Top Bar with DirectionAwareTabs with Icons + Undo/Redo */}
