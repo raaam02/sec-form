@@ -76,6 +76,7 @@ interface WYSIWYGFieldItemProps {
   onDelete: (id: string) => void;
   onDuplicate?: (field: FormField) => void;
   onInsertAfter?: (type: FieldType) => void;
+  onEnter?: () => void;
   activeTheme?: ThemeConfig | null;
 }
 
@@ -88,6 +89,7 @@ export function WYSIWYGFieldItem({
   onDelete,
   onDuplicate,
   onInsertAfter,
+  onEnter,
   activeTheme,
 }: WYSIWYGFieldItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -213,6 +215,12 @@ export function WYSIWYGFieldItem({
               type="text"
               value={field.label}
               onChange={(e) => onUpdate(field.id, { label: e.target.value })}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onEnter?.();
+                }
+              }}
               onClick={(e) => e.stopPropagation()}
               placeholder="Question title..."
               style={{

@@ -15,10 +15,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { FormField, FieldType } from "@sec-form/validators";
+import { FormField, FieldType, createDefaultField } from "@sec-form/validators";
 import { ThemeConfig, resolveThemeValues } from "@sec-form/shared";
 import { useTheme } from "@/components/ThemeProvider";
-import { Plus, Sparkles, Send } from "lucide-react";
+import { Plus, Sparkles, Send, GripVertical } from "lucide-react";
 import { WYSIWYGFieldItem } from "./canvas/WYSIWYGFieldItem";
 import { SlashCommandMenu } from "./canvas/SlashCommandMenu";
 import { useTranslations } from "next-intl";
@@ -59,6 +59,7 @@ export function FormCanvasTab({
   const t = useTranslations("Builder");
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number | undefined>(undefined);
+  const [slashQuery, setSlashQuery] = useState("");
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -77,7 +78,8 @@ export function FormCanvasTab({
 
         if (!isTyping) {
           e.preventDefault();
-          setInsertIndex(undefined);
+          setInsertIndex(fields.length);
+          setSlashQuery("");
           setSlashMenuOpen(true);
         }
       }
@@ -85,7 +87,7 @@ export function FormCanvasTab({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [slashMenuOpen]);
+  }, [slashMenuOpen, fields.length]);
 
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
@@ -108,16 +110,7 @@ export function FormCanvasTab({
     if (handleAddField) {
       handleAddField(type, insertIndex);
     } else {
-      const newField: FormField = {
-        id: crypto.randomUUID(),
-        type,
-        label: `New ${type.replace("_", " ")} Question`,
-        required: false,
-        placeholder: "Your response here...",
-        options: ["select", "multiselect"].includes(type)
-          ? ["Option 1", "Option 2", "Option 3"]
-          : undefined,
-      };
+      const newField = createDefaultField(type);
       const updated = [...fields];
       if (insertIndex !== undefined && insertIndex >= 0 && insertIndex <= fields.length) {
         updated.splice(insertIndex, 0, newField);
@@ -152,6 +145,56 @@ export function FormCanvasTab({
   const borderRadius = effectiveTheme.borderRadius || "24px";
   const cardColor = effectiveTheme.cardColor || undefined;
   const textColor = effectiveTheme.textColor || undefined;
+
+  const renderInlineInsertionRow = (targetIndex: number) => {
+    if (!slashMenuOpen || insertIndex !== targetIndex) return null;
+
+    return (
+      <div className="relative py-2 px-3 -mx-3 rounded-2xl bg-muted/30 border border-primary/20 my-2 animate-in fade-in zoom-in-95 duration-150 z-30">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 text-muted-foreground/60 select-none">
+            <GripVertical className="w-3.5 h-3.5" />
+            <span className="font-mono text-sm font-bold text-primary">/</span>
+          </div>
+          <input
+            type="text"
+            value={slashQuery}
+            onChange={(e) => setSlashQuery(e.target.value)}
+            placeholder="Type a question type or command..."
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === "Escape" || (e.key === "Backspace" && slashQuery === "")) {
+                e.preventDefault();
+                setSlashMenuOpen(false);
+                setInsertIndex(undefined);
+                setSlashQuery("");
+              }
+            }}
+            className="flex-1 text-xs sm:text-sm font-medium bg-transparent border-none focus:outline-none text-foreground placeholder:text-muted-foreground/40 leading-snug"
+          />
+        </div>
+
+        {/* Anchored Floating Popover */}
+        <div className="absolute left-6 top-full mt-2 z-50">
+          <SlashCommandMenu
+            isOpen={slashMenuOpen && insertIndex === targetIndex}
+            query={slashQuery}
+            onClose={() => {
+              setSlashMenuOpen(false);
+              setInsertIndex(undefined);
+              setSlashQuery("");
+            }}
+            onSelect={(type) => {
+              handleInsertField(type);
+              setSlashMenuOpen(false);
+              setInsertIndex(undefined);
+              setSlashQuery("");
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -214,6 +257,7 @@ export function FormCanvasTab({
                 type="button"
                 onClick={() => {
                   setInsertIndex(0);
+                  setSlashQuery("");
                   setSlashMenuOpen(true);
                 }}
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl shadow-lg hover:opacity-95 transition-all cursor-pointer"
@@ -234,6 +278,8 @@ export function FormCanvasTab({
               >
                 {fields.map((field, index) => (
                   <React.Fragment key={field.id}>
+                    {renderInlineInsertionRow(index)}
+
                     {/* Subtle Between-field Insert Trigger */}
                     <div className="group/inserter relative h-2 -my-1 flex items-center justify-center z-10">
                       <div className="absolute inset-x-0 h-[1px] bg-primary/30 opacity-0 group-hover/inserter:opacity-100 transition-opacity" />
@@ -241,6 +287,7 @@ export function FormCanvasTab({
                         type="button"
                         onClick={() => {
                           setInsertIndex(index);
+                          setSlashQuery("");
                           setSlashMenuOpen(true);
                         }}
                         className="relative z-10 opacity-0 group-hover/inserter:opacity-100 transition-opacity flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground bg-primary rounded-full shadow-md hover:scale-105 active:scale-95 cursor-pointer"
@@ -264,6 +311,11 @@ export function FormCanvasTab({
                         setInsertIndex(index + 1);
                         handleInsertField(type);
                       }}
+                      onEnter={() => {
+                        setInsertIndex(index + 1);
+                        setSlashQuery("");
+                        setSlashMenuOpen(true);
+                      }}
                       activeTheme={activeTheme}
                     />
                   </React.Fragment>
@@ -272,12 +324,15 @@ export function FormCanvasTab({
             </DndContext>
           )}
 
+          {renderInlineInsertionRow(fields.length)}
+
           {/* Bottom Quick-Add & Submit Preview */}
           <div className="pt-8 border-t border-border/60 flex flex-col sm:flex-row items-center justify-between gap-4">
             <button
               type="button"
               onClick={() => {
                 setInsertIndex(fields.length);
+                setSlashQuery("");
                 setSlashMenuOpen(true);
               }}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-5 py-3 text-xs font-semibold text-muted-foreground hover:text-foreground bg-muted/40 hover:bg-muted/80 border border-border/80 rounded-xl transition-all cursor-pointer shadow-xs"
@@ -294,9 +349,10 @@ export function FormCanvasTab({
               <button
                 type="button"
                 disabled
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 text-sm font-bold text-primary-foreground shadow-md transition-all opacity-90 cursor-default"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3 text-sm font-bold shadow-md transition-all opacity-95 cursor-default"
                 style={{
-                  backgroundColor: primaryColor,
+                  backgroundColor: effectiveTheme.buttonBgColor,
+                  color: effectiveTheme.buttonTextColor,
                   borderRadius,
                 }}
               >
@@ -307,13 +363,6 @@ export function FormCanvasTab({
           </div>
         </div>
       </div>
-
-      {/* Floating Slash Command Menu */}
-      <SlashCommandMenu
-        isOpen={slashMenuOpen}
-        onClose={() => setSlashMenuOpen(false)}
-        onSelect={handleInsertField}
-      />
     </div>
   );
 }

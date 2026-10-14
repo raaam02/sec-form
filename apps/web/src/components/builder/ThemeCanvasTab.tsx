@@ -60,13 +60,36 @@ export function ThemeCanvasTab({
   };
 
   return (
-    <div className="space-y-8">
-      {/* Custom Theme Editor */}
-      <div className="backdrop-blur-[1px] p-6 rounded-3xl border border-border/70 bg-card/20 space-y-6">
-        <h3 className="font-outfit font-extrabold text-foreground text-base">Custom Styling</h3>
+    <div className="space-y-6">
+      {/* Built-in Preset Themes */}
+      <div className="backdrop-blur-sm p-4 rounded-2xl border border-border/70 bg-card/40 space-y-3">
+        <h3 className="font-outfit font-bold text-foreground text-sm">{t("themePresets")}</h3>
+        <div className="grid grid-cols-2 gap-2.5">
+          {BUILTIN_THEMES.map((theme) => (
+            <motion.div
+              key={theme.id}
+              whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
+            >
+              <ThemePresetCard
+                theme={theme}
+                isActive={activeTheme?.id === theme.id}
+                onClick={() => {
+                  setActiveTheme(theme);
+                  saveForm(fields, theme);
+                  if (pushToHistory) pushToHistory(fields, theme);
+                }}
+              />
+            </motion.div>
+          ))}
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="grid grid-cols-1 gap-4">
+      {/* Custom Theme Editor */}
+      <div className="backdrop-blur-sm p-4 rounded-2xl border border-border/70 bg-card/40 space-y-5">
+        <h3 className="font-outfit font-bold text-foreground text-sm">Custom Styling</h3>
+
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-3.5">
             {CUSTOM_EDITOR_FIELDS.map((field) => (
               <ColorPicker
                 key={field.key}
@@ -78,10 +101,10 @@ export function ThemeCanvasTab({
             ))}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3 pt-2 border-t border-border/50">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-2">Border Radius</label>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-3 gap-1.5">
                 {[
                   { label: "none", value: "0px" },
                   { label: "xs", value: "2px" },
@@ -92,7 +115,6 @@ export function ThemeCanvasTab({
                 ].map((radius) => (
                   <motion.button
                     key={radius.value}
-                    // whileHover={{ scale: 1.02, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.1 } }}
                     whileTap={{ scale: 0.98, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
                     onClick={() => {
                       const newTheme = { ...(activeTheme || BUILTIN_THEMES[0]), id: "custom", name: "Custom", borderRadius: radius.value } as ThemeConfig;
@@ -100,7 +122,7 @@ export function ThemeCanvasTab({
                       saveForm(fields, newTheme);
                       if (pushToHistory) pushToHistory(fields, newTheme);
                     }}
-                    className={`flex-1 min-w-[60px] py-1.5 text-[10px] font-medium rounded-md border transition-colors ${
+                    className={`py-1.5 text-[10px] font-medium rounded-lg border transition-colors ${
                       (activeTheme?.borderRadius || "0.5rem") === radius.value || (radius.value === "8px" && activeTheme?.borderRadius === "0.5rem")
                         ? "border-primary bg-primary/10 text-primary"
                         : "border-border bg-card text-muted-foreground hover:bg-accent"
@@ -129,30 +151,6 @@ export function ThemeCanvasTab({
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Built-in Preset Themes */}
-      <div className="backdrop-blur-[1px] p-6 rounded-3xl border border-border/70 bg-card/20 space-y-4">
-        <h3 className="font-outfit font-extrabold text-foreground text-base">{t("themePresets")}</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {BUILTIN_THEMES.map((theme) => (
-            <motion.div
-              key={theme.id}
-              // whileHover={{ scale: 1.03, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.12 } }}
-              whileTap={{ scale: 0.97, transition: { type: "tween" as const, ease: "linear" as const, duration: 0.08 } }}
-            >
-              <ThemePresetCard
-                theme={theme}
-                isActive={activeTheme?.id === theme.id}
-                onClick={() => {
-                  setActiveTheme(theme);
-                  saveForm(fields, theme);
-                  if (pushToHistory) pushToHistory(fields, theme);
-                }}
-              />
-            </motion.div>
-          ))}
         </div>
       </div>
     </div>

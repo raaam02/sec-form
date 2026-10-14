@@ -251,3 +251,116 @@ export function buildSubmissionValidator(fields: FormField[]) {
 
   return z.object(shape);
 }
+
+export function createDefaultField(type: FieldType, id?: string): FormField {
+  const fieldId =
+    id ||
+    (typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : Math.random().toString(36).substring(2, 9));
+
+  switch (type) {
+    case "text":
+      return {
+        id: fieldId,
+        type: "text",
+        label: "Full Name",
+        placeholder: "Type your full name...",
+        required: false,
+      };
+    case "textarea":
+      return {
+        id: fieldId,
+        type: "textarea",
+        label: "Feedback or Message",
+        placeholder: "Write your answer or thoughts here...",
+        required: false,
+      };
+    case "email":
+      return {
+        id: fieldId,
+        type: "email",
+        label: "Email Address",
+        placeholder: "name@example.com",
+        required: true,
+      };
+    case "phone":
+      return {
+        id: fieldId,
+        type: "phone",
+        label: "Phone Number",
+        placeholder: "+1 (555) 000-0000",
+        required: false,
+      };
+    case "number":
+      return {
+        id: fieldId,
+        type: "number",
+        label: "Number or Quantity",
+        placeholder: "0",
+        required: false,
+      };
+    case "select":
+      return {
+        id: fieldId,
+        type: "select",
+        label: "Choose an option",
+        options: ["Option 1", "Option 2", "Option 3"],
+        required: false,
+      };
+    case "multiselect":
+      return {
+        id: fieldId,
+        type: "multiselect",
+        label: "Select all that apply",
+        options: ["Option 1", "Option 2", "Option 3"],
+        required: false,
+      };
+    case "checkbox":
+      return {
+        id: fieldId,
+        type: "checkbox",
+        label: "I agree to the terms and privacy policy",
+        required: true,
+      };
+    case "rating":
+      return {
+        id: fieldId,
+        type: "rating",
+        label: "How would you rate your experience?",
+        required: false,
+        validation: { min: 1, max: 5 },
+      };
+    case "date":
+      return {
+        id: fieldId,
+        type: "date",
+        label: "Date",
+        placeholder: "Select date (YYYY-MM-DD)",
+        required: false,
+      };
+    case "time":
+      return {
+        id: fieldId,
+        type: "time",
+        label: "Time",
+        placeholder: "Select time (HH:MM AM/PM)",
+        required: false,
+      };
+    case "step_break":
+      return {
+        id: fieldId,
+        type: "step_break",
+        label: "Page Break",
+        required: false,
+      };
+    default:
+      return {
+        id: fieldId,
+        type,
+        label: "Question",
+        placeholder: "Type your answer...",
+        required: false,
+      };
+  }
+}

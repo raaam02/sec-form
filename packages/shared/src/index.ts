@@ -19,6 +19,23 @@ export interface ThemeConfig {
   };
 }
 
+function getContrastTextColor(hexColor: string): string {
+  if (!hexColor || !hexColor.startsWith("#")) return "#ffffff";
+  const hex = hexColor.replace("#", "");
+  let r = 255, g = 255, b = 255;
+  if (hex.length === 3) {
+    r = parseInt(hex[0] + hex[0], 16);
+    g = parseInt(hex[1] + hex[1], 16);
+    b = parseInt(hex[2] + hex[2], 16);
+  } else if (hex.length >= 6) {
+    r = parseInt(hex.substring(0, 2), 16);
+    g = parseInt(hex.substring(2, 4), 16);
+    b = parseInt(hex.substring(4, 6), 16);
+  }
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 140 ? "#09090b" : "#ffffff";
+}
+
 /**
  * Returns active theme colors according to color mode (light vs dark).
  * If dark mode is active and the theme doesn't define dark overrides,
@@ -32,11 +49,15 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
   borderRadius: string;
   inputBgColor: string;
   inputBorderColor: string;
+  buttonBgColor: string;
+  buttonTextColor: string;
 } {
   const t = theme || BUILTIN_THEMES[0];
   const borderRadius = t.borderRadius || "0.5rem";
 
   if (!isDark) {
+    const btnBg = t.primaryColor;
+    const btnText = getContrastTextColor(btnBg);
     return {
       primaryColor: t.primaryColor,
       backgroundColor: t.backgroundColor,
@@ -45,19 +66,39 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
       borderRadius,
       inputBgColor: t.inputBgColor || "transparent",
       inputBorderColor: t.inputBorderColor || "rgba(128,128,128,0.22)",
+      buttonBgColor: btnBg,
+      buttonTextColor: btnText,
     };
   }
 
   // Dark Mode active
+  let darkPrimary = t.dark?.primaryColor || t.primaryColor;
+  // If the primary color is too dark in dark mode (e.g. slate-900 / #0f172a), invert to light contrast
+  if (darkPrimary.startsWith("#")) {
+    const hex = darkPrimary.replace("#", "");
+    const r = parseInt(hex.substring(0, 2) || "0", 16);
+    const g = parseInt(hex.substring(2, 4) || "0", 16);
+    const b = parseInt(hex.substring(4, 6) || "0", 16);
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    if (yiq < 70) {
+      darkPrimary = "#f4f4f5";
+    }
+  }
+
+  const btnBg = darkPrimary;
+  const btnText = getContrastTextColor(btnBg);
+
   if (t.dark) {
     return {
-      primaryColor: t.dark.primaryColor || t.primaryColor,
+      primaryColor: darkPrimary,
       backgroundColor: t.dark.backgroundColor || "#09090b",
       textColor: t.dark.textColor || "#fafafa",
       cardColor: t.dark.cardColor || "#18181b",
       borderRadius,
       inputBgColor: t.dark.inputBgColor || "rgba(255,255,255,0.04)",
       inputBorderColor: t.dark.inputBorderColor || "rgba(255,255,255,0.12)",
+      buttonBgColor: btnBg,
+      buttonTextColor: btnText,
     };
   }
 
@@ -70,24 +111,28 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
 
   if (isThemeAlreadyDark) {
     return {
-      primaryColor: t.primaryColor,
+      primaryColor: darkPrimary,
       backgroundColor: t.backgroundColor,
       textColor: t.textColor,
       cardColor: t.cardColor,
       borderRadius,
       inputBgColor: t.inputBgColor || "rgba(255,255,255,0.05)",
       inputBorderColor: t.inputBorderColor || "rgba(255,255,255,0.14)",
+      buttonBgColor: btnBg,
+      buttonTextColor: btnText,
     };
   }
 
   return {
-    primaryColor: t.primaryColor,
+    primaryColor: darkPrimary,
     backgroundColor: "#09090b",
     textColor: "#fafafa",
     cardColor: "#18181b",
     borderRadius,
     inputBgColor: "rgba(255,255,255,0.04)",
     inputBorderColor: "rgba(255,255,255,0.12)",
+    buttonBgColor: btnBg,
+    buttonTextColor: btnText,
   };
 }
 

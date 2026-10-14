@@ -386,6 +386,8 @@ export default function PublicFormPage() {
     "--border-radius": resolved.borderRadius,
     "--input-bg": resolved.inputBgColor,
     "--input-border": resolved.inputBorderColor,
+    "--button-bg": resolved.buttonBgColor,
+    "--button-text": resolved.buttonTextColor,
   } as React.CSSProperties;
 
   return (
@@ -677,21 +679,23 @@ export default function PublicFormPage() {
                   <Button
                     type="submit"
                     disabled={submitMutation.isLoading}
-                    className="flex-1 h-10 text-white font-semibold text-sm transition-all shadow-sm flex items-center justify-center disabled:opacity-50 focus-visible:ring-[var(--primary)]"
+                    className="flex-1 h-10 font-semibold text-sm transition-all shadow-sm flex items-center justify-center disabled:opacity-50 focus-visible:ring-[var(--button-bg)]"
                     style={{
-                      backgroundColor: "var(--primary)",
+                      backgroundColor: "var(--button-bg)",
+                      color: "var(--button-text)",
                       borderRadius: "min(var(--border-radius), 16px)",
                     }}
                   >
-                    {submitMutation.isLoading ? <LoadingSpinner className="w-5 h-5" color="text-white" /> : t("submitBtn")}
+                    {submitMutation.isLoading ? <LoadingSpinner className="w-5 h-5" color="text-current" /> : t("submitBtn")}
                   </Button>
                 ) : (
                   <Button
                     type="button"
                     onClick={handleNextStep}
-                    className="flex-1 h-10 text-white font-semibold text-sm transition-all shadow-sm flex items-center justify-center focus-visible:ring-[var(--primary)]"
+                    className="flex-1 h-10 font-semibold text-sm transition-all shadow-sm flex items-center justify-center focus-visible:ring-[var(--button-bg)]"
                     style={{
-                      backgroundColor: "var(--primary)",
+                      backgroundColor: "var(--button-bg)",
+                      color: "var(--button-text)",
                       borderRadius: "min(var(--border-radius), 16px)",
                     }}
                   >

@@ -13,7 +13,7 @@ import {
   getLocalForms,
 } from "@/utils/localForms";
 import { ThemeConfig } from "@sec-form/shared";
-import { FormField, FieldType } from "@sec-form/validators";
+import { FormField, FieldType, createDefaultField } from "@sec-form/validators";
 import { AlertCircle, X, ArrowLeft } from "lucide-react";
 import { LoadingSpinner } from "@sec-form/ui";
 
@@ -181,23 +181,6 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
     });
   }, []);
 
-  const handleUndo = useCallback(() => {
-    if (formHistory.index > 0) {
-      const targetState = formHistory.states[formHistory.index - 1];
-      setFields(targetState.fields);
-      setActiveTheme(targetState.theme);
-      setFormHistory((prev) => ({ ...prev, index: prev.index - 1 }));
-    }
-  }, [formHistory]);
-
-  const handleRedo = useCallback(() => {
-    if (formHistory.index < formHistory.states.length - 1) {
-      const targetState = formHistory.states[formHistory.index + 1];
-      setFields(targetState.fields);
-      setActiveTheme(targetState.theme);
-      setFormHistory((prev) => ({ ...prev, index: prev.index + 1 }));
-    }
-  }, [formHistory]);
 
   // Saving indicators
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -358,18 +341,32 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
     [saveForm]
   );
 
+  // Undo / Redo Actions with State Persistence
+  const handleUndo = useCallback(() => {
+    if (formHistory.index > 0) {
+      const targetIndex = formHistory.index - 1;
+      const targetState = formHistory.states[targetIndex];
+      setFields(targetState.fields);
+      setActiveTheme(targetState.theme);
+      setFormHistory((prev) => ({ ...prev, index: targetIndex }));
+      saveFormDebounced(targetState.fields, targetState.theme, layoutMode);
+    }
+  }, [formHistory, saveFormDebounced, layoutMode]);
+
+  const handleRedo = useCallback(() => {
+    if (formHistory.index < formHistory.states.length - 1) {
+      const targetIndex = formHistory.index + 1;
+      const targetState = formHistory.states[targetIndex];
+      setFields(targetState.fields);
+      setActiveTheme(targetState.theme);
+      setFormHistory((prev) => ({ ...prev, index: targetIndex }));
+      saveFormDebounced(targetState.fields, targetState.theme, layoutMode);
+    }
+  }, [formHistory, saveFormDebounced, layoutMode]);
+
   // Field manipulation helpers
   const handleAddField = (type: FieldType, atIndex?: number) => {
-    const newField: FormField = {
-      id: crypto.randomUUID(),
-      type,
-      label: `Untitled ${type.replace("_", " ")}`,
-      required: false,
-      placeholder: "Your answer here...",
-      options: ["select", "multiselect"].includes(type)
-        ? ["Option 1", "Option 2", "Option 3"]
-        : undefined,
-    };
+    const newField = createDefaultField(type);
     const updated = [...fields];
     if (atIndex !== undefined && atIndex >= 0 && atIndex <= fields.length) {
       updated.splice(atIndex, 0, newField);
@@ -382,10 +379,17 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
     pushToHistory(updated, activeTheme);
   };
 
+  const historyDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleUpdateField = (fieldId: string, updates: Partial<FormField>) => {
     const updated = fields.map((f) => (f.id === fieldId ? { ...f, ...updates } : f));
     setFields(updated);
     saveFormDebounced(updated, activeTheme, layoutMode);
+
+    if (historyDebounceRef.current) clearTimeout(historyDebounceRef.current);
+    historyDebounceRef.current = setTimeout(() => {
+      pushToHistory(updated, activeTheme);
+    }, 400);
   };
 
   const handleDeleteField = (fieldId: string) => {
@@ -549,8 +553,36 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
   };
 
   // Keyboard Shortcuts
-  useGlobalShortcut("undo", "z", "Undo", handleUndo, "Builder");
-  useGlobalShortcut("redo", "y", "Redo", handleRedo, "Builder");
+  useGlobalShortcut("undo", "ctrl+z", "Undo", handleUndo, "Builder");
+  useGlobalShortcut("redo", "ctrl+y", "Redo", handleRedo, "Builder");
+
+  useEffect(() => {
+    const handleUndoRedoKeys = (e: KeyboardEvent) => {
+      const activeEl = document.activeElement;
+      const isInput =
+        activeEl instanceof HTMLInputElement ||
+        activeEl instanceof HTMLTextAreaElement ||
+        activeEl?.getAttribute("contenteditable") === "true";
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        if (!isInput) {
+          e.preventDefault();
+          if (e.shiftKey) {
+            handleRedo();
+          } else {
+            handleUndo();
+          }
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+        if (!isInput) {
+          e.preventDefault();
+          handleRedo();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleUndoRedoKeys);
+    return () => window.removeEventListener("keydown", handleUndoRedoKeys);
+  }, [handleUndo, handleRedo]);
 
   if (activeIsFormLoading) {
     return (
