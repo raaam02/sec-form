@@ -55,6 +55,18 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
   const [middleTab, setMiddleTab] = useState<"form" | "theme" | "responses" | "analytics" | "settings" | "embed">(
     initialTab
   );
+  const [activeSidebar, setActiveSidebar] = useState<"theme" | "settings" | null>(
+    initialTab === "theme" || initialTab === "settings" ? initialTab : null
+  );
+
+  const handleToggleSidebar = (target: "theme" | "settings") => {
+    setActiveSidebar((prev) => {
+      const next = prev === target ? null : target;
+      setMiddleTab(next ? next : "form");
+      return next;
+    });
+  };
+
   const [hasLoadedLocal, setHasLoadedLocal] = useState(false);
   const [isLeftSidebarExpanded, setIsLeftSidebarExpanded] = useState(true);
 
@@ -63,6 +75,7 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
   useEffect(() => {
     if (isPublicBuilder && (middleTab === "settings" || middleTab === "embed")) {
       setMiddleTab("form");
+      setActiveSidebar(null);
     }
   }, [isPublicBuilder, middleTab]);
 
@@ -630,6 +643,9 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
           handlePublish={handlePublish}
           isPublishing={isPublishing}
           onExit={onExit}
+          activeSidebar={activeSidebar}
+          onToggleSidebar={handleToggleSidebar}
+          isPublicBuilder={isPublicBuilder}
         />
       </div>
 
@@ -649,6 +665,8 @@ export function UnifiedFormBuilder({ id, isExpandable, onExit }: UnifiedFormBuil
           <BuilderCanvas
             middleTab={middleTab}
             setMiddleTab={setMiddleTab}
+            activeSidebar={activeSidebar}
+            setActiveSidebar={setActiveSidebar}
             title={title}
             setTitle={setTitle}
             description={description}

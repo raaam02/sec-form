@@ -8,6 +8,14 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import Link from "next/link";
 
+import { MorphSelect, MorphSelectOption } from "@/components/arc/morph-select/morph-select";
+
+const LAYOUT_OPTIONS: MorphSelectOption[] = [
+  { value: "standard", label: "Standard (1 Page)", meta: "Single page" },
+  { value: "single_field", label: "Single Field per Step", meta: "One-by-one" },
+  { value: "custom_steps", label: "Custom Steps", meta: "Step Breaks" },
+];
+
 interface SettingsCanvasTabProps {
   visibility: "draft" | "public" | "unlisted";
   onSaveVisibility: (v: "draft" | "public" | "unlisted") => Promise<void>;
@@ -171,86 +179,81 @@ export function SettingsCanvasTab({
     slugStatus === "available" ? "border-emerald-500 focus-within:ring-emerald-500/20" :
     slugStatus === "taken" || slugStatus === "invalid" ? "border-rose-500 focus-within:ring-rose-500/20" :
     slugStatus === "network_error" ? "border-amber-500 focus-within:ring-amber-500/20" :
-    "border-border";
+    "border-border/70";
 
   return (
-    <div className="backdrop-blur-[1px] p-4 rounded-3xl border border-border/70 space-y-5 flex flex-col gap-2 text-xs text-muted-foreground font-semibold">
+    <div className="space-y-6 text-xs text-muted-foreground font-medium">
       {/* Visibility Toggle */}
-      <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <label className="text-xs font-bold text-foreground capitalize tracking-wider block">
-              {visibility === "public" ? t("public_visibility") : t("unlisted_visibility")}
-            </label>
-            <p className="text-xs font-normal leading-normal text-muted-foreground max-w-[280px]">
-              {visibility === "public"
-                ? "Public forms are open for anyone to view and submit responses."
-                : "Unlisted forms are private. Only the creator can view; public submissions are disabled."}
-            </p>
-          </div>
-          {visibility === "public" ? (
-            <ConfirmationPopover
-              onConfirm={() => onSaveVisibility("unlisted")}
-              title="Unlist Form?"
-              description="Are you sure you want to unlist this form? Public submissions will be disabled."
-              confirmText="Unlist"
-              cancelText="Cancel"
-            >
-              <div className="cursor-pointer">
-                <Switch checked={true} className="pointer-events-none" />
-              </div>
-            </ConfirmationPopover>
-          ) : (
-            <Switch
-              checked={false}
-              onCheckedChange={(checked) => {
-                if (checked) {
-                  onSaveVisibility("public");
-                }
-              }}
-            />
-          )}
+      <div className="flex items-center justify-between pb-5 border-b border-border/40">
+        <div className="space-y-0.5 pr-4">
+          <label className="text-xs font-semibold text-foreground block">
+            {visibility === "public" ? t("public_visibility") : t("unlisted_visibility")}
+          </label>
+          <p className="text-[11px] font-normal leading-relaxed text-muted-foreground">
+            {visibility === "public"
+              ? "Public forms are open for anyone to view and submit responses."
+              : "Unlisted forms are private. Only the creator can view; public submissions are disabled."}
+          </p>
         </div>
+        {visibility === "public" ? (
+          <ConfirmationPopover
+            onConfirm={() => onSaveVisibility("unlisted")}
+            title="Unlist Form?"
+            description="Are you sure you want to unlist this form? Public submissions will be disabled."
+            confirmText="Unlist"
+            cancelText="Cancel"
+          >
+            <div className="cursor-pointer shrink-0">
+              <Switch checked={true} className="pointer-events-none" />
+            </div>
+          </ConfirmationPopover>
+        ) : (
+          <Switch
+            checked={false}
+            className="shrink-0"
+            onCheckedChange={(checked) => {
+              if (checked) {
+                onSaveVisibility("public");
+              }
+            }}
+          />
+        )}
       </div>
 
-      {/* Form Display Layout */}
-      <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-        <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-2">Form Display Layout</label>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { mode: "standard", label: "Standard (1 Page)" },
-            { mode: "single_field", label: "Single Field per Step" },
-            { mode: "custom_steps", label: "Custom Steps" }
-          ].map((option) => (
-            <Button
-              key={option.mode}
-              type="button"
-              variant={layoutMode === option.mode ? "default" : "outline"}
-              onClick={() => setLayoutMode && setLayoutMode(option.mode as any)}
-              className="h-9 w-full font-bold text-xs transition-colors rounded-xl"
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-        <p className="text-xs text-muted-foreground mt-2 font-normal leading-normal">
-          {layoutMode === "standard" && "All fields are displayed on a single page."}
-          {layoutMode === "single_field" && "Each field gets its own separate page with Next/Back buttons."}
+      {/* Form Display Layout with MorphSelect */}
+      <div className="space-y-2 pb-5 border-b border-border/40">
+        <label className="text-xs font-semibold text-foreground block">
+          Form Display Layout
+        </label>
+        <MorphSelect
+          label="Form Display Layout"
+          hideLabel
+          items={LAYOUT_OPTIONS}
+          value={layoutMode || "standard"}
+          onValueChange={(val) => setLayoutMode && setLayoutMode(val as any)}
+          panelWidth={320}
+          className="w-full"
+        />
+        <p className="text-[11px] text-muted-foreground mt-1.5 font-normal leading-relaxed">
+          {layoutMode === "standard" && "All fields are displayed sequentially on a single page."}
+          {layoutMode === "single_field" && "Each field gets its own separate card with Next/Back buttons."}
           {layoutMode === "custom_steps" && "Drag and drop 'Step Break' fields into the canvas to split the form into custom pages."}
         </p>
       </div>
 
       {/* Custom Form URL Slug */}
-      <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
-        <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1.5">Custom Form URL Slug</label>
+      <div className="space-y-2 pb-5 border-b border-border/40">
+        <label className="text-xs font-semibold text-foreground block">
+          Custom Form URL Slug
+        </label>
         <div className="flex items-center gap-2">
           <div className={`flex-1 flex items-center rounded-xl border ${slugBorderColor} overflow-hidden bg-background/50 transition-colors`}>
-            <span className="text-xs font-mono text-muted-foreground px-3 bg-muted/40 h-9 flex items-center border-r border-border shrink-0 select-none">/f/</span>
+            <span className="text-xs font-mono text-muted-foreground px-2.5 bg-muted/40 h-8 flex items-center border-r border-border shrink-0 select-none">/f/</span>
             <Input
               type="text"
               value={tempSlug}
               onChange={(e) => setTempSlug(e.target.value)}
-              className="flex-1 h-9 px-3 bg-transparent border-0 text-xs text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none font-medium"
+              className="flex-1 h-8 px-2.5 bg-transparent border-0 text-xs text-foreground focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none font-medium"
               placeholder="custom-slug"
             />
             {/* Copy button */}
@@ -259,10 +262,10 @@ export function SettingsCanvasTab({
               variant="ghost"
               size="icon"
               onClick={handleCopyUrl}
-              className="h-9 w-9 text-muted-foreground hover:text-foreground shrink-0 border-l border-border rounded-none"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0 border-l border-border rounded-none"
               title="Copy URL"
             >
-              {isCopied ? <Check className="h-4 w-4 text-emerald-500 animate-in zoom-in duration-200" /> : <Copy className="h-4 w-4" />}
+              {isCopied ? <Check className="h-3.5 w-3.5 text-emerald-500 animate-in zoom-in duration-200" /> : <Copy className="h-3.5 w-3.5" />}
             </Button>
           </div>
           {/* Direct Save Button */}
@@ -271,7 +274,7 @@ export function SettingsCanvasTab({
               type="button"
               onClick={handleSaveSlugClick}
               disabled={slugStatus !== "available" || isSavingSlug}
-              className="h-9 px-3 font-semibold text-xs rounded-xl shrink-0 gap-1.5 min-w-[64px] transition-all animate-in fade-in zoom-in duration-200"
+              className="h-8 px-3 font-semibold text-xs rounded-xl shrink-0 gap-1.5 min-w-[60px] transition-all animate-in fade-in zoom-in duration-200"
             >
               {isSavingSlug ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
             </Button>
@@ -279,7 +282,7 @@ export function SettingsCanvasTab({
         </div>
 
         {/* Validation Feedback Messages */}
-        <div className="mt-1.5 text-xs font-normal leading-normal">
+        <div className="text-[11px] font-normal leading-relaxed">
           {slugStatus === "checking" && <span className="text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin inline" /> Checking availability...</span>}
           {slugStatus === "available" && <span className="text-emerald-600 dark:text-emerald-500 font-medium">✓ Available & valid slug! Click Save to apply.</span>}
           {slugStatus === "taken" && <span className="text-rose-600 dark:text-rose-500 font-medium">✗ This custom slug is already taken.</span>}
@@ -290,16 +293,17 @@ export function SettingsCanvasTab({
       </div>
 
       {/* Telegram Notifications */}
-      <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px]">
+      <div className="space-y-3 pb-5 border-b border-border/40">
         <div className="flex items-center justify-between">
-          <div>
-            <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Telegram Notifications</label>
-            <p className="text-xs text-muted-foreground font-normal leading-normal">
-              Receive real-time notifications in your own Telegram chats when answers are submitted.
+          <div className="pr-4">
+            <label className="text-xs font-semibold text-foreground block mb-0.5">Telegram Notifications</label>
+            <p className="text-[11px] text-muted-foreground font-normal leading-relaxed">
+              Receive real-time notifications in Telegram when responses are submitted.
             </p>
           </div>
           <Switch
             checked={telegramEnabled}
+            className="shrink-0"
             onCheckedChange={(checked) => {
               onSaveTelegram({
                 enabled: checked,
@@ -311,9 +315,9 @@ export function SettingsCanvasTab({
         </div>
 
         {telegramEnabled && (
-          <div className="space-y-4 mt-2">
+          <div className="space-y-3 pt-2">
             {telegramChatId ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-3 py-2 rounded-xl">
                   <CheckCircle2 className="h-4 w-4 shrink-0" />
                   <div>
@@ -333,20 +337,18 @@ export function SettingsCanvasTab({
                       chatName: undefined
                     });
                   }}
-                  className="h-8 px-3 text-[10px] font-bold rounded-xl"
+                  className="h-7 px-2.5 text-[10px] font-medium rounded-lg"
                 >
                   Disconnect Telegram
                 </Button>
               </div>
             ) : (
-              <div className="space-y-5">
-                <div className="border-t border-border/60 my-2" />
-
-                <div className="space-y-2">
-                  <div className="text-xs font-bold text-muted-foreground">
-                    Option 1: Quick Connect (Simplest)
-                    <p className="mt-0.5 text-xs text-muted-foreground font-normal leading-normal">
-                      Click the button below to open our Telegram Bot, then press <strong>Start</strong> to link this form.
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <div className="text-[11px] font-semibold text-foreground">
+                    Quick Connect via Bot
+                    <p className="mt-0.5 text-[11px] text-muted-foreground font-normal leading-relaxed">
+                      Open our Telegram Bot and press <strong>Start</strong> to link this form.
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -363,7 +365,7 @@ export function SettingsCanvasTab({
                         onStartTelegramSync?.();
                       }}
                       disabled={isTelegramSyncing}
-                      className="h-8 px-3 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 min-w-[170px]"
+                      className="h-8 px-3 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5"
                     >
                       {isTelegramSyncing ? (
                         isTelegramFetching ? (
@@ -390,23 +392,18 @@ export function SettingsCanvasTab({
                         type="button"
                         variant="outline"
                         onClick={() => onCheckTelegramStatus?.()}
-                        className="h-8 px-3 font-bold text-xs rounded-xl flex items-center gap-1.5 border-border hover:bg-muted"
+                        className="h-8 px-2.5 font-medium text-xs rounded-xl flex items-center gap-1.5 border-border hover:bg-muted"
                       >
-                        <RefreshCw className="h-3.5 w-3.5" />
+                        <RefreshCw className="h-3 w-3" />
                         Check Status
                       </Button>
                     )}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="text-xs font-bold text-muted-foreground">
-                    Option 2: Manual Chat ID Connection
-                    <p className="mt-0.5 text-xs text-muted-foreground font-normal leading-normal">
-                      Or enter your Telegram Chat ID manually. You can get your Chat ID by messaging the bot @
-                        <Link className="underline" target="_blank" href="https://t.me/userinfobot">userinfobot </Link>
-                      on Telegram.
-                    </p>
+                <div className="space-y-1.5 pt-2 border-t border-border/30">
+                  <div className="text-[11px] font-semibold text-foreground">
+                    Or Enter Chat ID Manually
                   </div>
                   <div className="flex gap-2">
                     <Input
@@ -414,7 +411,7 @@ export function SettingsCanvasTab({
                       value={manualChatIdInput}
                       onChange={(e) => setManualChatIdInput(e.target.value)}
                       placeholder="e.g. 535123456"
-                      className="h-9 px-3 bg-muted/50 text-xs text-foreground rounded-xl flex-1"
+                      className="h-8 px-2.5 bg-background/50 text-xs text-foreground rounded-xl flex-1 border-border/70"
                     />
                     <Button
                       type="button"
@@ -428,9 +425,9 @@ export function SettingsCanvasTab({
                         }
                       }}
                       disabled={!manualChatIdInput.trim()}
-                      className="h-9 px-4 font-bold text-xs rounded-xl shrink-0"
+                      className="h-8 px-3 font-medium text-xs rounded-xl shrink-0"
                     >
-                      Link Chat
+                      Link
                     </Button>
                   </div>
                 </div>
@@ -441,17 +438,17 @@ export function SettingsCanvasTab({
       </div>
 
       {/* Allowed Embed Domains */}
-      <div className="p-4 rounded-lg bg-secondary/35 backdrop-blur-[1px] space-y-3">
+      <div className="space-y-2.5">
         <div>
-          <label className="text-xs font-bold text-foreground capitalize tracking-wider block mb-1">Allowed Embed Domains</label>
-          <p className="text-xs text-muted-foreground font-normal leading-normal">
-            Restrict where your form can be embedded. Enter specific domains (max 4). Leave empty to allow embedding anywhere.
+          <label className="text-xs font-semibold text-foreground block mb-0.5">Allowed Embed Domains</label>
+          <p className="text-[11px] text-muted-foreground font-normal leading-relaxed">
+            Restrict where this form can be embedded. Enter specific domains (max 4) or leave empty for anywhere.
           </p>
         </div>
 
         {domainInputs.length === 0 ? (
-          <p className="text-xs font-normal text-muted-foreground italic py-1">
-            Embedding is allowed anywhere.
+          <p className="text-[11px] font-normal text-muted-foreground italic py-0.5">
+            Embedding is currently allowed on any domain.
           </p>
         ) : (
           <div className="space-y-2">
@@ -466,8 +463,8 @@ export function SettingsCanvasTab({
                       onChange={(e) => handleDomainInputChange(index, e.target.value)}
                       onBlur={handleDomainInputBlur}
                       placeholder="e.g. mywebsite.com"
-                      className={`h-9 px-3 bg-muted/40 text-xs text-foreground rounded-xl flex-1 focus-visible:ring-1 transition-colors ${
-                        !valid ? "border-rose-500 focus-visible:ring-rose-500/30" : "border-border focus-visible:ring-primary/30"
+                      className={`h-8 px-2.5 bg-background/50 text-xs text-foreground rounded-xl flex-1 focus-visible:ring-1 transition-colors ${
+                        !valid ? "border-rose-500 focus-visible:ring-rose-500/30" : "border-border/70 focus-visible:ring-primary/30"
                       }`}
                     />
                     <Button
@@ -475,14 +472,14 @@ export function SettingsCanvasTab({
                       variant="ghost"
                       size="icon"
                       onClick={() => removeDomainInput(index)}
-                      className="h-9 w-9 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-xl shrink-0"
+                      className="h-8 w-8 text-muted-foreground hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg shrink-0"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                   {!valid && (
                     <p className="text-[10px] text-rose-500 font-medium pl-1">
-                      Invalid domain format (e.g. example.com). Protocol and paths will be stripped.
+                      Invalid domain format. Protocol and paths will be stripped.
                     </p>
                   )}
                 </div>
@@ -497,9 +494,9 @@ export function SettingsCanvasTab({
             variant="outline"
             size="sm"
             onClick={addDomainInput}
-            className="h-8 px-3 font-semibold text-xs rounded-xl flex items-center gap-1.5 w-fit"
+            className="h-7 px-2.5 font-medium text-xs rounded-lg flex items-center gap-1.5 w-fit border-border/70 hover:bg-muted"
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-3 w-3" />
             Add Domain
           </Button>
         )}

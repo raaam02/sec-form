@@ -9,6 +9,10 @@ export interface ThemeConfig {
   borderRadius: string;
   inputBgColor?: string;
   inputBorderColor?: string;
+  inputTextColor?: string;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
+  accentColor?: string;
   dark?: {
     primaryColor?: string;
     backgroundColor?: string;
@@ -16,6 +20,9 @@ export interface ThemeConfig {
     cardColor?: string;
     inputBgColor?: string;
     inputBorderColor?: string;
+    inputTextColor?: string;
+    buttonBgColor?: string;
+    buttonTextColor?: string;
   };
 }
 
@@ -49,6 +56,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
   borderRadius: string;
   inputBgColor: string;
   inputBorderColor: string;
+  inputTextColor: string;
   buttonBgColor: string;
   buttonTextColor: string;
 } {
@@ -56,8 +64,8 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
   const borderRadius = t.borderRadius || "0.5rem";
 
   if (!isDark) {
-    const btnBg = t.primaryColor;
-    const btnText = getContrastTextColor(btnBg);
+    const btnBg = t.buttonBgColor || t.primaryColor;
+    const btnText = t.buttonTextColor || getContrastTextColor(btnBg);
     return {
       primaryColor: t.primaryColor,
       backgroundColor: t.backgroundColor,
@@ -66,6 +74,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
       borderRadius,
       inputBgColor: t.inputBgColor || "transparent",
       inputBorderColor: t.inputBorderColor || "rgba(128,128,128,0.22)",
+      inputTextColor: t.inputTextColor || t.textColor,
       buttonBgColor: btnBg,
       buttonTextColor: btnText,
     };
@@ -73,6 +82,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
 
   // Dark Mode active
   let darkPrimary = t.dark?.primaryColor || t.primaryColor;
+  let darkBtnBg = t.dark?.buttonBgColor || t.buttonBgColor || darkPrimary;
   // If the primary color is too dark in dark mode (e.g. slate-900 / #0f172a), invert to light contrast
   if (darkPrimary.startsWith("#")) {
     const hex = darkPrimary.replace("#", "");
@@ -85,8 +95,8 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
     }
   }
 
-  const btnBg = darkPrimary;
-  const btnText = getContrastTextColor(btnBg);
+  const btnBg = darkBtnBg;
+  const btnText = t.dark?.buttonTextColor || t.buttonTextColor || getContrastTextColor(btnBg);
 
   if (t.dark) {
     return {
@@ -97,6 +107,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
       borderRadius,
       inputBgColor: t.dark.inputBgColor || "rgba(255,255,255,0.04)",
       inputBorderColor: t.dark.inputBorderColor || "rgba(255,255,255,0.12)",
+      inputTextColor: t.dark.inputTextColor || t.inputTextColor || t.dark.textColor || "#fafafa",
       buttonBgColor: btnBg,
       buttonTextColor: btnText,
     };
@@ -104,6 +115,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
 
   // Auto-adapt light themes when dark mode is turned on
   const isThemeAlreadyDark =
+    t.id === "custom" ||
     t.backgroundColor.startsWith("#0") ||
     t.backgroundColor.startsWith("#1") ||
     t.backgroundColor.includes("rgb(0") ||
@@ -118,6 +130,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
       borderRadius,
       inputBgColor: t.inputBgColor || "rgba(255,255,255,0.05)",
       inputBorderColor: t.inputBorderColor || "rgba(255,255,255,0.14)",
+      inputTextColor: t.inputTextColor || t.textColor,
       buttonBgColor: btnBg,
       buttonTextColor: btnText,
     };
@@ -131,6 +144,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
     borderRadius,
     inputBgColor: "rgba(255,255,255,0.04)",
     inputBorderColor: "rgba(255,255,255,0.12)",
+    inputTextColor: "#fafafa",
     buttonBgColor: btnBg,
     buttonTextColor: btnText,
   };

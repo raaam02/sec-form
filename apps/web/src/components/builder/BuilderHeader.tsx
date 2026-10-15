@@ -1,27 +1,21 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { 
-  ArrowLeft, 
-  RefreshCw, 
-  AlertCircle, 
-  CheckCircle, 
-  ChevronDown, 
-  Check, 
-  Share2, 
-  ExternalLink, 
-  Globe, 
-  EyeOff, 
-  Lock,
-  Keyboard,
-  Upload,
+import {
+  ArrowLeft,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
+  Share2,
   LogIn,
-  X
+  X,
+  Palette,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTranslations } from "next-intl";
-import { useGlobalShortcutHelp } from "@/components/providers/GlobalShortcutProvider";
+import { cn } from "@/lib/utils";
 
 interface BuilderHeaderProps {
   title: string;
@@ -35,6 +29,9 @@ interface BuilderHeaderProps {
   handlePublish: () => void;
   isPublishing: boolean;
   onExit?: () => void;
+  activeSidebar?: "theme" | "settings" | null;
+  onToggleSidebar?: (target: "theme" | "settings") => void;
+  isPublicBuilder?: boolean;
 }
 
 export function BuilderHeader({
@@ -49,188 +46,173 @@ export function BuilderHeader({
   handlePublish,
   isPublishing,
   onExit,
+  activeSidebar,
+  onToggleSidebar,
+  isPublicBuilder,
 }: BuilderHeaderProps) {
   const { data: session } = useSession();
   const t = useTranslations("Builder");
-  const showShortcutsHelp = useGlobalShortcutHelp();
-  const [showVisibilityDropdown, setShowVisibilityDropdown] = useState(false);
-
-  const getVisibilityIcon = (vis: string) => {
-    switch (vis) {
-      case "public": return <Globe className="h-3.5 w-3.5" />;
-      case "unlisted": return <EyeOff className="h-3.5 w-3.5" />;
-      default: return <Lock className="h-3.5 w-3.5" />;
-    }
-  };
 
   const backHref = session?.user ? "/dashboard" : "/";
 
   return (
-    <header className="h-16 border-b border-border bg-sidebar/80 backdrop-blur-md px-6 shrink-0 flex items-center justify-between gap-4 transition-colors duration-200">
-      <div className="flex items-center gap-3 min-w-0">
+    <header className="h-14 border-b border-border/60 bg-background/80 backdrop-blur-md px-4 sm:px-6 shrink-0 flex items-center justify-between gap-3 transition-colors duration-200">
+      {/* Left: Back button + Form title + Save status indicator */}
+      <div className="flex items-center gap-2.5 min-w-0">
         {onExit ? (
-          <Button 
-            variant="outline" 
+          <Button
+            variant="ghost"
             size="icon"
             onClick={onExit}
-            className="h-8 w-8 rounded-xl p-1.5 border border-border bg-card text-muted-foreground shrink-0 hover:text-foreground hover:bg-accent cursor-pointer"
+            className="h-8 w-8 rounded-lg text-muted-foreground shrink-0 hover:text-foreground hover:bg-muted/60 cursor-pointer shadow-none"
             title="Exit builder"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
         ) : (
-          <Link href={backHref} passHref>
-            <Button 
-              variant="outline" 
+          <Link href={backHref}>
+            <Button
+              variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-xl p-1.5 border border-border bg-card text-muted-foreground shrink-0 hover:text-foreground hover:bg-accent"
+              className="h-8 w-8 rounded-lg text-muted-foreground shrink-0 hover:text-foreground hover:bg-muted/60 shadow-none cursor-pointer"
               title={session?.user ? t("backToDashboard") : "Back to Home"}
-              asChild
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
         )}
-        <div className="min-w-0">
-          <h1 className="font-outfit text-base font-bold text-foreground truncate max-w-[180px] sm:max-w-xs md:max-w-md">{title || t("canvasTitlePlaceholder")}</h1>
+        <div className="flex items-center gap-2 min-w-0">
+          <h1 className="font-outfit text-sm sm:text-base font-bold text-foreground truncate max-w-[140px] sm:max-w-xs md:max-w-sm">
+            {title || t("canvasTitlePlaceholder")}
+          </h1>
+          {/* Continuous saving indicator placed directly after form title */}
+          <div className="text-xs font-normal select-none shrink-0 flex items-center">
+            {saveStatus === "saving" ? (
+              <span className="text-muted-foreground flex items-center gap-1">
+                <RefreshCw className="h-3 w-3 animate-spin text-primary" />
+                <span className="hidden sm:inline">{t("saving")}</span>
+              </span>
+            ) : saveStatus === "error" ? (
+              <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1 font-medium">
+                <AlertCircle className="h-3 w-3" />
+                <span className="hidden sm:inline">{t("unsavedChanges")}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground/70 flex items-center gap-1 font-medium">
+                <CheckCircle className="h-3 w-3 text-emerald-500" />
+                <span className="hidden sm:inline">{t("saved")}</span>
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Share actions & Save indicators */}
-      <div className="flex items-center gap-3 shrink-0">
-        {hasUnpublishedChanges && (
-          <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 bg-amber-500/15 border border-amber-500/20 text-amber-700 dark:text-amber-500 rounded-lg text-[10px] font-bold tracking-wider select-none">
-            <span className="h-1.5 w-1.5 bg-amber-500 rounded-full shrink-0" />
-            Unpublished Changes
-          </div>
-        )}
-        {/* Continuous saving indicator */}
-        <div className="text-xs font-semibold select-none mr-2 hidden sm:block">
-          {saveStatus === "saving" ? (
-            <span className="text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 font-bold">
-              <RefreshCw className="h-3.5 w-3.5 animate-spin" /> {t("saving")}
-            </span>
-          ) : saveStatus === "error" ? (
-            <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5 font-bold">
-              <AlertCircle className="h-3.5 w-3.5" /> {t("unsavedChanges")}
-            </span>
-          ) : (
-            <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 font-bold">
-              <CheckCircle className="h-3.5 w-3.5" /> {t("saved")}
-            </span>
-          )}
-        </div>
-
-        {/* Visibility Dropdown Selector */}
-        {/* <div className="relative">
+      {/* Right Controls: Theme & Settings togglers + Share + Preview + Publish */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* Theme Toggler */}
+        {onToggleSidebar && (
           <Button
-            variant="outline"
+            variant={activeSidebar === "theme" ? "secondary" : "ghost"}
             size="sm"
-            onClick={() => setShowVisibilityDropdown(!showVisibilityDropdown)}
-            className="h-9 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-bold text-muted-foreground transition-colors"
+            onClick={() => onToggleSidebar("theme")}
+            className={cn(
+              "h-8 px-2.5 rounded-lg gap-1.5 text-xs font-medium transition-all shadow-none",
+              activeSidebar === "theme"
+                ? "bg-primary/15 text-primary border border-primary/30"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            )}
+            title="Customize theme & styling"
           >
-            {getVisibilityIcon(visibility)}
-            <span className="capitalize hidden sm:inline">{visibility === "draft" ? "unlisted" : visibility}</span>
-            <ChevronDown className="h-3 w-3 text-muted-foreground" />
+            <Palette className="h-3.5 w-3.5 text-purple-500" />
+            <span className="hidden sm:inline">Theme</span>
           </Button>
+        )}
 
-          {showVisibilityDropdown && (
-            <>
-              <div className="fixed inset-0 z-40" onClick={() => setShowVisibilityDropdown(false)} />
-              <div className="absolute right-0 mt-2 z-50 w-40 rounded-xl border border-border bg-popover text-popover-foreground p-1.5 shadow-xl ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-150">
-                {(["public", "unlisted"] as const).map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => {
-                      setShowVisibilityDropdown(false);
-                      handleUpdateVisibility(mode);
-                    }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-left transition-colors ${
-                      visibility === mode
-                        ? "bg-indigo-500/10 text-indigo-700 dark:text-indigo-400"
-                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      {getVisibilityIcon(mode)}
-                      <span className="capitalize">{mode}</span>
-                    </div>
-                    {visibility === mode && <Check className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" />}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div> */}
+        {/* Settings Toggler */}
+        {onToggleSidebar && !isPublicBuilder && (
+          <Button
+            variant={activeSidebar === "settings" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => onToggleSidebar("settings")}
+            className={cn(
+              "h-8 px-2.5 rounded-lg gap-1.5 text-xs font-medium transition-all shadow-none",
+              activeSidebar === "settings"
+                ? "bg-primary/15 text-primary border border-primary/30"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+            )}
+            title="Form settings & configuration"
+          >
+            <Settings className="h-3.5 w-3.5 text-rose-500" />
+            <span className="hidden sm:inline">Settings</span>
+          </Button>
+        )}
 
         {/* Share Button (triggers modal) */}
         {(visibility === "public" || visibility === "unlisted") && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={() => setIsShareModalOpen(true)}
-                className="h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-colors"
+                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors shadow-none"
                 title={t("share")}
               >
-                <Share2 className="h-4 w-4" />
+                <Share2 className="h-3.5 w-3.5" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Share / Embed [Ctrl + E]</TooltipContent>
           </Tooltip>
         )}
-        
-        {/* Live Preview Redirection Link */}
+
+        {/* Live Preview Button (without icon, subtle) */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               size="sm"
-              variant="outline"
-              className="h-9 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-bold text-muted-foreground transition-colors"
+              variant="ghost"
+              className="h-8 px-2.5 sm:px-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors shadow-none"
               asChild
             >
               <a href={publicFormUrl} target="_blank" rel="noopener noreferrer">
-                <span className="hidden sm:inline">{t("preview")}</span>
-                <ExternalLink className="h-3.5 w-3.5" />
+                <span>{t("preview")}</span>
               </a>
             </Button>
           </TooltipTrigger>
           <TooltipContent>Preview Form [Ctrl + P]</TooltipContent>
         </Tooltip>
 
-        {/* Publish Button */}
+        {/* Publish Button (without upload icon, shadow removed, subtle when disabled) */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               size="sm"
               onClick={handlePublish}
-              disabled={isPublishing}
-              className={`h-9 items-center gap-1.5 rounded-xl text-xs font-bold transition-all relative ${
+              disabled={!hasUnpublishedChanges || isPublishing}
+              className={cn(
+                "h-8 px-3 rounded-lg text-xs font-medium transition-all shadow-none",
                 hasUnpublishedChanges
-                  ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_0_10px_rgba(79,70,229,0.35)]"
-                  : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              }`}
-            >
-              {isPublishing ? (
-                <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-              ) : (
-                <Upload className="h-3.5 w-3.5" />
+                  ? "bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer"
+                  : "bg-muted/60 text-muted-foreground/60 cursor-not-allowed"
               )}
+            >
+              {isPublishing && <RefreshCw className="h-3 w-3 animate-spin mr-1.5" />}
               <span>Publish</span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent>Publish changes to live form</TooltipContent>
+          <TooltipContent>
+            {hasUnpublishedChanges ? "Publish changes to live form" : "All changes published"}
+          </TooltipContent>
         </Tooltip>
 
         {!session?.user && (
           <Link href={`/login?redirect=${encodeURIComponent(typeof window !== "undefined" ? window.location.pathname : "")}`} passHref>
             <Button
               size="sm"
-              variant="outline"
-              className="h-9 items-center gap-1.5 rounded-xl border border-border bg-card text-xs font-bold text-foreground transition-colors hover:bg-accent"
+              variant="ghost"
+              className="h-8 px-2.5 rounded-lg text-xs font-medium text-foreground hover:bg-muted/60 transition-colors shadow-none"
             >
-              <LogIn className="h-3.5 w-3.5 text-primary" />
+              <LogIn className="h-3.5 w-3.5 text-primary mr-1.5" />
               <span>Log In</span>
             </Button>
           </Link>
@@ -243,7 +225,7 @@ export function BuilderHeader({
                 size="icon"
                 variant="ghost"
                 onClick={onExit}
-                className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors ml-1 cursor-pointer"
+                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors ml-0.5 cursor-pointer shadow-none"
                 title="Exit Builder"
               >
                 <X className="h-4 w-4" />

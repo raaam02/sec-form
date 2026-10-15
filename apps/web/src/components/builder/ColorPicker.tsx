@@ -71,28 +71,34 @@ export function ColorPicker({ label, value, onChange, onComplete }: ColorPickerP
   };
 
   return (
-    <div className="space-y-1">
-      <label className="text-[10px] font-bold text-muted-foreground tracking-wider block">
+    <div className="space-y-1.5">
+      <label className="text-xs font-medium text-muted-foreground block truncate">
         {label}
       </label>
-      <div className="flex items-center gap-2">
-        <div className="relative w-8 h-8 rounded-lg border border-border overflow-hidden shrink-0 shadow-sm transition-all hover:border-primary/50 focus-within:ring-1 focus-within:ring-ring focus-within:border-primary">
+      <div className="relative flex items-center h-9 w-full rounded-xl border border-border/70 bg-background/60 hover:border-foreground/30 focus-within:border-primary/80 focus-within:ring-1 focus-within:ring-primary/20 transition-all px-2.5 gap-2">
+        {/* Color Swatch with overlaid invisible native color input */}
+        <div
+          className="relative h-5 w-5 rounded-md border border-black/15 dark:border-white/20 shrink-0 shadow-xs cursor-pointer overflow-hidden"
+          style={{ backgroundColor: localVal || "#ffffff" }}
+          title="Pick color"
+        >
           <input
             type="color"
-            value={localVal || "#ffffff"}
+            value={localVal && localVal.startsWith("#") ? localVal : "#ffffff"}
             onChange={(e) => handleChange(e.target.value)}
             onBlur={handleBlur}
-            className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer focus:outline-none"
+            className="absolute -inset-2 w-[150%] h-[150%] opacity-0 cursor-pointer"
           />
         </div>
-        <Input
+        {/* Hex input */}
+        <input
           type="text"
           value={localVal || ""}
           onChange={(e) => handleChange(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          className="h-8 text-xs font-mono rounded-lg"
-          placeholder="#ffffff"
+          className="flex-1 bg-transparent border-0 p-0 text-xs font-mono text-foreground focus:outline-none uppercase min-w-0"
+          placeholder="#FFFFFF"
         />
       </div>
     </div>
