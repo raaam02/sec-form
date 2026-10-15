@@ -119,7 +119,7 @@ export function WYSIWYGFieldItem({
   const borderRadius = effectiveTheme.borderRadius || "12px";
   const primaryColor = effectiveTheme.primaryColor || "var(--primary)";
   const inputBgColor = effectiveTheme.inputBgColor || "transparent";
-  const inputBorderColor = effectiveTheme.inputBorderColor || "rgba(128,128,128,0.22)";
+  const inputBorderColor = effectiveTheme.inputBorderColor || (isDark ? "#27272a" : "#e2e8f0");
 
   const currentMeta = FIELD_TYPE_METAS.find((m) => m.type === field.type) || FIELD_TYPE_METAS[0];
   const CurrentIcon = currentMeta.icon;

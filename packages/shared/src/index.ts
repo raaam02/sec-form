@@ -43,6 +43,37 @@ function getContrastTextColor(hexColor: string): string {
   return yiq >= 140 ? "#09090b" : "#ffffff";
 }
 
+export function isColorDark(colorStr?: string): boolean {
+  if (!colorStr) return false;
+  const c = colorStr.trim().toLowerCase();
+  if (c.startsWith("#")) {
+    const hex = c.replace("#", "");
+    let r = 255, g = 255, b = 255;
+    if (hex.length === 3) {
+      r = parseInt(hex[0] + hex[0], 16);
+      g = parseInt(hex[1] + hex[1], 16);
+      b = parseInt(hex[2] + hex[2], 16);
+    } else if (hex.length >= 6) {
+      r = parseInt(hex.substring(0, 2), 16);
+      g = parseInt(hex.substring(2, 4), 16);
+      b = parseInt(hex.substring(4, 6), 16);
+    }
+    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+    return yiq < 140;
+  }
+  if (c.startsWith("rgb")) {
+    const match = c.match(/\d+/g);
+    if (match && match.length >= 3) {
+      const r = parseInt(match[0], 10);
+      const g = parseInt(match[1], 10);
+      const b = parseInt(match[2], 10);
+      const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+      return yiq < 140;
+    }
+  }
+  return false;
+}
+
 /**
  * Returns active theme colors according to color mode (light vs dark).
  * If dark mode is active and the theme doesn't define dark overrides,
@@ -73,7 +104,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
       cardColor: t.cardColor,
       borderRadius,
       inputBgColor: t.inputBgColor || "transparent",
-      inputBorderColor: t.inputBorderColor || "rgba(128,128,128,0.22)",
+      inputBorderColor: t.inputBorderColor || "#e2e8f0",
       inputTextColor: t.inputTextColor || t.textColor,
       buttonBgColor: btnBg,
       buttonTextColor: btnText,
@@ -106,7 +137,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
       cardColor: t.dark.cardColor || "#18181b",
       borderRadius,
       inputBgColor: t.dark.inputBgColor || "rgba(255,255,255,0.04)",
-      inputBorderColor: t.dark.inputBorderColor || "rgba(255,255,255,0.12)",
+      inputBorderColor: t.dark.inputBorderColor || "#27272a",
       inputTextColor: t.dark.inputTextColor || t.inputTextColor || t.dark.textColor || "#fafafa",
       buttonBgColor: btnBg,
       buttonTextColor: btnText,
@@ -114,12 +145,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
   }
 
   // Auto-adapt light themes when dark mode is turned on
-  const isThemeAlreadyDark =
-    t.id === "custom" ||
-    t.backgroundColor.startsWith("#0") ||
-    t.backgroundColor.startsWith("#1") ||
-    t.backgroundColor.includes("rgb(0") ||
-    t.backgroundColor.includes("rgb(1");
+  const isThemeAlreadyDark = isColorDark(t.backgroundColor);
 
   if (isThemeAlreadyDark) {
     return {
@@ -129,7 +155,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
       cardColor: t.cardColor,
       borderRadius,
       inputBgColor: t.inputBgColor || "rgba(255,255,255,0.05)",
-      inputBorderColor: t.inputBorderColor || "rgba(255,255,255,0.14)",
+      inputBorderColor: t.inputBorderColor || "#27272a",
       inputTextColor: t.inputTextColor || t.textColor,
       buttonBgColor: btnBg,
       buttonTextColor: btnText,
@@ -143,7 +169,7 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
     cardColor: "#18181b",
     borderRadius,
     inputBgColor: "rgba(255,255,255,0.04)",
-    inputBorderColor: "rgba(255,255,255,0.12)",
+    inputBorderColor: "#27272a",
     inputTextColor: "#fafafa",
     buttonBgColor: btnBg,
     buttonTextColor: btnText,

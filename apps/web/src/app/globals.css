@@ -54,6 +54,33 @@
     --sidebar-accent-foreground: 224 71.4% 4.1%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 221.2 83.2% 53.3%;
+
+    /* UI ARC tokens */
+    --surface: hsl(var(--card));
+    --surface-raised: hsl(var(--popover));
+    --surface-muted: hsl(var(--muted));
+    --border-strong: hsl(var(--border));
+    --border-subtle: hsl(var(--border) / 0.5);
+    --text-primary: hsl(var(--foreground));
+    --text-secondary: hsl(var(--muted-foreground));
+    --text-muted: hsl(var(--muted-foreground) / 0.7);
+    --radius-surface: 1.25rem;
+    --radius-pill: 9999px;
+    --control-height-md: 38px;
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --duration-considered: 200ms;
+    --duration-fast: 150ms;
+    --duration-instant: 100ms;
+    --duration-spring: 250ms;
+    --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    --shadow-resting: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-floating: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   }
 
   .dark {
@@ -104,6 +131,18 @@
     --sidebar-accent-foreground: 210 20% 98%;
     --sidebar-border: 222.2 84% 12%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* UI ARC tokens */
+    --surface: hsl(var(--card));
+    --surface-raised: hsl(var(--popover));
+    --surface-muted: hsl(var(--muted));
+    --border-strong: hsl(var(--border));
+    --border-subtle: hsl(var(--border) / 0.5);
+    --text-primary: hsl(var(--foreground));
+    --text-secondary: hsl(var(--muted-foreground));
+    --text-muted: hsl(var(--muted-foreground) / 0.7);
+    --shadow-resting: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    --shadow-floating: 0 16px 32px -6px rgba(0, 0, 0, 0.5), 0 8px 16px -6px rgba(0, 0, 0, 0.35);
   }
 
   /* ═══════════════════════════════════════════════════════════════════════

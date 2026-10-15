@@ -9,11 +9,12 @@ import { toast } from "sonner";
 import Link from "next/link";
 
 import { MorphSelect, MorphSelectOption } from "@/components/arc/morph-select/morph-select";
+import { FileText, Layers, Split } from "lucide-react";
 
 const LAYOUT_OPTIONS: MorphSelectOption[] = [
-  { value: "standard", label: "Standard (1 Page)", meta: "Single page" },
-  { value: "single_field", label: "Single Field per Step", meta: "One-by-one" },
-  { value: "custom_steps", label: "Custom Steps", meta: "Step Breaks" },
+  { value: "standard", label: "Standard (1 Page)", meta: "Single page", icon: <FileText className="h-3.5 w-3.5" /> },
+  { value: "single_field", label: "Single Field per Step", meta: "One-by-one", icon: <Layers className="h-3.5 w-3.5" /> },
+  { value: "custom_steps", label: "Custom Steps", meta: "Step Breaks", icon: <Split className="h-3.5 w-3.5" /> },
 ];
 
 interface SettingsCanvasTabProps {
@@ -234,8 +235,8 @@ export function SettingsCanvasTab({
           panelWidth={320}
           className="w-full"
         />
-        <p className="text-[11px] text-muted-foreground mt-1.5 font-normal leading-relaxed">
-          {layoutMode === "standard" && "All fields are displayed sequentially on a single page."}
+        <p className="text-[11px] text-muted-foreground mt-2 font-normal leading-relaxed">
+          {(!layoutMode || layoutMode === "standard") && "All fields are displayed sequentially on a single page."}
           {layoutMode === "single_field" && "Each field gets its own separate card with Next/Back buttons."}
           {layoutMode === "custom_steps" && "Drag and drop 'Step Break' fields into the canvas to split the form into custom pages."}
         </p>

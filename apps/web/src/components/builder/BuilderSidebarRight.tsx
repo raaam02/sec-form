@@ -33,7 +33,7 @@ export function BuilderSidebarRight({
 }: BuilderSidebarRightProps) {
   const t = useTranslations("Builder");
   const inputBg = activeTheme?.inputBgColor || "transparent";
-  const inputBorder = activeTheme?.inputBorderColor || "rgba(128,128,128,0.2)";
+  const inputBorder = activeTheme?.inputBorderColor || "#e2e8f0";
 
   // Pre-process steps
   const pages: FormField[][] = React.useMemo(() => {
