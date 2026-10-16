@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   DndContext,
   closestCenter,
@@ -60,6 +60,7 @@ export function FormCanvasTab({
   const [slashMenuOpen, setSlashMenuOpen] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number | undefined>(undefined);
   const [slashQuery, setSlashQuery] = useState("");
+  const insertionRowRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -150,7 +151,10 @@ export function FormCanvasTab({
     if (!slashMenuOpen || insertIndex !== targetIndex) return null;
 
     return (
-      <div className="relative py-2 px-3 -mx-3 rounded-2xl bg-muted/30 border border-primary/20 my-2 animate-in fade-in zoom-in-95 duration-150 z-30">
+      <div
+        ref={insertionRowRef}
+        className="relative py-2 px-3 -mx-3 rounded-2xl bg-muted/30 border border-primary/20 my-2 animate-in fade-in zoom-in-95 duration-150 z-30"
+      >
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-muted-foreground/60 select-none">
             <GripVertical className="w-3.5 h-3.5" />
@@ -174,24 +178,23 @@ export function FormCanvasTab({
           />
         </div>
 
-        {/* Anchored Floating Popover */}
-        <div className="absolute left-6 top-full mt-2 z-50">
-          <SlashCommandMenu
-            isOpen={slashMenuOpen && insertIndex === targetIndex}
-            query={slashQuery}
-            onClose={() => {
-              setSlashMenuOpen(false);
-              setInsertIndex(undefined);
-              setSlashQuery("");
-            }}
-            onSelect={(type) => {
-              handleInsertField(type);
-              setSlashMenuOpen(false);
-              setInsertIndex(undefined);
-              setSlashQuery("");
-            }}
-          />
-        </div>
+        {/* Anchored Floating Popover (Edge Aware) */}
+        <SlashCommandMenu
+          isOpen={slashMenuOpen && insertIndex === targetIndex}
+          query={slashQuery}
+          anchorRef={insertionRowRef}
+          onClose={() => {
+            setSlashMenuOpen(false);
+            setInsertIndex(undefined);
+            setSlashQuery("");
+          }}
+          onSelect={(type) => {
+            handleInsertField(type);
+            setSlashMenuOpen(false);
+            setInsertIndex(undefined);
+            setSlashQuery("");
+          }}
+        />
       </div>
     );
   };
