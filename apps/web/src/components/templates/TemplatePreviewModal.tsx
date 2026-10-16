@@ -8,6 +8,7 @@ import { useClickOutside } from "@/components/ui/popover-form";
 import { useTheme } from "@/components/ThemeProvider";
 import { TemplateLiveField } from "./TemplateLiveField";
 import { getComputedTemplateTheme } from "./templateConstants";
+import { FieldLabel } from "@/components/ui/field-label";
 
 export interface TemplatePreviewModalProps {
   template: FormTemplate | null;
@@ -96,12 +97,12 @@ export function TemplatePreviewModal({
                   {template.fields.map((field) => (
                     <div key={field.id} className="space-y-1.5">
                       {field.type !== "checkbox" && (
-                        <label className="text-xs font-semibold opacity-90 block">
-                          {field.label}{" "}
-                          {field.required && (
-                            <span className="text-rose-500">*</span>
-                          )}
-                        </label>
+                        <FieldLabel
+                          label={field.label}
+                          required={field.required}
+                          className="text-xs font-semibold opacity-90"
+                          badgeClassName="w-3.5 h-3.5 text-[10px]"
+                        />
                       )}
                       {field.description && (
                         <p className="text-[11px] opacity-70">

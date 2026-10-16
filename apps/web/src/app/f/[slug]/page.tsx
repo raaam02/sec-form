@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { resolveThemeValues } from "@sec-form/shared";
 import { useTheme } from "@/components/ThemeProvider";
+import { FieldLabel } from "@/components/ui/field-label";
 
 import { getLocalForms, saveLocalForm, saveLocalSubmission } from "../../../utils/localForms";
 
@@ -63,10 +64,10 @@ export default function PublicFormPage() {
   // Local state for answers
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
+
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  
+
   const activeSchema: any = (form as any)?.publishedSchemaJson || form?.schemaJson || {};
   const fields: FormField[] = activeSchema.fields || [];
   const layoutMode = activeSchema.layout?.mode || "standard";
@@ -104,7 +105,7 @@ export default function PublicFormPage() {
       ...prev,
       [fieldId]: value,
     }));
-    
+
     // Clear validation error when field is updated
     if (validationErrors[fieldId]) {
       setValidationErrors((prev) => {
@@ -334,7 +335,7 @@ export default function PublicFormPage() {
   // Check embed restrictions
   const allowedDomains: string[] = form.schemaJson ? (form.schemaJson as any).allowedDomains || [] : [];
   const isEmbedded = isMounted && typeof window !== "undefined" && window.self !== window.top;
-  
+
   let isEmbedRestricted = false;
   if (isEmbedded && allowedDomains.length > 0) {
     try {
@@ -344,12 +345,12 @@ export default function PublicFormPage() {
       } else {
         const referrerUrl = new URL(referrer);
         const referrerHost = referrerUrl.hostname.toLowerCase();
-        
+
         const isAllowed = allowedDomains.some((domain) => {
           const cleanDomain = domain.trim().toLowerCase();
           return referrerHost === cleanDomain || referrerHost.endsWith("." + cleanDomain);
         });
-        
+
         if (!isAllowed) {
           isEmbedRestricted = true;
         }
@@ -442,9 +443,7 @@ export default function PublicFormPage() {
               <div className="space-y-6">
                 {currentFields.map((field) => (
                   <div key={field.id} className="space-y-2 text-left">
-                    <label className="text-sm font-semibold block">
-                      {field.label} {field.required && <span className="text-destructive">*</span>}
-                    </label>
+                    <FieldLabel label={field.label} required={field.required} />
                     {field.description && <span className="text-xs opacity-60 block leading-tight">{field.description}</span>}
 
                     <div className="mt-1">
@@ -674,7 +673,7 @@ export default function PublicFormPage() {
                     Previous
                   </Button>
                 )}
-                
+
                 {isLastStep ? (
                   <Button
                     type="submit"

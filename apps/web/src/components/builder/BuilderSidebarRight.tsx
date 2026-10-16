@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { FormField } from "@sec-form/validators";
 import { Button } from "../ui/button";
 import { EyeOff } from "lucide-react";
+import { FieldLabel } from "@/components/ui/field-label";
 
 interface BuilderSidebarRightProps {
   title: string;
@@ -159,10 +160,15 @@ export function BuilderSidebarRight({
                         borderRadius: activeTheme?.borderRadius || "0.5rem"
                       }}
                     >
-                      <label className="text-[10px] font-bold block">
-                        {field.label} {field.required && <span className="text-rose-500">*</span>}
+                      <div>
+                        <FieldLabel
+                          label={field.label}
+                          required={field.required}
+                          className="text-[10px] font-bold"
+                          badgeClassName="w-3 h-3 text-[9px]"
+                        />
                         {field.description && <span className="block text-[9px] opacity-60 font-normal mt-0.5">{field.description}</span>}
-                      </label>
+                      </div>
 
                       {/* Interactive fields inside preview */}
                       <div className="mt-1">

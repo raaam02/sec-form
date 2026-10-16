@@ -31,6 +31,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { FieldLabel } from "@/components/ui/field-label";
 
 interface FieldTypeMeta {
   type: FieldType;
@@ -210,35 +211,14 @@ export function WYSIWYGFieldItem({
         {/* Question Title & Actions Row */}
         <div className="flex items-center justify-between gap-2">
           {/* Question Label with Required Asterisk attached directly to it */}
-          <div className="flex items-center min-w-0 max-w-full gap-1">
-            <input
-              type="text"
-              value={field.label}
-              onChange={(e) => onUpdate(field.id, { label: e.target.value })}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  onEnter?.();
-                }
-              }}
-              onClick={(e) => e.stopPropagation()}
-              placeholder="Question title..."
-              style={{
-                fieldSizing: "content",
-                width: field.label ? `${Math.max(field.label.length + 1, 14)}ch` : "14ch",
-                maxWidth: "calc(100% - 20px)",
-              } as React.CSSProperties}
-              className="font-semibold text-sm sm:text-base text-foreground bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/40 leading-snug tracking-tight"
-            />
-            {field.required && (
-              <span
-                className="text-destructive font-bold text-base select-none shrink-0"
-                title="Required"
-              >
-                *
-              </span>
-            )}
-          </div>
+          <FieldLabel
+            label={field.label}
+            required={field.required}
+            editable
+            onChange={(val) => onUpdate(field.id, { label: val })}
+            onEnter={onEnter}
+            placeholder="Question title..."
+          />
 
           {/* Right Header Controls: Type Badge + Description Toggle + Required Toggle + Settings */}
           <div
