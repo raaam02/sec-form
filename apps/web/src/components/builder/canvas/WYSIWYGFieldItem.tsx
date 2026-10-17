@@ -32,6 +32,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { FieldLabel } from "@/components/ui/field-label";
+import { motion, AnimatePresence } from "motion/react";
 
 interface FieldTypeMeta {
   type: FieldType;
@@ -420,30 +421,40 @@ export function WYSIWYGFieldItem({
         </div>
 
         {/* Optional Description (only shown when toggled on or if content exists) */}
-        {(showDescription || (field.description && field.description.trim().length > 0)) && (
-          <div className="flex items-center gap-1.5 pt-0.5">
-            <input
-              type="text"
-              value={field.description || ""}
-              onChange={(e) => onUpdate(field.id, { description: e.target.value })}
-              onClick={(e) => e.stopPropagation()}
-              placeholder="Add description or instructions (optional)..."
-              className="flex-1 text-xs text-muted-foreground bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/40 leading-normal"
-              autoFocus={showDescription && !field.description}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                onUpdate(field.id, { description: undefined });
-                setShowDescription(false);
-              }}
-              className="h-5 w-5 flex items-center justify-center text-muted-foreground/40 hover:text-foreground rounded transition-colors"
-              title="Remove description"
+        <AnimatePresence>
+          {(showDescription || (field.description && field.description.trim().length > 0)) && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
             >
-              <X className="w-3 h-3" />
-            </button>
-          </div>
-        )}
+              <div className="flex items-center gap-1.5 pt-0.5 pb-0.5">
+                <input
+                  type="text"
+                  value={field.description || ""}
+                  onChange={(e) => onUpdate(field.id, { description: e.target.value })}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="Add description or instructions (optional)..."
+                  className="flex-1 text-xs text-muted-foreground bg-transparent border-none focus:outline-none placeholder:text-muted-foreground/40 leading-normal"
+                  autoFocus={showDescription && !field.description}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    onUpdate(field.id, { description: undefined });
+                    setShowDescription(false);
+                  }}
+                  className="h-5 w-5 flex items-center justify-center text-muted-foreground/40 hover:text-foreground rounded transition-colors"
+                  title="Remove description"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Real Live Form Inputs (Tally / Typeform Style) */}
         <div className="pt-1.5" onClick={(e) => e.stopPropagation()}>
@@ -501,38 +512,47 @@ export function WYSIWYGFieldItem({
           {["select", "multiselect"].includes(field.type) && (
             <div className="space-y-2 pt-1">
               <div className="flex flex-col gap-1.5 items-start">
-                {(field.options || ["Option 1", "Option 2"]).map((opt, optIdx) => {
-                  const palette = CHOICE_COLOR_PALETTES[optIdx % CHOICE_COLOR_PALETTES.length];
-                  return (
-                    <div
-                      key={optIdx}
-                      className={`group/opt inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${palette.bg} ${palette.text} ${palette.border}`}
-                    >
-                      <Check className="w-3.5 h-3.5 shrink-0 opacity-80" />
-                      <input
-                        type="text"
-                        value={opt}
-                        onChange={(e) => {
-                          const updated = [...(field.options || [])];
-                          updated[optIdx] = e.target.value;
-                          onUpdate(field.id, { options: updated });
-                        }}
-                        className="bg-transparent border-none text-xs font-medium focus:outline-none min-w-[100px] text-inherit"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = (field.options || []).filter((_, i) => i !== optIdx);
-                          onUpdate(field.id, { options: updated });
-                        }}
-                        className="opacity-0 group-hover/opt:opacity-100 hover:text-destructive transition-opacity ml-1 cursor-pointer"
-                        title="Remove option"
+                <AnimatePresence initial={false}>
+                  {(field.options || ["Option 1", "Option 2"]).map((opt, optIdx) => {
+                    const palette = CHOICE_COLOR_PALETTES[optIdx % CHOICE_COLOR_PALETTES.length];
+                    return (
+                      <motion.div
+                        key={`option-${optIdx}`}
+                        initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                        transition={{ duration: 0.16, ease: "easeOut" }}
                       >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  );
-                })}
+                        <div
+                          className={`group/opt inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${palette.bg} ${palette.text} ${palette.border}`}
+                        >
+                          <Check className="w-3.5 h-3.5 shrink-0 opacity-80" />
+                          <input
+                            type="text"
+                            value={opt}
+                            onChange={(e) => {
+                              const updated = [...(field.options || [])];
+                              updated[optIdx] = e.target.value;
+                              onUpdate(field.id, { options: updated });
+                            }}
+                            className="bg-transparent border-none text-xs font-medium focus:outline-none min-w-[100px] text-inherit"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = (field.options || []).filter((_, i) => i !== optIdx);
+                              onUpdate(field.id, { options: updated });
+                            }}
+                            className="opacity-0 group-hover/opt:opacity-100 hover:text-destructive transition-opacity ml-1 cursor-pointer"
+                            title="Remove option"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
               </div>
 
               {/* Add Option Trigger */}

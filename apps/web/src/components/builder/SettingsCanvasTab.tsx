@@ -7,6 +7,7 @@ import { ConfirmationPopover } from "@/components/ui/confirmation-popover";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import Link from "next/link";
+import { motion, AnimatePresence } from "motion/react";
 
 import { MorphSelect, MorphSelectOption } from "@/components/arc/morph-select/morph-select";
 import { FileText, Layers, Split } from "lucide-react";
@@ -270,26 +271,103 @@ export function SettingsCanvasTab({
             </Button>
           </div>
           {/* Direct Save Button */}
-          {tempSlug !== initialSlug && (
-            <Button
-              type="button"
-              onClick={handleSaveSlugClick}
-              disabled={slugStatus !== "available" || isSavingSlug}
-              className="h-8 px-3 font-semibold text-xs rounded-xl shrink-0 gap-1.5 min-w-[60px] transition-all animate-in fade-in zoom-in duration-200"
-            >
-              {isSavingSlug ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
-            </Button>
-          )}
+          <AnimatePresence>
+            {tempSlug !== initialSlug && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Button
+                  type="button"
+                  onClick={handleSaveSlugClick}
+                  disabled={slugStatus !== "available" || isSavingSlug}
+                  className="h-8 px-3 font-semibold text-xs rounded-xl shrink-0 gap-1.5 min-w-[60px]"
+                >
+                  {isSavingSlug ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Validation Feedback Messages */}
-        <div className="text-[11px] font-normal leading-relaxed">
-          {slugStatus === "checking" && <span className="text-muted-foreground flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin inline" /> Checking availability...</span>}
-          {slugStatus === "available" && <span className="text-emerald-600 dark:text-emerald-500 font-medium">✓ Available & valid slug! Click Save to apply.</span>}
-          {slugStatus === "taken" && <span className="text-rose-600 dark:text-rose-500 font-medium">✗ This custom slug is already taken.</span>}
-          {slugStatus === "invalid" && <span className="text-rose-600 dark:text-rose-500 font-medium">✗ Must be 3+ characters and contain only lowercase letters, numbers, and dashes.</span>}
-          {slugStatus === "network_error" && <span className="text-amber-600 dark:text-amber-500 font-medium">⚠ Server connection issue. Please check your network or try again later.</span>}
-          {slugStatus === "idle" && <span className="text-muted-foreground font-normal">This is the current active slug.</span>}
+        <div className="text-[11px] font-normal leading-relaxed min-h-[18px]">
+          <AnimatePresence mode="wait">
+            {slugStatus === "checking" && (
+              <motion.span
+                key="checking"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.15 }}
+                className="text-muted-foreground flex items-center gap-1"
+              >
+                <Loader2 className="h-3 w-3 animate-spin inline" /> Checking availability...
+              </motion.span>
+            )}
+            {slugStatus === "available" && (
+              <motion.span
+                key="available"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.15 }}
+                className="text-emerald-600 dark:text-emerald-500 font-medium"
+              >
+                ✓ Available & valid slug! Click Save to apply.
+              </motion.span>
+            )}
+            {slugStatus === "taken" && (
+              <motion.span
+                key="taken"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.15 }}
+                className="text-rose-600 dark:text-rose-500 font-medium"
+              >
+                ✗ This custom slug is already taken.
+              </motion.span>
+            )}
+            {slugStatus === "invalid" && (
+              <motion.span
+                key="invalid"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.15 }}
+                className="text-rose-600 dark:text-rose-500 font-medium"
+              >
+                ✗ Must be 3+ characters and contain only lowercase letters, numbers, and dashes.
+              </motion.span>
+            )}
+            {slugStatus === "network_error" && (
+              <motion.span
+                key="network_error"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.15 }}
+                className="text-amber-600 dark:text-amber-500 font-medium"
+              >
+                ⚠ Server connection issue. Please check your network or try again later.
+              </motion.span>
+            )}
+            {slugStatus === "idle" && (
+              <motion.span
+                key="idle"
+                initial={{ opacity: 0, y: 3 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -3 }}
+                transition={{ duration: 0.15 }}
+                className="text-muted-foreground font-normal"
+              >
+                This is the current active slug.
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -315,7 +393,15 @@ export function SettingsCanvasTab({
           />
         </div>
 
-        {telegramEnabled && (
+        <AnimatePresence>
+          {telegramEnabled && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
           <div className="space-y-3 pt-2">
             {telegramChatId ? (
               <div className="space-y-2">
@@ -435,8 +521,10 @@ export function SettingsCanvasTab({
               </div>
             )}
           </div>
-        )}
-      </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
 
       {/* Allowed Embed Domains */}
       <div className="space-y-2.5">

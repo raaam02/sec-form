@@ -244,41 +244,59 @@ export function BuilderCanvas({
 
                 {/* Sidebar Scrollable Body */}
                 <div className="flex-1 overflow-y-auto canvas-scrollbar p-5 space-y-6">
-                  {currentSidebar === "theme" && (
-                    <ThemeCanvasTab
-                      activeTheme={activeTheme}
-                      setActiveTheme={setActiveTheme}
-                      saveForm={saveForm}
-                      pushToHistory={pushToHistory}
-                      fields={fields}
-                    />
-                  )}
-                  {currentSidebar === "settings" && (
-                    <SettingsCanvasTab
-                      visibility={visibility}
-                      onSaveVisibility={onSaveVisibility}
-                      layoutMode={layoutMode}
-                      setLayoutMode={setLayoutMode}
-                      slug={slug}
-                      initialSlug={initialSlug}
-                      onSaveSlug={onSaveSlug}
-                      onValidateSlug={onValidateSlug}
-                      telegramEnabled={telegramEnabled}
-                      onSaveTelegram={onSaveTelegram}
-                      telegramChatId={telegramChatId}
-                      telegramChatName={telegramChatName}
-                      formId={formId}
-                      allowedDomains={allowedDomains || []}
-                      onSaveAllowedDomains={onSaveAllowedDomains}
-                      manualChatIdInput={manualChatIdInput}
-                      setManualChatIdInput={setManualChatIdInput}
-                      publicFormUrl={publicFormUrl}
-                      isTelegramSyncing={isTelegramSyncing}
-                      isTelegramFetching={isTelegramFetching}
-                      onStartTelegramSync={onStartTelegramSync}
-                      onCheckTelegramStatus={onCheckTelegramStatus}
-                    />
-                  )}
+                  <AnimatePresence mode="wait">
+                    {currentSidebar === "theme" && (
+                      <motion.div
+                        key="theme-tab"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                      >
+                        <ThemeCanvasTab
+                          activeTheme={activeTheme}
+                          setActiveTheme={setActiveTheme}
+                          saveForm={saveForm}
+                          pushToHistory={pushToHistory}
+                          fields={fields}
+                        />
+                      </motion.div>
+                    )}
+                    {currentSidebar === "settings" && (
+                      <motion.div
+                        key="settings-tab"
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                      >
+                        <SettingsCanvasTab
+                          visibility={visibility}
+                          onSaveVisibility={onSaveVisibility}
+                          layoutMode={layoutMode}
+                          setLayoutMode={setLayoutMode}
+                          slug={slug}
+                          initialSlug={initialSlug}
+                          onSaveSlug={onSaveSlug}
+                          onValidateSlug={onValidateSlug}
+                          telegramEnabled={telegramEnabled}
+                          onSaveTelegram={onSaveTelegram}
+                          telegramChatId={telegramChatId}
+                          telegramChatName={telegramChatName}
+                          formId={formId}
+                          allowedDomains={allowedDomains || []}
+                          onSaveAllowedDomains={onSaveAllowedDomains}
+                          manualChatIdInput={manualChatIdInput}
+                          setManualChatIdInput={setManualChatIdInput}
+                          publicFormUrl={publicFormUrl}
+                          isTelegramSyncing={isTelegramSyncing}
+                          isTelegramFetching={isTelegramFetching}
+                          onStartTelegramSync={onStartTelegramSync}
+                          onCheckTelegramStatus={onCheckTelegramStatus}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
             </motion.aside>

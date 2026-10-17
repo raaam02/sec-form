@@ -2,6 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "motion/react";
 
 export interface FieldLabelProps {
   label: string;
@@ -36,17 +37,24 @@ export function FieldLabel({
   const isEditable = editable || typeof onChange === "function";
 
   const renderBadge = () => {
-    if (!required) return null;
     return (
-      <span
-        className={cn(
-          "inline-flex items-center justify-center w-4 h-4 rounded-full bg-transparent text-muted-foreground/90 font-bold text-xs leading-none select-none shrink-0",
-          badgeClassName
+      <AnimatePresence>
+        {required && (
+          <motion.span
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.16, ease: "easeOut" }}
+            className={cn(
+              "inline-flex items-center justify-center w-4 h-4 rounded-full bg-transparent text-muted-foreground/90 font-bold text-xs leading-none select-none shrink-0",
+              badgeClassName
+            )}
+            title="Required"
+          >
+            *
+          </motion.span>
         )}
-        title="Required"
-      >
-        *
-      </span>
+      </AnimatePresence>
     );
   };
 

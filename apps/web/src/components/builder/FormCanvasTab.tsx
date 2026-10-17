@@ -19,6 +19,7 @@ import { FormField, FieldType, createDefaultField } from "@sec-form/validators";
 import { ThemeConfig, resolveThemeValues } from "@sec-form/shared";
 import { useTheme } from "@/components/ThemeProvider";
 import { Plus, Sparkles, Send, GripVertical } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { WYSIWYGFieldItem } from "./canvas/WYSIWYGFieldItem";
 import { SlashCommandMenu } from "./canvas/SlashCommandMenu";
 import { useTranslations } from "next-intl";
@@ -148,54 +149,89 @@ export function FormCanvasTab({
   const textColor = effectiveTheme.textColor || undefined;
 
   const renderInlineInsertionRow = (targetIndex: number) => {
-    if (!slashMenuOpen || insertIndex !== targetIndex) return null;
+    const isThisOpen = slashMenuOpen && insertIndex === targetIndex;
 
     return (
-      <div
-        ref={insertionRowRef}
-        className="relative py-2 px-3 -mx-3 rounded-2xl bg-muted/30 border border-primary/20 my-2 animate-in fade-in zoom-in-95 duration-150 z-30"
-      >
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 text-muted-foreground/60 select-none">
-            <GripVertical className="w-3.5 h-3.5" />
-            <span className="font-mono text-sm font-bold text-primary">/</span>
-          </div>
-          <input
-            type="text"
-            value={slashQuery}
-            onChange={(e) => setSlashQuery(e.target.value)}
-            placeholder="Type a question type or command..."
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === "Escape" || (e.key === "Backspace" && slashQuery === "")) {
-                e.preventDefault();
+      <AnimatePresence>
+        {isThisOpen && (
+          <div key={`inline-insertion-wrapper-${targetIndex}`} className="relative z-30 -mx-3">
+            <motion.div
+              initial={{ height: 0, opacity: 0, marginTop: 0, marginBottom: 0 }}
+              animate={{
+                height: "auto",
+                opacity: 1,
+                marginTop: 8,
+                marginBottom: 8,
+                transition: {
+                  height: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                  opacity: { duration: 0.2, ease: "easeOut" },
+                  marginTop: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                  marginBottom: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
+              exit={{
+                height: 0,
+                opacity: 0,
+                marginTop: 0,
+                marginBottom: 0,
+                transition: {
+                  height: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+                  opacity: { duration: 0.15, ease: "easeIn" },
+                  marginTop: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+                  marginBottom: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+                },
+              }}
+              className="overflow-hidden"
+            >
+              <div
+                ref={insertionRowRef}
+                className="py-2 px-3 rounded-2xl bg-muted/30 border border-primary/20"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 text-muted-foreground/60 select-none">
+                    <GripVertical className="w-3.5 h-3.5" />
+                    <span className="font-mono text-sm font-bold text-primary">/</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={slashQuery}
+                    onChange={(e) => setSlashQuery(e.target.value)}
+                    placeholder="Type a question type or command..."
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape" || (e.key === "Backspace" && slashQuery === "")) {
+                        e.preventDefault();
+                        setSlashMenuOpen(false);
+                        setInsertIndex(undefined);
+                        setSlashQuery("");
+                      }
+                    }}
+                    className="flex-1 text-xs sm:text-sm font-medium bg-transparent border-none focus:outline-none text-foreground placeholder:text-muted-foreground/40 leading-snug"
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Anchored Floating Popover (Edge Aware) - Sibling to overflow-hidden so it is never clipped */}
+            <SlashCommandMenu
+              isOpen={isThisOpen}
+              query={slashQuery}
+              anchorRef={insertionRowRef}
+              onClose={() => {
                 setSlashMenuOpen(false);
                 setInsertIndex(undefined);
                 setSlashQuery("");
-              }
-            }}
-            className="flex-1 text-xs sm:text-sm font-medium bg-transparent border-none focus:outline-none text-foreground placeholder:text-muted-foreground/40 leading-snug"
-          />
-        </div>
-
-        {/* Anchored Floating Popover (Edge Aware) */}
-        <SlashCommandMenu
-          isOpen={slashMenuOpen && insertIndex === targetIndex}
-          query={slashQuery}
-          anchorRef={insertionRowRef}
-          onClose={() => {
-            setSlashMenuOpen(false);
-            setInsertIndex(undefined);
-            setSlashQuery("");
-          }}
-          onSelect={(type) => {
-            handleInsertField(type);
-            setSlashMenuOpen(false);
-            setInsertIndex(undefined);
-            setSlashQuery("");
-          }}
-        />
-      </div>
+              }}
+              onSelect={(type) => {
+                handleInsertField(type);
+                setSlashMenuOpen(false);
+                setInsertIndex(undefined);
+                setSlashQuery("");
+              }}
+            />
+          </div>
+        )}
+      </AnimatePresence>
     );
   };
 
@@ -203,7 +239,7 @@ export function FormCanvasTab({
     <div className="w-full max-w-2xl mx-auto space-y-6">
       {/* Live Form Canvas Paper with authentic document feel */}
       <div
-        className="rounded-[24px] border border-border/70 shadow-xl p-8 sm:p-12 transition-all duration-200 bg-card/90 backdrop-blur-xl relative"
+        className="rounded-[24px] border border-border/70 shadow-xl p-8 sm:p-12 transition-colors duration-200 bg-card/90 backdrop-blur-xl relative"
         style={{
           backgroundColor: cardColor,
           color: textColor,
@@ -239,93 +275,110 @@ export function FormCanvasTab({
 
         {/* Form Fields Canvas */}
         <div className="pt-4 space-y-4">
-          {fields.length === 0 ? (
-            <div className="py-16 border-2 border-dashed border-border/70 rounded-2xl flex flex-col items-center justify-center text-center p-6 space-y-4 bg-muted/10">
-              <div className="p-3 bg-primary/10 rounded-2xl text-primary">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-base font-semibold text-foreground">
-                  Your form is empty
-                </h3>
-                <p className="text-xs text-muted-foreground max-w-sm">
-                  Add questions using the left sidebar, click the button below, or press{" "}
-                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-muted border border-border rounded">
-                    /
-                  </kbd>{" "}
-                  anywhere.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setInsertIndex(0);
-                  setSlashQuery("");
-                  setSlashMenuOpen(true);
-                }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl shadow-lg hover:opacity-95 transition-all cursor-pointer"
+          <AnimatePresence mode="wait">
+            {fields.length === 0 ? (
+              <motion.div
+                key="empty-state"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.98 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="py-16 border-2 border-dashed border-border/70 rounded-2xl flex flex-col items-center justify-center text-center p-6 space-y-4 bg-muted/10"
               >
-                <Plus className="w-4 h-4" />
-                <span>Add First Question</span>
-              </button>
-            </div>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={fields.map((f) => f.id)}
-                strategy={verticalListSortingStrategy}
+                <div className="p-3 bg-primary/10 rounded-2xl text-primary">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-base font-semibold text-foreground">
+                    Your form is empty
+                  </h3>
+                  <p className="text-xs text-muted-foreground max-w-sm">
+                    Add questions using the left sidebar, click the button below, or press{" "}
+                    <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-muted border border-border rounded">
+                      /
+                    </kbd>{" "}
+                    anywhere.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInsertIndex(0);
+                    setSlashQuery("");
+                    setSlashMenuOpen(true);
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-semibold rounded-xl shadow-lg hover:opacity-95 transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add First Question</span>
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="fields-container"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
-                {fields.map((field, index) => (
-                  <React.Fragment key={field.id}>
-                    {renderInlineInsertionRow(index)}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={fields.map((f) => f.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {fields.map((field, index) => (
+                      <React.Fragment key={field.id}>
+                        {renderInlineInsertionRow(index)}
 
-                    {/* Subtle Between-field Insert Trigger */}
-                    <div className="group/inserter relative h-2 -my-1 flex items-center justify-center z-10">
-                      <div className="absolute inset-x-0 h-[1px] bg-primary/30 opacity-0 group-hover/inserter:opacity-100 transition-opacity" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setInsertIndex(index);
-                          setSlashQuery("");
-                          setSlashMenuOpen(true);
-                        }}
-                        className="relative z-10 opacity-0 group-hover/inserter:opacity-100 transition-opacity flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground bg-primary rounded-full shadow-md hover:scale-105 active:scale-95 cursor-pointer"
-                        title="Insert question here (or press '/')"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>Insert</span>
-                      </button>
-                    </div>
+                        {/* Subtle Between-field Insert Trigger */}
+                        <div className="group/inserter relative h-2 -my-1 flex items-center justify-center z-10">
+                          <div className="absolute inset-x-0 h-[1px] bg-primary/30 opacity-0 group-hover/inserter:opacity-100 transition-opacity" />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setInsertIndex(index);
+                              setSlashQuery("");
+                              setSlashMenuOpen(true);
+                            }}
+                            className="relative z-10 opacity-0 group-hover/inserter:opacity-100 transition-opacity flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-semibold text-primary-foreground bg-primary rounded-full shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+                            title="Insert question here (or press '/')"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>Insert</span>
+                          </button>
+                        </div>
 
-                    {/* Live In-place WYSIWYG Field */}
-                    <WYSIWYGFieldItem
-                      field={field}
-                      index={index}
-                      isSelected={selectedFieldId === field.id}
-                      onSelect={() => setSelectedFieldId(field.id)}
-                      onUpdate={handleUpdateField}
-                      onDelete={handleDeleteField}
-                      onDuplicate={handleDuplicateField}
-                      onInsertAfter={(type) => {
-                        setInsertIndex(index + 1);
-                        handleInsertField(type);
-                      }}
-                      onEnter={() => {
-                        setInsertIndex(index + 1);
-                        setSlashQuery("");
-                        setSlashMenuOpen(true);
-                      }}
-                      activeTheme={activeTheme}
-                    />
-                  </React.Fragment>
-                ))}
-              </SortableContext>
-            </DndContext>
-          )}
+                        {/* Live In-place WYSIWYG Field */}
+                        <WYSIWYGFieldItem
+                          field={field}
+                          index={index}
+                          isSelected={selectedFieldId === field.id}
+                          onSelect={() => setSelectedFieldId(field.id)}
+                          onUpdate={handleUpdateField}
+                          onDelete={handleDeleteField}
+                          onDuplicate={handleDuplicateField}
+                          onInsertAfter={(type) => {
+                            setInsertIndex(index + 1);
+                            handleInsertField(type);
+                          }}
+                          onEnter={() => {
+                            setInsertIndex(index + 1);
+                            setSlashQuery("");
+                            setSlashMenuOpen(true);
+                          }}
+                          activeTheme={activeTheme}
+                        />
+                      </React.Fragment>
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {renderInlineInsertionRow(fields.length)}
 

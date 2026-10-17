@@ -87,7 +87,8 @@ export function SlashCommandMenu({
       if (!anchor) return;
 
       const rect = anchor.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
+      const effectiveBottom = Math.max(rect.bottom, rect.top + 46);
+      const spaceBelow = window.innerHeight - effectiveBottom;
       const spaceAbove = rect.top;
       const neededHeight = 310;
 
@@ -122,7 +123,11 @@ export function SlashCommandMenu({
   // Click outside to close
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node) &&
+        (!anchorRef?.current || !anchorRef.current.contains(e.target as Node))
+      ) {
         onClose();
       }
     }
@@ -130,7 +135,7 @@ export function SlashCommandMenu({
       document.addEventListener("mousedown", handleClickOutside);
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, anchorRef]);
 
   // Global arrow / enter listener when menu is open
   useEffect(() => {
@@ -158,70 +163,70 @@ export function SlashCommandMenu({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, filteredItems, selectedIndex, onSelect, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className={`absolute left-6 z-50 ${placement === "top" ? "bottom-full mb-2" : "top-full mt-2"}`}>
-      <AnimatePresence mode="wait">
-        <motion.div
-          ref={containerRef}
-          initial={{ opacity: 0, scale: 0.96, y: placement === "top" ? 6 : -6 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: placement === "top" ? 6 : -6 }}
-          transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] }}
-          className={`w-64 bg-popover/95 border border-border/80 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col py-1.5 ${className}`}
-        >
-          <div className="px-3 py-1.5 text-[11px] font-semibold text-muted-foreground/80 select-none">
-            Questions
-          </div>
-
-          <div
-            ref={listRef}
-            className="overflow-y-auto px-1 space-y-0.5 custom-scrollbar"
-            style={{ maxHeight: `${maxListHeight}px` }}
+    <AnimatePresence>
+      {isOpen && (
+        <div className={`absolute left-6 z-50 ${placement === "top" ? "bottom-full mb-2" : "top-full mt-2"}`}>
+          <motion.div
+            ref={containerRef}
+            initial={{ opacity: 0, scale: 0.96, y: placement === "top" ? 6 : -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: placement === "top" ? 6 : -6 }}
+            transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+            className={`w-64 bg-popover/95 border border-border/80 rounded-2xl shadow-2xl backdrop-blur-xl overflow-hidden flex flex-col py-1.5 ${className}`}
           >
-            {filteredItems.length === 0 ? (
-              <div className="py-4 text-center text-xs text-muted-foreground">
-                No matching questions
-              </div>
-            ) : (
-              filteredItems.map((item, idx) => {
-                const Icon = item.icon;
-                const isSelected = idx === selectedIndex;
-                return (
-                  <button
-                    key={`${item.type}-${item.label}-${idx}`}
-                    type="button"
-                    onMouseEnter={() => setSelectedIndex(idx)}
-                    onClick={() => onSelect(item.type)}
-                    className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-left transition-colors cursor-pointer ${
-                      isSelected
-                        ? "bg-accent text-accent-foreground shadow-2xs font-semibold"
-                        : "text-foreground hover:bg-muted/70"
-                    }`}
-                  >
-                    <div
-                      className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.bgColor} ${item.iconColor} transition-transform ${
-                        isSelected ? "scale-105" : ""
+            <div className="px-3 py-1.5 text-[11px] font-semibold text-muted-foreground/80 select-none">
+              Questions
+            </div>
+
+            <div
+              ref={listRef}
+              className="overflow-y-auto px-1 space-y-0.5 custom-scrollbar"
+              style={{ maxHeight: `${maxListHeight}px` }}
+            >
+              {filteredItems.length === 0 ? (
+                <div className="py-4 text-center text-xs text-muted-foreground">
+                  No matching questions
+                </div>
+              ) : (
+                filteredItems.map((item, idx) => {
+                  const Icon = item.icon;
+                  const isSelected = idx === selectedIndex;
+                  return (
+                    <button
+                      key={`${item.type}-${item.label}-${idx}`}
+                      type="button"
+                      onMouseEnter={() => setSelectedIndex(idx)}
+                      onClick={() => onSelect(item.type)}
+                      className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl text-xs font-medium text-left transition-colors cursor-pointer ${
+                        isSelected
+                          ? "bg-accent text-accent-foreground shadow-2xs font-semibold"
+                          : "text-foreground hover:bg-muted/70"
                       }`}
                     >
-                      {item.badge ? (
-                        <span className="font-bold text-[11px] font-sans tracking-tight leading-none">
-                          {item.badge}
-                        </span>
-                      ) : Icon ? (
-                        <Icon className="w-3.5 h-3.5" />
-                      ) : null}
-                    </div>
-                    <span className="truncate">{item.label}</span>
-                  </button>
-                );
-              })
-            )}
-          </div>
-        </motion.div>
-      </AnimatePresence>
-    </div>
+                      <div
+                        className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${item.bgColor} ${item.iconColor} transition-transform ${
+                          isSelected ? "scale-105" : ""
+                        }`}
+                      >
+                        {item.badge ? (
+                          <span className="font-bold text-[11px] font-sans tracking-tight leading-none">
+                            {item.badge}
+                          </span>
+                        ) : Icon ? (
+                          <Icon className="w-3.5 h-3.5" />
+                        ) : null}
+                      </div>
+                      <span className="truncate">{item.label}</span>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
 
