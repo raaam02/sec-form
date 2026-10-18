@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BUILTIN_THEMES, ThemeConfig } from "@sec-form/shared";
 import { Sparkles, Copy, Check, ArrowRight, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { ThemeCard } from "@/components/builder/ThemeCard";
 
 export default function ThemesPage() {
   // Default to Dark Mode theme matching the website
@@ -215,56 +216,15 @@ export default function ThemesPage() {
             </div>
 
             {/* Scrollable Presets Grid */}
-            <div className="space-y-2 h-[520px] overflow-y-auto pr-1.5 custom-scrollbar">
-              {BUILTIN_THEMES.map((theme) => {
-                const isSelected = selectedTheme.id === theme.id;
-                return (
-                  <button
-                    key={theme.id}
-                    type="button"
-                    onClick={() => setSelectedTheme(theme)}
-                    className={`w-full text-left p-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-3 ${
-                      isSelected
-                        ? "border-primary/60 bg-card shadow-sm ring-1 ring-primary/40"
-                        : "border-border/40 bg-card/40 hover:border-border hover:bg-card/70"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      {/* Visual Color Palette Swatch Dots */}
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span
-                          className="h-4 w-4 rounded-full border border-black/15 dark:border-white/20 shadow-xs"
-                          style={{ backgroundColor: theme.primaryColor }}
-                          title={`Primary: ${theme.primaryColor}`}
-                        />
-                        <span
-                          className="h-4 w-4 rounded-full border border-black/15 dark:border-white/20 shadow-xs"
-                          style={{ backgroundColor: theme.cardColor }}
-                          title={`Card: ${theme.cardColor}`}
-                        />
-                        <span
-                          className="h-4 w-4 rounded-full border border-black/15 dark:border-white/20 shadow-xs"
-                          style={{ backgroundColor: theme.backgroundColor }}
-                          title={`Background: ${theme.backgroundColor}`}
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="font-semibold text-xs text-foreground truncate">
-                          {theme.name}
-                        </p>
-                        <p className="text-[11px] font-mono text-muted-foreground truncate">
-                          {theme.primaryColor} • r: {theme.borderRadius}
-                        </p>
-                      </div>
-                    </div>
-
-                    {isSelected && (
-                      <span className="h-2 w-2 rounded-full bg-primary shrink-0" />
-                    )}
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 h-[520px] overflow-y-auto pr-1.5 custom-scrollbar">
+              {BUILTIN_THEMES.map((theme) => (
+                <ThemeCard
+                  key={theme.id}
+                  theme={theme}
+                  isActive={selectedTheme.id === theme.id}
+                  onClick={() => setSelectedTheme(theme)}
+                />
+              ))}
             </div>
 
             {/* Bottom helper tip */}

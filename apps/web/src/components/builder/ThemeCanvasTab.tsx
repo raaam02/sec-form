@@ -1,8 +1,9 @@
-import React from "react";
-import { motion } from "motion/react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { BUILTIN_THEMES, ThemeConfig } from "@sec-form/shared";
 import { FormField } from "@sec-form/validators";
-import { ThemePresetCard } from "./ThemePresetCard";
+import { ThemeCard } from "./ThemeCard";
+import { ActiveThemeCard } from "./ActiveThemeCard";
 import { Input } from "@/components/ui/input";
 import { ColorPicker } from "./ColorPicker";
 import { useTranslations } from "next-intl";
@@ -55,6 +56,20 @@ export function ThemeCanvasTab({
   fields,
 }: ThemeCanvasTabProps) {
   const t = useTranslations("Builder");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+
+  const THEME_CATEGORIES = [
+    { id: "all", label: "All" },
+    { id: "minimal", label: "Minimal" },
+    { id: "light", label: "Light" },
+    { id: "dark", label: "Dark" },
+    { id: "vibrant", label: "Vibrant" },
+  ];
+
+  const filteredThemes =
+    selectedCategory === "all"
+      ? BUILTIN_THEMES
+      : BUILTIN_THEMES.filter((t) => t.category === selectedCategory);
 
   const handleColorChange = (key: keyof ThemeConfig, val: string) => {
     const defaultTheme = BUILTIN_THEMES[0];
@@ -82,13 +97,28 @@ export function ThemeCanvasTab({
     }
   };
 
+  const handleResetToPreset = () => {
+    const defaultTheme = BUILTIN_THEMES[0];
+    setActiveTheme(defaultTheme);
+    saveForm(fields, defaultTheme);
+    if (pushToHistory) {
+      pushToHistory(fields, defaultTheme);
+    }
+  };
+
   return (
     <div className="space-y-6 text-xs">
+      {/* 0. Live Active Theme Preview Card */}
+      {/*<ActiveThemeCard
+        activeTheme={activeTheme}
+        onResetToPreset={handleResetToPreset}
+      />*/}
+
       {/* 1. Custom Styling Options on TOP (Tally-Style) */}
       <div className="space-y-4">
-        <h4 className="text-xs font-semibold text-muted-foreground">
+        {/*<h4 className="text-xs font-semibold text-muted-foreground">
           Custom colors
-        </h4>
+        </h4>*/}
 
         {/* 2-Column Grid for All Customizing Fields */}
         <div className="grid grid-cols-2 gap-3">
@@ -168,17 +198,42 @@ export function ThemeCanvasTab({
 
       {/* 2. Theme Presets on BOTTOM */}
       <div className="pt-5 border-t border-border/40 space-y-3">
-        <h4 className="text-xs font-semibold text-muted-foreground">
-          {t("themePresets")}
-        </h4>
-        <div className="grid grid-cols-2 gap-2.5">
-          {BUILTIN_THEMES.map((theme) => (
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-semibold text-muted-foreground">
+            {t("themePresets")}
+          </h4>
+          <span className="text-[11px] text-muted-foreground font-medium">
+            {filteredThemes.length} {filteredThemes.length === 1 ? "theme" : "themes"}
+          </span>
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {THEME_CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-2.5 py-1 text-[11px] font-medium rounded-lg transition-colors cursor-pointer shrink-0 ${
+                selectedCategory === cat.id
+                  ? "bg-primary text-primary-foreground font-semibold shadow-2xs"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5 pt-1">
+          {filteredThemes.map((theme) => (
             <motion.div
               key={theme.id}
-              whileTap={{ scale: 0.97 }}
+              whileTap={{ scale: 0.98 }}
             >
-              <ThemePresetCard
+              <ThemeCard
                 theme={theme}
+                size="sm"
                 isActive={activeTheme?.id === theme.id}
                 onClick={() => {
                   setActiveTheme(theme);

@@ -13,6 +13,7 @@ export interface ThemeConfig {
   buttonBgColor?: string;
   buttonTextColor?: string;
   accentColor?: string;
+  category?: "light" | "dark" | "vibrant" | "minimal";
   dark?: {
     primaryColor?: string;
     backgroundColor?: string;
@@ -179,157 +180,274 @@ export function resolveThemeValues(theme: ThemeConfig | null | undefined, isDark
 export const BUILTIN_THEMES: ThemeConfig[] = [
   {
     id: "minimal",
-    name: "Minimal",
-    primaryColor: "#0f172a", // slate-900
+    name: "Minimal Slate",
+    primaryColor: "#0f172a",
     backgroundColor: "#ffffff",
     textColor: "#0f172a",
     cardColor: "#f8fafc",
-    borderRadius: "0.25rem"
+    borderRadius: "0.5rem",
+    buttonBgColor: "#0f172a",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#e2e8f0",
+    inputTextColor: "#0f172a",
+    category: "minimal",
   },
   {
     id: "modern-saas",
     name: "Modern SaaS",
-    primaryColor: "#6366f1", // indigo-500
+    primaryColor: "#6366f1",
     backgroundColor: "#fafafa",
     textColor: "#18181b",
     cardColor: "#ffffff",
-    borderRadius: "0.75rem"
+    borderRadius: "0.75rem",
+    buttonBgColor: "#6366f1",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#e2e8f0",
+    inputTextColor: "#18181b",
+    category: "light",
   },
   {
     id: "dark",
-    name: "Dark Mode",
-    primaryColor: "#3b82f6", // blue-500
-    backgroundColor: "#09090b", // zinc-950
+    name: "Onyx Dark",
+    primaryColor: "#3b82f6",
+    backgroundColor: "#09090b",
     textColor: "#fafafa",
-    cardColor: "#18181b", // zinc-900
-    borderRadius: "1rem"
-  },
-  {
-    id: "corporate",
-    name: "Corporate",
-    primaryColor: "#0369a1", // sky-700
-    backgroundColor: "#f0f4f8",
-    textColor: "#1e293b",
-    cardColor: "#ffffff",
-    borderRadius: "0rem"
-  },
-  {
-    id: "gradient",
-    name: "Gradient",
-    primaryColor: "#ec4899", // pink-500
-    backgroundColor: "#f5f3ff", // violet-50
-    textColor: "#1e1b4b",
-    cardColor: "#ffffff",
-    borderRadius: "1rem"
+    cardColor: "#18181b",
+    borderRadius: "0.875rem",
+    buttonBgColor: "#3b82f6",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#27272a",
+    inputBorderColor: "#3f3f46",
+    inputTextColor: "#fafafa",
+    category: "dark",
   },
   {
     id: "forest",
-    name: "Forest Green",
-    primaryColor: "#15803d", // green-700
-    backgroundColor: "#f0fdf4", // green-50
-    textColor: "#14532d",
+    name: "Forest Emerald",
+    primaryColor: "#059669",
+    backgroundColor: "#f2f7f4",
+    textColor: "#064e3b",
     cardColor: "#ffffff",
-    borderRadius: "0.5rem"
-  },
-  {
-    id: "cyberpunk",
-    name: "Cyberpunk",
-    primaryColor: "#f43f5e", // rose-500
-    backgroundColor: "#0c0a09", // stone-950
-    textColor: "#f5f5f4",
-    cardColor: "#1c1917", // stone-900
-    borderRadius: "0.125rem"
+    borderRadius: "0.75rem",
+    buttonBgColor: "#059669",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#a7f3d0",
+    inputTextColor: "#064e3b",
+    category: "light",
   },
   {
     id: "sunset",
-    name: "Sunset Glow",
-    primaryColor: "#f97316", // orange-500
-    backgroundColor: "#fff7ed", // orange-50
+    name: "Sunset Amber",
+    primaryColor: "#f97316",
+    backgroundColor: "#fff7ed",
     textColor: "#431407",
     cardColor: "#ffffff",
-    borderRadius: "0.75rem"
+    borderRadius: "0.75rem",
+    buttonBgColor: "#f97316",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#fed7aa",
+    inputTextColor: "#431407",
+    category: "vibrant",
+  },
+  {
+    id: "lavender",
+    name: "Lavender Lilac",
+    primaryColor: "#8b5cf6",
+    backgroundColor: "#faf5ff",
+    textColor: "#3b0764",
+    cardColor: "#ffffff",
+    borderRadius: "1rem",
+    buttonBgColor: "#8b5cf6",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#e9d5ff",
+    inputTextColor: "#3b0764",
+    category: "vibrant",
   },
   {
     id: "ocean",
-    name: "Ocean Breeze",
-    primaryColor: "#0ea5e9", // sky-500
-    backgroundColor: "#f0f9ff", // sky-50
+    name: "Ocean Azure",
+    primaryColor: "#0284c7",
+    backgroundColor: "#f0f9ff",
     textColor: "#0c4a6e",
     cardColor: "#ffffff",
-    borderRadius: "0.375rem"
+    borderRadius: "0.625rem",
+    buttonBgColor: "#0284c7",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#bae6fd",
+    inputTextColor: "#0c4a6e",
+    category: "light",
+  },
+  {
+    id: "cyberpunk",
+    name: "Cyberpunk Void",
+    primaryColor: "#f43f5e",
+    backgroundColor: "#0c0a09",
+    textColor: "#f5f5f4",
+    cardColor: "#1c1917",
+    borderRadius: "0.375rem",
+    buttonBgColor: "#f43f5e",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#292524",
+    inputBorderColor: "#44403c",
+    inputTextColor: "#f5f5f4",
+    category: "dark",
+  },
+  {
+    id: "coffee-cozy",
+    name: "Warm Espresso",
+    primaryColor: "#9a3412",
+    backgroundColor: "#fdf8f6",
+    textColor: "#451a03",
+    cardColor: "#faf7f5",
+    borderRadius: "0.5rem",
+    buttonBgColor: "#9a3412",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#e7e5e4",
+    inputTextColor: "#451a03",
+    category: "minimal",
   },
   {
     id: "nordic",
     name: "Nordic Slate",
-    primaryColor: "#475569", // slate-600
-    backgroundColor: "#f1f5f9", // slate-100
+    primaryColor: "#334155",
+    backgroundColor: "#f1f5f9",
     textColor: "#0f172a",
     cardColor: "#ffffff",
-    borderRadius: "0.5rem"
-  },
-  {
-    id: "lavender",
-    name: "Sweet Lavender",
-    primaryColor: "#8b5cf6", // violet-500
-    backgroundColor: "#faf5ff", // purple-50
-    textColor: "#3b0764",
-    cardColor: "#ffffff",
-    borderRadius: "1.25rem"
+    borderRadius: "0.5rem",
+    buttonBgColor: "#334155",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#cbd5e1",
+    inputTextColor: "#0f172a",
+    category: "minimal",
   },
   {
     id: "cherry-blossom",
     name: "Cherry Blossom",
-    primaryColor: "#db2777", // pink-600
-    backgroundColor: "#fff1f2", // rose-50
-    textColor: "#4c0519", // rose-950
+    primaryColor: "#e11d48",
+    backgroundColor: "#fff1f2",
+    textColor: "#4c0519",
     cardColor: "#ffffff",
-    borderRadius: "0.75rem"
+    borderRadius: "0.75rem",
+    buttonBgColor: "#e11d48",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#fecdd3",
+    inputTextColor: "#4c0519",
+    category: "vibrant",
   },
   {
     id: "midnight-neon",
     name: "Midnight Neon",
-    primaryColor: "#a855f7", // purple-500
-    backgroundColor: "#030712", // gray-950
-    textColor: "#f3f4f6", // gray-100
-    cardColor: "#111827", // gray-900
-    borderRadius: "0.5rem"
+    primaryColor: "#a855f7",
+    backgroundColor: "#030712",
+    textColor: "#f3f4f6",
+    cardColor: "#111827",
+    borderRadius: "0.75rem",
+    buttonBgColor: "#a855f7",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#1f2937",
+    inputBorderColor: "#374151",
+    inputTextColor: "#f3f4f6",
+    category: "dark",
   },
   {
-    id: "coffee-cozy",
-    name: "Coffee Cozy",
-    primaryColor: "#7c2d12", // orange-900
-    backgroundColor: "#fdf8f6",
-    textColor: "#451a03", // amber-950
-    cardColor: "#fafaf9", // stone-50
-    borderRadius: "0.375rem"
-  },
-  {
-    id: "sand-dune",
-    name: "Sand Dune",
-    primaryColor: "#c2410c", // orange-700
-    backgroundColor: "#fefcfb",
-    textColor: "#431407",
-    cardColor: "#f7f5f0",
-    borderRadius: "1rem"
+    id: "corporate",
+    name: "Corporate Navy",
+    primaryColor: "#0369a1",
+    backgroundColor: "#f0f4f8",
+    textColor: "#0f172a",
+    cardColor: "#ffffff",
+    borderRadius: "0.375rem",
+    buttonBgColor: "#0369a1",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#cbd5e1",
+    inputTextColor: "#0f172a",
+    category: "minimal",
   },
   {
     id: "emerald-mint",
     name: "Emerald Mint",
-    primaryColor: "#0d9488", // teal-600
-    backgroundColor: "#f0fdfa", // teal-50
-    textColor: "#042f2e", // teal-950
+    primaryColor: "#0d9488",
+    backgroundColor: "#f0fdfa",
+    textColor: "#042f2e",
     cardColor: "#ffffff",
-    borderRadius: "0.5rem"
+    borderRadius: "0.625rem",
+    buttonBgColor: "#0d9488",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#99f6e4",
+    inputTextColor: "#042f2e",
+    category: "light",
+  },
+  {
+    id: "sand-dune",
+    name: "Sand Dune",
+    primaryColor: "#c2410c",
+    backgroundColor: "#fbf9f5",
+    textColor: "#431407",
+    cardColor: "#f5f2eb",
+    borderRadius: "0.875rem",
+    buttonBgColor: "#c2410c",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#e5dfd5",
+    inputTextColor: "#431407",
+    category: "minimal",
   },
   {
     id: "crimson-velvet",
     name: "Crimson Velvet",
-    primaryColor: "#dc2626", // red-600
-    backgroundColor: "#fef2f2", // red-50
-    textColor: "#450a0a", // red-950
+    primaryColor: "#dc2626",
+    backgroundColor: "#fef2f2",
+    textColor: "#450a0a",
     cardColor: "#ffffff",
-    borderRadius: "0.25rem"
-  }
+    borderRadius: "0.5rem",
+    buttonBgColor: "#dc2626",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#fecaca",
+    inputTextColor: "#450a0a",
+    category: "vibrant",
+  },
+  {
+    id: "matrix-teal",
+    name: "Teal Matrix",
+    primaryColor: "#14b8a6",
+    backgroundColor: "#041e24",
+    textColor: "#e6fffa",
+    cardColor: "#072b33",
+    borderRadius: "0.75rem",
+    buttonBgColor: "#14b8a6",
+    buttonTextColor: "#041e24",
+    inputBgColor: "#0a3843",
+    inputBorderColor: "#134e5e",
+    inputTextColor: "#e6fffa",
+    category: "dark",
+  },
+  {
+    id: "matcha-latte",
+    name: "Matcha Latte",
+    primaryColor: "#4d7c0f",
+    backgroundColor: "#f4f7f2",
+    textColor: "#1a2e05",
+    cardColor: "#ffffff",
+    borderRadius: "0.75rem",
+    buttonBgColor: "#4d7c0f",
+    buttonTextColor: "#ffffff",
+    inputBgColor: "#ffffff",
+    inputBorderColor: "#d9e5d2",
+    inputTextColor: "#1a2e05",
+    category: "light",
+  },
 ];
 
 // Pre-seeded templates
