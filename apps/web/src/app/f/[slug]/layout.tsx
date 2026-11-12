@@ -21,7 +21,7 @@ export async function generateMetadata({
       siteName: SITE_NAME,
       images: [
         {
-          url: `${SITE_URL}/opengraph-image`,
+          url: `${SITE_URL}/og-image.png`,
           width: 1200,
           height: 630,
           alt: "Formu.AI Form",
@@ -33,7 +33,9 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `Online Form | ${SITE_NAME}`,
       description: "Fill out and submit this interactive online form powered by Formu.AI.",
-      images: [`${SITE_URL}/opengraph-image`],
+      site: "@FormuAI",
+      creator: "@FormuAI",
+      images: [`${SITE_URL}/og-image.png`],
     },
     robots: {
       index: true,

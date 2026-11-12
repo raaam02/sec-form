@@ -18,6 +18,9 @@ const appOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
   : ["http://localhost:3000", "http://127.0.0.1:3000"];
 
+// Enable fast OPTIONS preflight resolution across all routes
+app.options("*", cors());
+
 // 1. Permissive CORS for Public REST API endpoints & embeds
 app.use(
   "/api/v1/forms",
@@ -29,19 +32,29 @@ app.use(
   })
 );
 
-// 2. Strict CORS for internal /trpc endpoints (protects user session & credentials)
+// 2. Cross-origin support for /trpc endpoints (supports mobile apps, web embeds, and deployed apps)
 app.use(
   "/trpc",
   cors({
     origin: (origin, callback) => {
+      // Allow requests with no origin (mobile native apps, curl, server-to-server)
       if (!origin) return callback(null, true);
-      if (appOrigins.includes(origin)) return callback(null, true);
+      // Allow local development
       if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) {
         return callback(null, true);
       }
-      callback(new Error("CORS policy violation for this origin on private /trpc API"));
+      // Allow render.com deployment domains
+      if (origin.endsWith(".onrender.com") || origin.includes("render.com")) {
+        return callback(null, true);
+      }
+      // Allow explicitly configured origins
+      if (appOrigins.includes(origin)) return callback(null, true);
+      // Allow all origins for seamless web and mobile API client integration
+      return callback(null, true);
     },
     credentials: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "x-api-key", "x-user-id", "batch"],
   })
 );
 
@@ -49,6 +62,16 @@ app.use(
 app.use(cors({ origin: true }));
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Healthcheck & Ping endpoints for cloud monitoring and preventing free-tier sleep
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+});
+
+app.get("/ping", (req, res) => {
+  res.status(200).send("pong");
+});
 
 // ----------------------------------------------------
 // REST API ENDPOINTS (FOR DEVELOPERS & SCALAR DOCS)
@@ -470,6 +493,16 @@ app.use(
     createContext,
   })
 );
+
+// Global error handler to guarantee immediate JSON responses and prevent connection stalls
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("[Express Error Handler]:", err);
+  if (!res.headersSent) {
+    res.status(err.status || 500).json({
+      error: err.message || "Internal server error",
+    });
+  }
+});
 
 // Start listening
 app.listen(PORT, () => {

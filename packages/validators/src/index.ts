@@ -96,7 +96,7 @@ export const UpdateFormInput = z.object({
 });
 
 export const SubmitResponseInput = z.object({
-  formId: z.string().uuid(),
+  formId: z.string().min(1, "Form ID or slug is required"),
   answersJson: z.record(z.any())
 });
 

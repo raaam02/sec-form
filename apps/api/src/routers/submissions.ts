@@ -29,7 +29,8 @@ export const submissionsRouter = router({
         console.warn("Rate limit check failed, skipping:", e);
       }
 
-      // 2. Fetch Form with metadata cache
+      // 2. Fetch Form with metadata cache (supports UUID or slug)
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(formId);
       const formCacheKey = `form:meta:${formId}`;
       let form: any = null;
       try {
@@ -39,7 +40,7 @@ export const submissionsRouter = router({
 
       if (!form) {
         form = await ctx.db.query.forms.findFirst({
-          where: eq(forms.id, formId),
+          where: isUuid ? eq(forms.id, formId) : eq(forms.slug, formId),
         });
 
         if (!form) {

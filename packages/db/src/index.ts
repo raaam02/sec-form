@@ -10,12 +10,34 @@ console.log(
   process.env.DATABASE_URL?.substring(0, 10)
 );
 
-// For serverless/script executions, postgres client is preferred
-const client = postgres(connectionString, {
-  max: process.env.DB_MAX_CONNECTIONS ? parseInt(process.env.DB_MAX_CONNECTIONS) : 10,
-  idle_timeout: 20,
-  connect_timeout: 10,
-});
+const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
+const isCloudDb =
+  connectionString.includes("render.com") ||
+  connectionString.includes("supabase.co") ||
+  connectionString.includes("neon.tech") ||
+  connectionString.includes("pooler") ||
+  connectionString.includes("sslmode=require");
+
+const globalForDb = globalThis as unknown as {
+  postgresClient: postgres.Sql | undefined;
+};
+
+// High-performance client with connection pooler and SSL compatibility
+const client =
+  globalForDb.postgresClient ??
+  postgres(connectionString, {
+    max: process.env.DB_MAX_CONNECTIONS ? parseInt(process.env.DB_MAX_CONNECTIONS, 10) : 10,
+    idle_timeout: 30,
+    connect_timeout: 10,
+    // CRITICAL: Disable prepared statements for connection poolers (PgBouncer, Render, Supabase pooler, Neon)
+    // Prepared statements hang or fail when queries route through transaction poolers!
+    prepare: false,
+    ssl: isCloudDb || isProduction ? { rejectUnauthorized: false } : undefined,
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForDb.postgresClient = client;
+}
 
 export const db = drizzle(client, { schema });
 

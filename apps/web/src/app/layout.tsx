@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     images: [
       {
-        url: "/opengraph-image",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: `${SITE_NAME} - Premium AI-Powered Form Builder`,
@@ -70,8 +70,16 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
-    images: ["/opengraph-image"],
+    site: "@FormuAI",
     creator: "@FormuAI",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} - Premium AI-Powered Form Builder`,
+      },
+    ],
   },
   icons: {
     icon: [

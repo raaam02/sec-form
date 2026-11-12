@@ -6,6 +6,7 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   transpilePackages: ['@sec-form/shared', '@sec-form/ui', '@sec-form/validators'],
   poweredByHeader: false,
+  htmlLimitedBots: /.*/,
   async headers() {
     return [
       {
@@ -30,6 +31,16 @@ const nextConfig = {
             value: 'frame-ancestors *',
           },
         ],
+      },
+    ];
+  },
+  async rewrites() {
+    const apiUrl = process.env.API_URL || 'http://localhost:4000';
+    const baseUrl = apiUrl.replace(/\/trpc\/?$/, '');
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${baseUrl}/api/v1/:path*`,
       },
     ];
   },

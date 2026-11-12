@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import { Container, SectionHeader } from "./ui";
 import { fadeUp, stagger } from "./motion";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://form.emoicons.com";
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://form.xram.in";
 
 // ─── Bento Tile Shell ────────────────────────────────────────────────────────
 

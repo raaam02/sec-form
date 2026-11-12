@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const SITE_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
   process.env.NEXT_PUBLIC_SITE_URL ||
-  "https://form.emoicons.com";
+  "https://form.xram.in";
 
 export const SITE_NAME = "Formu.AI";
 
@@ -51,7 +51,7 @@ export function buildMetadata({
   keywords = DEFAULT_KEYWORDS,
   noIndex = false,
   ogType = "website",
-  image = "/opengraph-image",
+  image = "/og-image.png",
 }: PageMetadataOptions = {}): Metadata {
   const pageTitle = title ? `${title} | ${SITE_NAME}` : DEFAULT_TITLE;
   const canonicalUrl = path ? `${SITE_URL}${path}` : SITE_URL;
@@ -86,6 +86,7 @@ export function buildMetadata({
       title: pageTitle,
       description,
       images: [ogImageUrl],
+      site: "@FormuAI",
       creator: "@FormuAI",
     },
     robots: noIndex
